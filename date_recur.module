@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * @file
+ * Contains date_recur.module..
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\field\FieldConfigInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_help().
+ */
+function date_recur_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the date_recur module.
+    case 'help.page.date_recur':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Recurring date field.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function date_recur_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+//  ksm($view, $query);
+}
+
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for 'field_config'.
+ */
+function date_recur_field_config_insert(FieldConfigInterface $field) {
+  if ($field->getType() == 'date_recur') {
+    date_recur_create_field_table($field);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for 'field_config'.
+ */
+function date_recur_field_config_update(FieldConfigInterface $field) {
+  if ($field->getType() == 'date_recur') {
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for 'field_config'.
+ */
+function date_recur_field_config_delete(FieldConfigInterface $field) {
+  if ($field->getType() == 'date_recur') {
+    date_recur_delete_field_table($field);
+  }
+}
+
+/**
+ * @param FieldStorageDefinitionInterface|FieldDefinitionInterface $field
+ * @return string
+ */
+function date_recur_get_table_name($field) {
+  $entity_type = $field->getTargetEntityTypeId();
+  $field_name = $field->getName();
+  $table_name = 'date_recur__' . $entity_type . '__' . $field_name;
+  return $table_name;
+
+}
+
+function date_recur_create_field_table(FieldDefinitionInterface $field) {
+  $entity_type = $field->getTargetEntityTypeId();
+  $field_name = $field->getName();
+  $table_name = date_recur_get_table_name($field);
+
+  $spec = date_recur_table_schema($field);
+  $spec['description'] = 'Date recur cache for ' . $entity_type . '.' . $field_name;
+  $schema = Database::getConnection()->schema();
+  $schema->createTable($table_name, $spec);
+
+}
+function date_recur_delete_field_table(FieldConfigInterface $field) {
+  $table_name = date_recur_get_table_name($field);
+  $schema = Database::getConnection()->schema();
+  $schema->dropTable($table_name);
+}
+
+function date_recur_table_schema(FieldDefinitionInterface $field) {
+  $field_name = $field->getName();
+  return [
+    'fields' => [
+      'entity_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Entity id",
+      ],
+      'revision_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Entity revision id",
+      ],
+      'field_delta' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'delta' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      $field_name . '_value' => [
+        'description' => 'Start date',
+        'type' => 'varchar',
+        'length' => 20,
+      ],
+      $field_name . '_value2' => [
+        'description' => 'End date',
+        'type' => 'varchar',
+        'length' => 20,
+      ],
+    ],
+    'indexes' => [
+      'value' => ['entity_id', $field_name . '_value'],
+    ],
+  ];
+
+}
+
