@@ -37,10 +37,6 @@ function date_recur_field_views_data(FieldStorageConfigInterface $field_storage)
       }
     }
 
-    // Remove unneeded fields for now.
-    unset($table_data[$field_name . '_rrule']);
-    unset($table_data[$field_name . '_recur_end_value']);
-
     // Update table name references.
     $handler_keys = ['argument', 'filter', 'sort', 'field'];
     foreach ($table_data as $column_name => &$column_data) {
