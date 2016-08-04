@@ -10,6 +10,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\datetime\Plugin\Field\FieldType\DateRangeItem;
 use RRule\RRule;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Plugin implementation of the 'date_recur' field type.
@@ -108,10 +109,30 @@ class DateRecurItem extends DateRangeItem {
     parent::onChange($property_name, $notify);
   }
 
-  public function getRRule() {
+  public function getRRule($start = NULL) {
     $rule = $this->rrule;
-    $rule .= ';DTSTART=' . $this->start_date->format('Y-m-d');
-    return new RRule($rule);
+    if (empty($rule)) {
+      return;
+    }
+    try {
+      $parts = RRule::parseRfcString($rule);
+      if (empty($parts['DTSTART'])) {
+        $start = !empty($start) ? $start : $this->start_date;
+        $parts['DTSTART'] = new \DateTime($start->format('Y-m-d'));
+      }
+      if (empty($parts['WKST'])) {
+        $parts['WKST'] = 'MO';
+      }
+      if (!empty($this->recur_end_date)) {
+        $parts['UNTIL'] = new \DateTime($this->recur_end_date->format('Y-m-d'));
+      }
+      $rrule = new RRule($parts);
+      return $rrule;
+    }
+    catch (Exception $e) {
+      // @todo: maybe handle?
+      return FALSE;
+    }
 
   }
 
@@ -121,7 +142,7 @@ class DateRecurItem extends DateRangeItem {
    * @return DrupalDateTime[]
    * @throws \Exception
    */
-  protected function createOccurrences($start = NULL, $end = NULL, $timezoneDisplay = FALSE) {
+  protected function createOccurrences($start = NULL, $end = NULL) {
     $dates[] = ['value' => $this->start_date, 'value2' => $this->end_date];
     if (empty($this->rrule)) {
       return $dates;
@@ -130,12 +151,12 @@ class DateRecurItem extends DateRangeItem {
       $start = $this->start_date;
     }
     if (empty($end)) {
-      $end = $this->recur_end_value;
+      $end = $this->recur_end_date;
     }
     if (empty($end)) {
       $end = clone $start;
       // @todo: Make this configurable.
-      $end->add(new \DateInterval('P1Y'));
+      $end->add(new \DateInterval('P3Y'));
     }
 
     if (!empty($this->end_date)) {
@@ -145,24 +166,33 @@ class DateRecurItem extends DateRangeItem {
 
     $time = $this->start_date->format('H:i');
     $rrule = $this->getRRule();
+    if (empty($rrule)) {
+      return $dates;
+    }
 
     /** @var \DateTime[] $occurrences */
     $occurrences = $rrule->getOccurrencesBetween($start, $end);
     foreach ($occurrences as $occurrence) {
-      $date = DrupalDateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $time, $start->getTimezone());
-      if ($timezoneDisplay) {
-        $date->setTimeZone(timezone_open(drupal_get_user_timezone()));
-      }
-      else {
-        $date->setTimezone(new \DateTimezone(DATETIME_STORAGE_TIMEZONE));
-      }
-      $date_end = clone $date;
-      if (!empty($diff)) {
-        $date_end = $date_end->add($diff);
-      }
-      $dates[] = ['value' => $date, 'value2' => $date_end];
+      $dates[] = $this->massageOccurrence(clone $occurrence);
     }
     return $dates;
+  }
+
+  protected function massageOccurrence($occurrence) {
+    if (empty($this->recurTime)) {
+      $this->recurTime = $this->start_date->format('H:i');
+      if (!empty($this->end_date)) {
+        /** @var \DateInterval $diff */
+        $this->recurDiff = $this->start_date->diff($this->end_date);
+      }
+    }
+    $date = DrupalDateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $this->recurTime, $this->start_date->getTimezone());
+    $date->setTimeZone(timezone_open(drupal_get_user_timezone()));
+    $date_end = clone $date;
+    if (!empty($this->recurDiff)) {
+      $date_end = $date_end->add($this->recurDiff);
+    }
+    return ['value' => $date, 'value2' => $date_end];
   }
 
   public function getOccurrences($start = NULL, $end = NULL) {
@@ -177,6 +207,30 @@ class DateRecurItem extends DateRangeItem {
       }
     }
     return $occurrences;
+  }
+
+  public function getNextOccurrences($start = 'now', $num = 5) {
+    if (empty($this->rrule)) {
+      return [['value' => $this->start_date, 'value2' => $this->end_date]];
+    }
+    if (is_string($start)) {
+      $start = new \DateTime($start);
+    }
+    $rrule = $this->getRRule($start);
+    $i = 0;
+    $res = [];
+    foreach ($rrule as $occurrence) {
+      if ($occurrence < $start) {
+        continue;
+      }
+      if (!empty($occurrence)) {
+        $res[] = $this->massageOccurrence($occurrence);
+      }
+      if (++$i >= $num) {
+        return $res;
+      }
+    }
+    return $res;
   }
 
   /**

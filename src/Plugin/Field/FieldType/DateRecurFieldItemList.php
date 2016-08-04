@@ -37,4 +37,17 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
     }
     $q->execute();
   }
+
+  public function delete() {
+    parent::delete();
+    $table_name = date_recur_get_table_name($this->getFieldDefinition());
+    db_delete($table_name)->condition('entity_id', $this->getEntity()->id());
+  }
+
+  public function deleteRevision() {
+    parent::deleteRevision();
+    $table_name = date_recur_get_table_name($this->getFieldDefinition());
+    db_delete($table_name)->condition('revision_id', $this->getEntity()->getRevisionId());
+  }
+
 }

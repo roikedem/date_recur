@@ -74,7 +74,7 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
     if ($items[$delta]->recur_end_value) {
       $storage_format = $this->fieldDefinition->getSetting('daterange_type_type') == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
       /** @var \Drupal\Core\Datetime\DrupalDateTime $recur_end_date*/
-      $recur_end_date = DrupalDateTime::createFromFormat(DATETIME_DATE_STORAGE_FORMAT, $items[$delta]->recur_end_value, DATETIME_STORAGE_TIMEZONE);
+      $recur_end_date = DrupalDateTime::createFromFormat($storage_format, $items[$delta]->recur_end_value, DATETIME_STORAGE_TIMEZONE);
       // The date was created and verified during field_load(), so it is safe to
       // use without further inspection.
       datetime_date_default_time($recur_end_date);
@@ -93,14 +93,14 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
     // The widget form element type has transformed the value to a
     // DrupalDateTime object at this point. We need to convert it back to the
     // storage timezone and format.
+    $storage_format = $this->fieldDefinition->getSetting('daterange_type_type') == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
     foreach ($values as &$item) {
       if (!empty($item['recur_end_value']) && $item['recur_end_value'] instanceof DrupalDateTime) {
         /** @var \Drupal\Core\Datetime\DrupalDateTime $end_date */
         $end_date = $item['recur_end_value'];
-        $format = DATETIME_DATE_STORAGE_FORMAT;
         // Adjust the date for storage.
         $end_date->setTimezone(new \DateTimezone(DATETIME_STORAGE_TIMEZONE));
-        $item['recur_end_value'] = $end_date->format($format);
+        $item['recur_end_value'] = $end_date->format($storage_format);
       }
 
       // @todo: Why are these needed? DB errors otherwise. Columns seem to be

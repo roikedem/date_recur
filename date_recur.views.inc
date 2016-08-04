@@ -11,7 +11,7 @@ use Drupal\field\FieldStorageConfigInterface;
  * Implements hook_field_views_data().
  */
 function date_recur_field_views_data(FieldStorageConfigInterface $field_storage) {
-  module_load_include('inc', 'datetime', 'views');
+  module_load_include('inc', 'datetime', 'datetime.views');
   $data = datetime_field_views_data($field_storage);
   if (empty($data)) {
     return [];
