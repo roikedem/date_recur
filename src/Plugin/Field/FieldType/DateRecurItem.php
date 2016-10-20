@@ -8,7 +8,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\datetime\Plugin\Field\FieldType\DateRangeItem;
+use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 use RRule\RRule;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -56,9 +56,6 @@ class DateRecurItem extends DateRangeItem {
 
     return $properties;
   }
-
-
-
 
   /**
    * {@inheritdoc}
@@ -112,7 +109,7 @@ class DateRecurItem extends DateRangeItem {
   public function getRRule($start = NULL) {
     $rule = $this->rrule;
     if (empty($rule)) {
-      return;
+      return FALSE;
     }
     try {
       $parts = RRule::parseRfcString($rule);
@@ -143,8 +140,9 @@ class DateRecurItem extends DateRangeItem {
    * @throws \Exception
    */
   protected function createOccurrences($start = NULL, $end = NULL) {
-    $dates[] = ['value' => $this->start_date, 'value2' => $this->end_date];
-    if (empty($this->rrule)) {
+    $dates[] = ['value' => $this->start_date, 'end_value' => $this->end_date];
+    $rrule = $this->getRRule();
+    if (empty($rrule)) {
       return $dates;
     }
     if (empty($start)) {
@@ -165,10 +163,6 @@ class DateRecurItem extends DateRangeItem {
     }
 
     $time = $this->start_date->format('H:i');
-    $rrule = $this->getRRule();
-    if (empty($rrule)) {
-      return $dates;
-    }
 
     /** @var \DateTime[] $occurrences */
     $occurrences = $rrule->getOccurrencesBetween($start, $end);
@@ -186,24 +180,25 @@ class DateRecurItem extends DateRangeItem {
         $this->recurDiff = $this->start_date->diff($this->end_date);
       }
     }
-    $date = DrupalDateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $this->recurTime, $this->start_date->getTimezone());
-    $date->setTimeZone(timezone_open(drupal_get_user_timezone()));
+    $date = \DateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $this->recurTime, $this->start_date->getTimezone());
     $date_end = clone $date;
     if (!empty($this->recurDiff)) {
       $date_end = $date_end->add($this->recurDiff);
     }
-    return ['value' => $date, 'value2' => $date_end];
+    return ['value' => $date, 'end_value' => $date_end];
   }
 
   public function getOccurrences($start = NULL, $end = NULL) {
-    return $this->createOccurrences($start, $end, TRUE);
+    return $this->createOccurrences($start, $end);
   }
 
   public function getOccurrencesForStorage() {
-    $occurrences = $this->createOccurrences(NULL, NULL, FALSE);
+    $occurrences = $this->createOccurrences();
     foreach ($occurrences as &$row) {
       foreach ($row as $key => $date) {
-        $row[$key] = $this->massageDateValueForStorage($date);
+        if (!empty($date)) {
+          $row[$key] = $this->massageDateValueForStorage($date);
+        }
       }
     }
     return $occurrences;
@@ -211,7 +206,7 @@ class DateRecurItem extends DateRangeItem {
 
   public function getNextOccurrences($start = 'now', $num = 5) {
     if (empty($this->rrule)) {
-      return [['value' => $this->start_date, 'value2' => $this->end_date]];
+      return [['value' => $this->start_date, 'end_value' => $this->end_date]];
     }
     if (is_string($start)) {
       $start = new \DateTime($start);
@@ -234,24 +229,20 @@ class DateRecurItem extends DateRangeItem {
   }
 
   /**
-   * @param DrupalDateTime $date
+   * @param DateTime|DrupalDateTime $date
    * @return string
    */
   protected function massageDateValueForStorage($date) {
     switch ($this->getSetting('daterange_type')) {
-      case DateRangeItem::DATERANGE_TYPE_DATE:
-        // If this is a date-only field, set it to the default time so the
-        // timezone conversion can be reversed.
+      case DateRangeItem::DATETIME_TYPE_DATE:
         datetime_date_default_time($date);
         $format = DATETIME_DATE_STORAGE_FORMAT;
         break;
-
       default:
         $format = DATETIME_DATETIME_STORAGE_FORMAT;
         break;
     }
     // Adjust the date for storage.
-    $date->setTimezone(new \DateTimezone(DATETIME_STORAGE_TIMEZONE));
     return $date->format($format);
   }
 }

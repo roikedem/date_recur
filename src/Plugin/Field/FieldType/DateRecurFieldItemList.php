@@ -1,8 +1,8 @@
 <?php
 
 namespace Drupal\date_recur\Plugin\Field\FieldType;
+use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeFieldItemList;
 
-use Drupal\datetime\Plugin\Field\FieldType\DateRangeFieldItemList;
 
 /**
  * Represents a configurable entity date_recur field.
@@ -21,7 +21,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
         ->execute();
     }
 
-    $fields = ['entity_id', 'revision_id', 'field_delta', $field_name . '_value', $field_name . '_value2', 'delta'];
+    $fields = ['entity_id', 'revision_id', 'field_delta', $field_name . '_value', $field_name . '_end_value', 'delta'];
     $default_values = [$entity_id, $revision_id];
 
     $q = db_insert($table_name)->fields($fields);

@@ -23,15 +23,18 @@ function date_recur_field_views_data(FieldStorageConfigInterface $field_storage)
   $table_name = date_recur_get_table_name($field_storage);
 
   foreach ($data as $table_alias => &$table_data) {
-    // Remove fields not present in date_recur tables.
-    if (!empty($table_data['table']['join'])) {
-      foreach ($table_data['table']['join'] as $join_key => $join) {
+    // Remove fields not present in date_recur tables and change the join to
+    // the date_recur cache table.
+    // @todo: Are there situations where the join can have more than one table?
+    if (!empty($table_data['table']['join']) && count($table_data['table']['join'])  === 1) {
+      foreach ($table_data['table']['join'] as $join_key => &$join) {
         if (empty($join['extra'])) {
           continue;
         }
+        $join['table'] = $table_name;
         foreach ($join['extra'] as $extra_key => $extra) {
           if (in_array($extra['field'], ['deleted', 'langcode'])) {
-            unset($table_data['table']['join'][$join_key]['extra'][$extra_key]);
+            unset($join['extra'][$extra_key]);
           }
         }
       }

@@ -30,6 +30,21 @@ function date_recur_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function date_recur_theme($existing, $type, $theme, $path) {
+  return array(
+    'date_recur_default_formatter' => [
+      'variables' => [
+        'occurrences' => [],
+        'repeatrule' => NULL,
+      ],
+    ],
+  );
+}
+
+
+/**
  * Implements hook_views_query_alter().
  */
 function date_recur_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
@@ -123,7 +138,7 @@ function date_recur_table_schema(FieldDefinitionInterface $field) {
         'type' => 'varchar',
         'length' => 20,
       ],
-      $field_name . '_value2' => [
+      $field_name . '_end_value' => [
         'description' => 'End date',
         'type' => 'varchar',
         'length' => 20,

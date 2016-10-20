@@ -1,0 +1,26 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a recurring dates field.
+ *
+ * Available variables:
+ * - repeatrule: The human readable repeat rule.
+ * - occurrences: The actual date occurrences.
+ *
+ * @ingroup themeable
+ */
+#}
+{{ kint() }}
+
+
+{% if repeatrule %}
+    <div class="date-recur-repeat-rule">{{ repeatrule }}</div>
+{% endif %}
+
+{% if occurrences %}
+  <ul class="item-list date-recur-occurrences">
+    {% for item in occurrences %}
+      <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}

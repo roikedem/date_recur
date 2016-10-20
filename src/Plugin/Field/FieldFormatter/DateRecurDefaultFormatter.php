@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 use Drupal\datetime\Plugin\Field\FieldFormatter\DateTimeDefaultFormatter;
 use Drupal\datetime\Plugin\Field\FieldFormatter\DateTimeFormatterBase;
+use Drupal\views\ResultRow;
+use Drupal\views\ViewExecutable;
 use RRule\RRule;
 use When\When;
 
@@ -45,6 +47,16 @@ class DateRecurDefaultFormatter extends DateTimeDefaultFormatter {
       $next_options[$i] = $i;
     }
     return $next_options;
+  }
+
+  protected function setTimezone(DrupalDateTime $date) {
+    return $date;
+  }
+
+  protected function formatDate($date) {
+    $format_type = $this->getSetting('format_type');
+    $timezone = DATETIME_STORAGE_TIMEZONE;
+    return $this->dateFormatter->format($date->getTimestamp(), $format_type, '', $timezone);
   }
 
   /**
@@ -82,6 +94,7 @@ class DateRecurDefaultFormatter extends DateTimeDefaultFormatter {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
+
     $elements = [];
 
     foreach ($items as $delta => $item) {
@@ -102,26 +115,35 @@ class DateRecurDefaultFormatter extends DateTimeDefaultFormatter {
    */
   protected function viewValue(DateRecurItem $item) {
     $dates = [];
+    $build = [
+      '#theme' => 'date_recur_default_formatter'
+    ];
 
     if ($item->rrule && $this->getSetting('show_rrule')) {
-      $dates[] = $item->getRRule()->humanReadable();
+      $build['#repeatrule'] = $item->getRRule()->humanReadable();
     }
     $occurrences = $item->getNextOccurrences('now', $this->getSetting('show_next'));
+
     foreach ($occurrences as $occurrence) {
       if (!empty($occurrence)) {
         $date = $this->formatDate($occurrence['value']);
-        if (!empty($occurrence['value2'])) {
+        if (!empty($occurrence['end_value']) && $occurrence['value']->format('c') != $occurrence['end_value']->format('c')) {
           // @todo: Make seperator configurable or use a proper placeholdered t string.
-          $date .= $this->t(' until ') . $this->formatDate($occurrence['value2']);
+          // @todo: Hide end date if identical to start.
+          $date .= $this->t(' until ');
+          if ($occurrence['end_value']->format('Ymd') == $occurrence['value']->format('Ymd')) {
+            $date .= $occurrence['end_value']->format('H:i');
+
+          }
+          else {
+            $date .= $this->formatDate($occurrence['end_value']);
+          }
         }
         $dates[] = $date;
       }
     }
     // @todo: Make this a proper theme hook.
-    $build = array(
-      '#theme' => 'item_list',
-      '#items' => $dates,
-    );
+    $build['#occurrences'] = $dates;
     return $build;
   }
 

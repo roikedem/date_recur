@@ -5,7 +5,8 @@ namespace Drupal\date_recur\Plugin\Field\FieldWidget;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\datetime\Plugin\Field\FieldWidget\DateRangeDefaultWidget;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+use Drupal\datetime_range\Plugin\Field\FieldWidget\DateRangeDefaultWidget;
 
 /**
  * Plugin implementation of the 'date_recur_default_widget' widget.
@@ -52,6 +53,12 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
+    foreach (array('value', 'end_value') as $key) {
+      $element[$key]['#date_timezone'] = DATETIME_STORAGE_TIMEZONE;
+    }
+
+    $element['end_value']['#required'] = FALSE;
+
     $element['rrule'] = array(
       '#type' => 'textfield',
       '#default_value' => isset($items[$delta]->rrule) ? $items[$delta]->rrule : NULL,
@@ -60,29 +67,38 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
 
     $element['recur_end_value'] = [
       '#title' => $this->t('Recur event until'),
-      '#type' => 'datetime',
-      '#default_value' => NULL,
-      '#date_increment' => 1,
-      '#date_timezone' => drupal_get_user_timezone(),
       '#required' => FALSE,
-      '#date_date_format' => $this->dateStorage->load('html_date')->getPattern(),
-      '#date_date_element' => 'date',
       '#date_time_format' => '',
       '#date_time_element' => 'none',
-    ];
+    ] + $element['value'];
 
     if ($items[$delta]->recur_end_value) {
-      $storage_format = $this->fieldDefinition->getSetting('daterange_type_type') == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
-      /** @var \Drupal\Core\Datetime\DrupalDateTime $recur_end_date*/
-      $recur_end_date = DrupalDateTime::createFromFormat($storage_format, $items[$delta]->recur_end_value, DATETIME_STORAGE_TIMEZONE);
-      // The date was created and verified during field_load(), so it is safe to
-      // use without further inspection.
-      datetime_date_default_time($recur_end_date);
-      $recur_end_date->setTimezone(new \DateTimeZone($element['recur_end_value']['#date_timezone']));
-      $element['recur_end_value']['#default_value'] = $recur_end_date;
+      /** @var \Drupal\Core\Datetime\DrupalDateTime $start_date */
+      $recur_end_value = $items[$delta]->recur_end_value;
+      $element['recur_end_value']['#default_value'] = $this->createDefaultValue($recur_end_value, $element['recur_end_value']['#date_timezone']);
     }
 
     return $element;
+  }
+
+  /**
+   * Creates a date object for use as a default value.
+   *
+   * This overrides DateRangeWidgetBase to remove timezone handling.
+   *
+   * @param \Drupal\Core\Datetime\DrupalDateTime $date
+   * @param string $timezone
+   * @return \Drupal\Core\Datetime\DrupalDateTime
+   */
+  protected function createDefaultValue($date, $timezone) {
+    // The date was created and verified during field_load(), so it is safe to
+    // use without further inspection.
+    if ($this->getFieldSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE) {
+      // A date without time will pick up the current time, use the default
+      // time.
+      datetime_date_default_time($date);
+    }
+    return $date;
   }
 
   /**
@@ -90,23 +106,14 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
     $values = parent::massageFormValues($values, $form, $form_state);
-    // The widget form element type has transformed the value to a
-    // DrupalDateTime object at this point. We need to convert it back to the
-    // storage timezone and format.
-    $storage_format = $this->fieldDefinition->getSetting('daterange_type_type') == 'date' ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
     foreach ($values as &$item) {
       if (!empty($item['recur_end_value']) && $item['recur_end_value'] instanceof DrupalDateTime) {
         /** @var \Drupal\Core\Datetime\DrupalDateTime $end_date */
         $end_date = $item['recur_end_value'];
-        // Adjust the date for storage.
-        $end_date->setTimezone(new \DateTimezone(DATETIME_STORAGE_TIMEZONE));
-        $item['recur_end_value'] = $end_date->format($storage_format);
+        $item['recur_end_value'] = $end_date->format(DATETIME_DATE_STORAGE_FORMAT);
       }
-
-      // @todo: Why are these needed? DB errors otherwise. Columns seem to be
-      // NOT NULL even though they have setRequired(FALSE).
-      if (empty($item['recur_end_value'])) {
-        $item['recur_end_value'] = '';
+      if (empty($item['end_value'])) {
+        $item['end_value'] = $item['value'];
       }
       if (empty($item['rrule'])) {
         $item['rrule'] = '';
