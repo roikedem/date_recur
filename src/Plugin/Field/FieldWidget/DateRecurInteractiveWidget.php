@@ -30,19 +30,9 @@ class DateRecurInteractiveWidget extends DateRecurDefaultWidget {
       '#type' => 'container',
       '#weight' => -10,
       '#attributes' => [
-        'class' => ['date-recur-container-inline'],
+        'class' => ['date-recur-container-inline', 'clearfix'],
       ],
     ];
-    $element['date_group']['seperator'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'span',
-      '#value' => t('to'),
-      '#attributes' => ['class' => ['label', 'seperator']],
-      '#weight' => 1,
-    ];
-//    $element['#title_display'] = 'invisible';
-//    $element['#theme_wrappers'] = [];
-
     return $element;
   }
 

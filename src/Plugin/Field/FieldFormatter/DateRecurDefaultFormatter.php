@@ -41,9 +41,10 @@ class DateRecurDefaultFormatter extends DateTimeDefaultFormatter {
   }
 
   protected function showNextOptions() {
-    $next_options[-1] = $this->t('All');
+    // This cannot work for infinite fields.
+//    $next_options[-1] = $this->t('All');
     $next_options[0] = $this->t('None');
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 20; $i++) {
       $next_options[$i] = $i;
     }
     return $next_options;

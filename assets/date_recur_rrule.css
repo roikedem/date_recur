@@ -1,22 +1,11 @@
 .date-recur-container-inline .label {
-    display: none;
-}
-.date-recur-container-inline .label.seperator {
-    display: block;
+    display: inline-block;
     float: left;
-    margin: 0 .5em;
+    margin: 2px .5em 0 0;
 }
 .date-recur-container-inline .container-inline {
     float: left;
-}
-
-/* Clear-fix markup for the inline container */
-div.date-recur-container-inline:after {
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
+    margin-right: .5em;
 }
 
 .date-recur-widget {

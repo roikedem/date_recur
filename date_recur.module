@@ -148,6 +148,17 @@ function date_recur_table_schema(FieldDefinitionInterface $field) {
       'value' => ['entity_id', $field_name . '_value'],
     ],
   ];
-
 }
+
+
+/**
+ * Implements hook_cron().
+ */
+//function date_recur_cron() {
+  // @todo Implement like this:
+  // - Check if some timespan since last run has passed (e.g. 1 month).
+  // - Use EntityQuery to load all items with infinite = 1.
+  // - Load those entities.
+  // - Call DateRecurFieldItemList::postSave().
+//}
 

@@ -8,9 +8,8 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\date_recur\DateRecurRRule;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
-use RRule\RRule;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Plugin implementation of the 'date_recur' field type.
@@ -25,6 +24,8 @@ use Symfony\Component\Config\Definition\Exception\Exception;
  * )
  */
 class DateRecurItem extends DateRangeItem {
+
+  protected $rruleObject;
 
   /**
    * {@inheritdoc}
@@ -43,16 +44,9 @@ class DateRecurItem extends DateRangeItem {
     $properties['rrule'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('RRule'))
       ->setRequired(FALSE);
-    $properties['recur_end_value'] = DataDefinition::create('datetime_iso8601')
-      ->setLabel(t('End date value'))
+    $properties['infinite'] = DataDefinition::create('boolean')
+      ->setLabel(new TranslatableMarkup('Is the RRule an inifinite rule?'))
       ->setRequired(FALSE);
-    $properties['recur_end_date'] = DataDefinition::create('any')
-      ->setLabel(t('Computed recur_end date'))
-      ->setDescription(t('The computed recur_end DateTime object.'))
-      ->setComputed(TRUE)
-      ->setClass('\Drupal\datetime\DateTimeComputed')
-      ->setSetting('date source', 'recur_end_value')
-      ->setSetting('date type', 'date');
 
     return $properties;
   }
@@ -67,10 +61,10 @@ class DateRecurItem extends DateRangeItem {
       'type' => 'varchar',
       'length' => 255,
     ];
-    $schema['columns']['recur_end_value'] = [
-      'description' => 'When to stop recurring',
-      'type' => 'varchar',
-      'length' => 20,
+    $schema['columns']['infinite'] = [
+      'description' => 'Infinity of the repeat rule.',
+      'type' => 'int',
+      'size' => 'tiny',
     ];
 
     return $schema;
@@ -81,7 +75,6 @@ class DateRecurItem extends DateRangeItem {
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
     $values = parent::generateSampleValue($field_definition);
-    $values['recur_end_value'] = $values['end_value'];
   }
 
   /**
@@ -95,115 +88,91 @@ class DateRecurItem extends DateRangeItem {
   /**
    * {@inheritdoc}
    */
+  public static function defaultFieldSettings() {
+    return [
+      'precreate' => 'P2Y',
+    ] + parent::defaultFieldSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
+    $element = parent::fieldSettingsForm($form, $form_state);
+    $options = [];
+    for ($i = 1; $i < 6; $i++) {
+      $options['P' . $i . 'Y'] = $this->formatPlural($i, '@count year', '@count years', ['@count' => $i]);
+    }
+    $element['precreate'] = [
+      '#type' => 'select',
+      '#title' => t('Precreate occurrences'),
+      '#description' => t('For infinitely repeating dates, precreate occurrences for this amount of time in the views cache table.'),
+      '#options' => $options,
+      '#default_value' => $this->getSetting('precreate'),
+    ];
+    return $element;
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
   public function isEmpty() {
     return parent::isEmpty();
   }
 
-  public function onChange($property_name, $notify = TRUE) {
-    if ($property_name == 'recur_end_value') {
-      $this->recur_end_date = NULL;
-    }
-    parent::onChange($property_name, $notify);
-  }
-
-  public function getRRule($start = NULL) {
-    $rule = $this->rrule;
-    if (empty($rule)) {
-      return FALSE;
-    }
-    try {
-      $parts = RRule::parseRfcString($rule);
-      if (empty($parts['DTSTART'])) {
-        $start = !empty($start) ? $start : $this->start_date;
-        $parts['DTSTART'] = new \DateTime($start->format('Y-m-d'));
-      }
-      if (empty($parts['WKST'])) {
-        $parts['WKST'] = 'MO';
-      }
-      if (!empty($this->recur_end_date)) {
-        $parts['UNTIL'] = new \DateTime($this->recur_end_date->format('Y-m-d'));
-      }
-      $rrule = new RRule($parts);
-      return $rrule;
-    }
-    catch (Exception $e) {
-      // @todo: maybe handle?
-      return FALSE;
-    }
-
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave() {
+    parent::preSave();
+    $this->infinite = (int) $this->getRrule()->isInfinite();
   }
 
   /**
-   * @param DrupalDateTime $start
-   * @param DrupalDateTime $end
-   * @return DrupalDateTime[]
-   * @throws \Exception
+   * Get the RRule object.
+   *
+   * @return bool|\Drupal\date_recur\DateRecurRRule
    */
-  protected function createOccurrences($start = NULL, $end = NULL) {
-    $dates[] = ['value' => $this->start_date, 'end_value' => $this->end_date];
-    $rrule = $this->getRRule();
-    if (empty($rrule)) {
-      return $dates;
+  public function getRRule() {
+    if (!empty($this->rruleObject)) {
+      return $this->rruleObject;
     }
-    if (empty($start)) {
-      $start = $this->start_date;
-    }
-    if (empty($end)) {
-      $end = $this->recur_end_date;
-    }
-    if (empty($end)) {
-      $end = clone $start;
-      // @todo: Make this configurable.
-      $end->add(new \DateInterval('P3Y'));
-    }
-
-    if (!empty($this->end_date)) {
-      /** @var \DateInterval $diff */
-      $diff = $this->start_date->diff($this->end_date);
-    }
-
-    $time = $this->start_date->format('H:i');
-
-    /** @var \DateTime[] $occurrences */
-    $occurrences = $rrule->getOccurrencesBetween($start, $end);
-    foreach ($occurrences as $occurrence) {
-      $dates[] = $this->massageOccurrence(clone $occurrence);
-    }
-    return $dates;
-  }
-
-  protected function massageOccurrence($occurrence) {
-    if (empty($this->recurTime)) {
-      $this->recurTime = $this->start_date->format('H:i');
-      if (!empty($this->end_date)) {
-        /** @var \DateInterval $diff */
-        $this->recurDiff = $this->start_date->diff($this->end_date);
+    else {
+      $rule = $this->rrule;
+      if (empty($rule)) {
+        return FALSE;
       }
+      $this->rruleObject = new DateRecurRRule($rule, $this->start_date, $this->end_date);
+      return $this->rruleObject;
     }
-    $date = \DateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $this->recurTime, $this->start_date->getTimezone());
-    $date_end = clone $date;
-    if (!empty($this->recurDiff)) {
-      $date_end = $date_end->add($this->recurDiff);
-    }
-    return ['value' => $date, 'end_value' => $date_end];
   }
 
+
+  /**
+   * Get occurrences. Optionally set a start or an end date.
+   *
+   * @throws \LogicException If the rule is infinite and no $end is supplied.
+   *
+   * @param null|\DateTime $start
+   * @param null|\DateTime $end
+   * @return array [[value => DrupalDateTime, end_value => DrupalDateTime], ...]
+   */
   public function getOccurrences($start = NULL, $end = NULL) {
-    return $this->createOccurrences($start, $end);
-  }
-
-  public function getOccurrencesForStorage() {
-    $occurrences = $this->createOccurrences();
-    foreach ($occurrences as &$row) {
-      foreach ($row as $key => $date) {
-        if (!empty($date)) {
-          $row[$key] = $this->massageDateValueForStorage($date);
-        }
-      }
+    if (empty($this->rrule)) {
+      return [['value' => $this->start_date, 'end_value' => $this->end_date]];
     }
-    return $occurrences;
+    return $this->getRRule()->getOccurrencesBetween($start, $end);
   }
 
+
+  /**
+   * Get next occurrences from some date.
+   *
+   * @param string|\DateTime $start
+   * @param int $num
+   * @return array
+   */
   public function getNextOccurrences($start = 'now', $num = 5) {
     if (empty($this->rrule)) {
       return [['value' => $this->start_date, 'end_value' => $this->end_date]];
@@ -211,38 +180,6 @@ class DateRecurItem extends DateRangeItem {
     if (is_string($start)) {
       $start = new \DateTime($start);
     }
-    $rrule = $this->getRRule($start);
-    $i = 0;
-    $res = [];
-    foreach ($rrule as $occurrence) {
-      if ($occurrence < $start) {
-        continue;
-      }
-      if (!empty($occurrence)) {
-        $res[] = $this->massageOccurrence($occurrence);
-      }
-      if (++$i >= $num) {
-        return $res;
-      }
-    }
-    return $res;
-  }
-
-  /**
-   * @param DateTime|DrupalDateTime $date
-   * @return string
-   */
-  protected function massageDateValueForStorage($date) {
-    switch ($this->getSetting('daterange_type')) {
-      case DateRangeItem::DATETIME_TYPE_DATE:
-        datetime_date_default_time($date);
-        $format = DATETIME_DATE_STORAGE_FORMAT;
-        break;
-      default:
-        $format = DATETIME_DATETIME_STORAGE_FORMAT;
-        break;
-    }
-    // Adjust the date for storage.
-    return $date->format($format);
+    return $this->getRRule()->getNextOccurrences($start, $num);
   }
 }
