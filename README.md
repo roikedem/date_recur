@@ -20,6 +20,6 @@ Views works. Calendar needs to be patched (see https://www.drupal.org/node/28208
 
 Installation via composer is recommended.  Run the following:
 
-    composer require drupal/date_recur:dev-8.x-1.x --prefer-source
+    composer require drupal/date_recur:dev-1.x --prefer-source
 
 Without composer, you have to take care of installing php-rrule yourself (this is unsupported).
