@@ -12,18 +12,6 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   public function postSave($update) {
     parent::postSave($update);
 
-    // Get storage format from settings.
-    switch ($this->getSetting('daterange_type')) {
-      case DateRangeItem::DATETIME_TYPE_DATE:
-        $storageFormat = DATETIME_DATE_STORAGE_FORMAT;
-        break;
-      default:
-        $storageFormat = DATETIME_DATETIME_STORAGE_FORMAT;
-        break;
-    }
-
-    $until = new \DateTime();
-    $until->add(new \DateInterval($this->getSetting('precreate')));
 
     // Prepare update operation.
     $table_name = date_recur_get_table_name($this->getFieldDefinition());
@@ -45,7 +33,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
     $delta = 0;
     /** @var DateRecurItem $item*/
     foreach ($this as $field_delta => $item) {
-      $dates = $item->getRrule()->getOccurrencesForCacheStorage($until, $storageFormat);
+      $dates = $item->getOccurrencesForCacheStorage();
       foreach ($dates as $date) {
         $q->values(array_merge($default_values, [$field_delta], $date, [$delta]));
         $delta++;

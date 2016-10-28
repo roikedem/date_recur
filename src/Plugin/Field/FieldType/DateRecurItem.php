@@ -126,16 +126,22 @@ class DateRecurItem extends DateRangeItem {
    */
   public function preSave() {
     parent::preSave();
-    $this->infinite = (int) $this->getRrule()->isInfinite();
+    if ($this->getRRule()) {
+      $this->infinite = (int) $this->getRrule()->isInfinite();
+    }
+    else {
+      $this->infinite = 0;
+    }
   }
 
   /**
    * Get the RRule object.
    *
+   * @param bool $reset
    * @return bool|\Drupal\date_recur\DateRecurRRule
    */
-  public function getRRule() {
-    if (!empty($this->rruleObject)) {
+  public function getRRule($reset = FALSE) {
+    if (!$reset && !empty($this->rruleObject)) {
       return $this->rruleObject;
     }
     else {
@@ -181,5 +187,37 @@ class DateRecurItem extends DateRangeItem {
       $start = new \DateTime($start);
     }
     return $this->getRRule()->getNextOccurrences($start, $num);
+  }
+
+  /**
+   * Get the occurrences for storage in the cache table (for views).
+   *
+   * @see DateRecurFieldItemList::postSave()
+   *
+   * @return array
+   */
+  public function getOccurrencesForCacheStorage() {
+    // Get storage format from settings.
+    switch ($this->getSetting('daterange_type')) {
+      case DateRangeItem::DATETIME_TYPE_DATE:
+        $storageFormat = DATETIME_DATE_STORAGE_FORMAT;
+        break;
+      default:
+        $storageFormat = DATETIME_DATETIME_STORAGE_FORMAT;
+        break;
+    }
+
+    if (empty($this->rrule)) {
+      return [[
+        'value' => DateRecurRRule::massageDateValueForStorage($this->start_date, $storageFormat),
+        'end_value' => DateRecurRRule::massageDateValueForStorage($this->end_date, $storageFormat),
+      ]];
+    }
+    else {
+      $until = new \DateTime();
+      $until->add(new \DateInterval($this->getSetting('precreate')));
+      return $this->getRRule()
+        ->getOccurrencesForCacheStorage($until, $storageFormat);
+    }
   }
 }

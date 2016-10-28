@@ -176,7 +176,7 @@ class DateRecurRRule {
     foreach ($occurrences as &$row) {
       foreach ($row as $key => $date) {
         if (!empty($date)) {
-          $row[$key] = $this->massageDateValueForStorage($date, $storageFormat);
+          $row[$key] = self::massageDateValueForStorage($date, $storageFormat);
         }
       }
     }
@@ -195,8 +195,8 @@ class DateRecurRRule {
       throw new \LogicException('Cannot get all occurrences of an infinite recurrence rule.');
     }
     // If a start date was supplied, create a new rule object with the supplied
-    // start date. Not sure if this is more performant than iterating through
-    // all occurrences.
+    // start date.
+    // @todo: Not sure if this is more performant than iterating through all occurrences.
     if (!empty($start)) {
       $rrule = sprintf(
         "DTSTART:%s\nRRULE:%s",
@@ -235,13 +235,11 @@ class DateRecurRRule {
     return ['value' => $date, 'end_value' => $date_end];
   }
 
-  protected function massageDateValueForStorage($date, $format) {
+  public static function massageDateValueForStorage($date, $format) {
     if ($format == DATETIME_DATE_STORAGE_FORMAT) {
       datetime_date_default_time($date);
     }
     // Adjust the date for storage.
     return $date->format($format);
   }
-
-
 }
