@@ -147,9 +147,9 @@ class DateRecurDefaultRRule extends RRule {
   }
 
   protected function formatDateForDisplay(\DateTime $date, $format) {
-    if (!empty($this->timezoneOffset)) {
-      $date->add(new \DateInterval('PT' . $this->timezoneOffset. 'S'));
+    if (empty($this->timezone)) {
+      return $date->format('H:i');
     }
-    return $date->format('H:i');
+    return $date->setTimezone(new \DateTimeZone($this->timezone))->format('H:i');
   }
 }

@@ -11,7 +11,7 @@
  * @ingroup themeable
  */
 #}
-{% if date %}
+{% if date and not (repeatrule or occurrences|length) %}
   <div class="date-recur-date">{{ date }}</div>
 {% endif %}
 

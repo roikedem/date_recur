@@ -95,7 +95,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     if ($start_date->format('U') !== $end_date->format('U')) {
       $element = [
         'start_date' => $this->buildDateWithIsoAttribute($start_date),
-        'separator' => ['#plain_text' => ' ' . $this->getSetting('seperator') . ' '],
+        'separator' => ['#plain_text' => ' ' . $this->getSetting('separator') . ' '],
         'end_date' => $this->buildDateWithIsoAttribute($end_date),
       ];
     }
@@ -144,10 +144,8 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       '#theme' => 'date_recur_default_formatter'
     ];
 
-    if (empty($item->rrule)) {
-      $build['#date'] = $this->buildDateRangeValue($item->start_date, $item->end_date);
-    }
-    else {
+    $build['#date'] = $this->buildDateRangeValue($item->start_date, $item->end_date);
+    if (!empty($item->rrule)) {
       if ($this->getSetting('show_rrule')) {
         $build['#repeatrule'] = $item->getRRule()->humanReadable();
       }
