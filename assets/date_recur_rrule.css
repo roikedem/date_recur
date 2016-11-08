@@ -38,3 +38,34 @@
     content: '';
 }
 
+.date-recur-widget .byweekday-pos-container {
+    display: inline-block;
+    position: relative;
+    min-width: 100px;
+}
+.date-recur-widget .byweekday-pos-text {
+    border-bottom: 1px dotted #008ee6;
+    cursor: pointer;
+}
+
+.date-recur-widget .byweekday-pos-text:after {
+    content: '▼';
+    color: #008ee6;
+    font-size: 11px;
+    margin-left: 3px;
+}
+
+.date-recur-widget .byweekday-pos-input{
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: auto;
+    height: auto;
+    background: #fff;
+    border: 2px solid #008ee6;
+    padding: 5px;
+}
+
+.date-recur-widget .byweekday-pos-input label {
+    display: block;
+}

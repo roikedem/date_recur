@@ -12,13 +12,13 @@
 (function ($, Drupal, RRule) {
 
   RRule.FREQUENCY_ADVERBS = [
-    Drupal.t('yearly', {}, {context: 'Date recur interface: frequencies'}),
-    Drupal.t('monthly', {}, {context: 'Date recur interface: frequencies'}),
-    Drupal.t('weekly', {}, {context: 'Date recur interface: frequencies'}),
-    Drupal.t('daily', {}, {context: 'Date recur interface: frequencies'}),
-    Drupal.t('hourly', {}, {context: 'Date recur interface: frequencies'}),
-    Drupal.t('minutely', {}, {context: 'Date recur interface: frequencies'}),
-    Drupal.t('secondly', {}, {context: 'Date recur interface: frequencies'})
+    Drupal.t('yearly', {}, {context: 'Date recur: Freq'}),
+    Drupal.t('monthly', {}, {context: 'Date recur: Freq'}),
+    Drupal.t('weekly', {}, {context: 'Date recur: Freq'}),
+    Drupal.t('daily', {}, {context: 'Date recur: Freq'}),
+    Drupal.t('hourly', {}, {context: 'Date recur: Freq'}),
+    Drupal.t('minutely', {}, {context: 'Date recur: Freq'}),
+    Drupal.t('secondly', {}, {context: 'Date recur: Freq'})
   ];
   // add helpful constants to RRule
   RRule.FREQUENCY_NAMES = [
@@ -66,18 +66,12 @@
   ];
 
   RRule.SETPOS = {
-    '1': Drupal.t('first', {}, {context: 'Date recur interface: frequency'}),
-    '2': Drupal.t('second', {}, {context: 'Date recur interface: frequency'}),
-    '3': Drupal.t('third', {}, {context: 'Date recur interface: frequency'}),
-    '4': Drupal.t('forth', {}, {context: 'Date recur interface: frequency'}),
-    '-1': Drupal.t('last', {}, {context: 'Date recur interface: frequency'}),
-    '1,2': Drupal.t('1. and 2.', {}, {context: 'Date recur interface: frequency'}),
-    '1,3': Drupal.t('1. and 3.', {}, {context: 'Date recur interface: frequency'}),
-    '1,2,3': Drupal.t('1., 2. and 3.', {}, {context: 'Date recur interface: frequency'}),
-    '1,3,-1': Drupal.t('1., 3. and last', {}, {context: 'Date recur interface: frequency'}),
-    '1,2,3,4': Drupal.t('1.,2.,3. and 4.', {}, {context: 'Date recur interface: frequency'}),
-    '2,4': Drupal.t('2. and 4.', {}, {context: 'Date recur interface: frequency'}),
-    '2,-1': Drupal.t('2. and last', {}, {context: 'Date recur interface: frequency'})
+    '1': Drupal.t('first', {}, {context: 'Date recur: Freq'}),
+    '2': Drupal.t('second', {}, {context: 'Date recur: Freq'}),
+    '3': Drupal.t('third', {}, {context: 'Date recur: Freq'}),
+    '4': Drupal.t('forth', {}, {context: 'Date recur: Freq'}),
+    '5': Drupal.t('fifth', {}, {context: 'Date recur: Freq'}),
+    '-1': Drupal.t('last', {}, {context: 'Date recur: Freq'}),
   };
 
   // @todo: localize. @see: locale.datepicker.js.
@@ -96,7 +90,7 @@
       //frequency
       tmpl += '<div class="container-inline">';
       tmpl += '<label class="controls">'
-        + Drupal.t('Repeat', {}, {context: 'Date recur interface'})
+        + Drupal.t('Repeat', {}, {context: 'Date recur'})
         + ' ';
       tmpl += '<select name="freq">';
       _.each(RRule.FREQUENCIES, function (element, index) {
@@ -108,7 +102,7 @@
 
 
       tmpl += '<label class="controls"> ';
-      tmpl += Drupal.t('every', {}, {context: 'Date recur interface'})
+      tmpl += Drupal.t('every', {}, {context: 'Date recur'})
       tmpl += ' <input type="number" value="1" min="1" max="100" name="interval"/>';
       tmpl += '&nbsp;<span id="frequency_name"></span>';
       tmpl += '</label>';
@@ -120,13 +114,15 @@
       //bymonth: weekdays
       tmpl += '<div class="repeat-options controls container-inline" data-freq="monthly">';
       tmpl += '<label for="byweekday-pos">';
-      tmpl += Drupal.t('On the', {}, {context: 'Date recur interface: weekday in month'})
+      tmpl += Drupal.t('On the', {}, {context: 'Date recur: weekday in month'})
       tmpl += '</label>';
-      tmpl += '<select name="byweekday-pos">';
+      tmpl += ' <div class="byweekday-pos-container"><span class="byweekday-pos-text"></span>';
+      tmpl += ' <div class="byweekday-pos-input">';
       _.each(RRule.SETPOS, function (element, index) {
-        tmpl += '<option value=' + index + '>' + element + '</option>';
+        tmpl += '<label><input type="checkbox" name="byweekday-pos" value=' + index + '> ' + element + '</label>';
       });
-      tmpl += '</select>';
+      tmpl += '</div>';
+      tmpl += '</div>';
       _.each(RRule.DAYCODES, function (element, index) {
         var d = RRule[element];
         tmpl += '<label class="inline">';
@@ -137,7 +133,7 @@
 
       //bymonth: months
       tmpl += '<div class="repeat-options controls container-inline" data-freq="monthly">';
-      tmpl += Drupal.t('Only in', {}, {context: 'Date recur interface: month'})
+      tmpl += Drupal.t('Only in', {}, {context: 'Date recur: month'})
       tmpl += ' </label>';
       _.each(RRule.MONTHS, function (element, index) {
         tmpl += '<label class="inline">';
@@ -149,7 +145,7 @@
       //byweekday
       tmpl += '<div class="repeat-options controls container-inline" data-freq="weekly">';
       tmpl += '<label for="byweekday">';
-      tmpl += Drupal.t('On', {}, {context: 'Date recur interface: weekday'})
+      tmpl += Drupal.t('On', {}, {context: 'Date recur: weekday'})
       tmpl += ' </label>';
       _.each(RRule.DAYCODES, function (element, index) {
         var d = RRule[element];
@@ -161,17 +157,17 @@
 
       //byhour
       tmpl += '<label class="repeat-options" data-freq="hourly">';
-      tmpl += Drupal.t('Only at', {}, {context: 'Date recur interface: time'})
+      tmpl += Drupal.t('Only at', {}, {context: 'Date recur: time'})
       tmpl += ' <input name="byhour" /> <span>o\'clock</span></label>';
 
       //byminute
       tmpl += '<label class="repeat-options" data-freq="minutely">';
-      tmpl += Drupal.t('Only at', {}, {context: 'Date recur interface: time'})
+      tmpl += Drupal.t('Only at', {}, {context: 'Date recur: time'})
       tmpl += ' <input name="byminute" />  <span>minutes<span></label>';
 
       //bysecond
       tmpl += '<label class="repeat-options" data-freq="secondly">';
-      tmpl += Drupal.t('Only at', {}, {context: 'Date recur interface: time'})
+      tmpl += Drupal.t('Only at', {}, {context: 'Date recur: time'})
       tmpl += ' <input name="bysecond" /> <span>seconds</span></label>';
 
       // end repeat options
@@ -180,29 +176,29 @@
       // end on
       tmpl += '<div class="end-options controls">';
       tmpl += '<label for="end">';
-      tmpl += Drupal.t('End', {}, {context: 'Date recur interface'})
+      tmpl += Drupal.t('End', {}, {context: 'Date recur'})
       tmpl += ' </label>';
 
       tmpl += '<label class="inline">';
       tmpl += '<input type="radio" name="end" value="0" checked="checked"/> ';
-      tmpl += Drupal.t('Never', {}, {context: 'Date recur interface'})
+      tmpl += Drupal.t('Never', {}, {context: 'Date recur'})
       tmpl += '</label>';
       tmpl += '<label class="inline">';
       tmpl += '<input type="radio" name="end" value="1" /> ';
-      tmpl += Drupal.t('After !count occurrences', {'!count': '<input type="number" max="1000" min="1" value="" name="count"/> '}, {context: 'Date recur interface'})
+      tmpl += Drupal.t('After !count occurrences', {'!count': '<input type="number" max="1000" min="1" value="" name="count"/> '}, {context: 'Date recur'})
       tmpl += '</label>';
       tmpl += '<label class="inline">';
       tmpl += '<input type="radio" name="end" value="2"> ';
-      tmpl += Drupal.t('On date !date', {'!date': '<input type="date" name="until"/>'}, {context: 'Date recur interface'})
+      tmpl += Drupal.t('On date !date', {'!date': '<input type="date" name="until"/>'}, {context: 'Date recur'})
       tmpl += '</label>';
 
       tmpl += '</div>';
 
       // summary
       tmpl += '<label for="output">';
-      tmpl += Drupal.t('Summary', {}, {context: 'Date recur interface'})
+      tmpl += Drupal.t('Summary', {}, {context: 'Date recur'})
       tmpl += ': <em class="text-output"></em></label>'; // human readable
-      tmpl += '<label>RRule <code class="rrule-output"></code></label>'; // ugly rrule
+      tmpl += '<label>' + Drupal.t('RRule') + ':<code class="rrule-output"></code></label>'; // ugly rrule
 
       //TODO: show next few instances to help user debug
 
@@ -213,10 +209,35 @@
       this.frequency_select = this.element.find('select[name="freq"]');
       this.interval_input = this.element.find('input[name="interval"]');
       this.end_input = this.element.find('input[type="radio"][name="end"]');
+      this.byweekday_pos_input = this.element.find('.byweekday-pos-input');
 
       //bind event handlers
       this._on(this.element.find('select, input'), {
         change: this._refresh
+      });
+
+      // Handle byweekday_pos popup.
+      this.byweekday_pos_input.hide();
+      var widget = this;
+      this.element.find('.byweekday-pos-text').click(function(e) {
+        if ($(this).hasClass('select-shown')) {
+          $(this).removeClass('select-shown');
+          widget.byweekday_pos_input.hide();
+        }
+        else {
+          $(this).addClass('select-shown');
+          widget.byweekday_pos_input.show();
+        }
+        e.stopPropagation();
+      });
+      this.byweekday_pos_input.click(function(e) {
+        e.stopPropagation();
+      });
+      $(document).click(function(e) {
+        if (widget.byweekday_pos_input.is(':visible')) {
+          widget.byweekday_pos_input.hide();
+          widget.element.find('.byweekday-pos-text')
+        }
       });
 
       //set sensible defaults
@@ -271,7 +292,8 @@
         }
         return a - b;
       });
-      opts['byweekday-pos'] = byweekdayPos.join(',');
+      opts['byweekday-pos'] = byweekdayPos;
+
 
       var $sel = $('[data-freq!=' + freq + ']', this.element);
       var k;
@@ -279,12 +301,19 @@
         var v = opts[k];
 
         // Try to set the value.
-        if ($('input[name=' + k + '][type!=checkbox]', $sel).val(v).length) {
-        }
-        else if ($('select[name=' + k + ']', $sel).val(v).length) {
-        }
-        else if (v instanceof Array) {
+        if (v instanceof Array) {
           $('input[name=' + k + '][type=checkbox]', $sel).val(v);
+          if ($('select[name=' + k + ']', $sel).length) {
+            $.each(v, function(i, e) {
+              $('select[name=' + k + '] option[value=' + e + ']', $sel).prop("selected", true);
+            })
+          }
+        }
+        else {
+          if ($('input[name=' + k + '][type!=checkbox]', $sel).val(v).length) {
+          }
+          else if ($('select[name=' + k + ']', $sel).val(v).length) {
+          }
         }
       }
       if (opts.count) {
@@ -294,6 +323,21 @@
       if (opts.until) {
         $('input[name=until]', this.element)[0].valueAsDate = opts.until;
         $('input[name=end][value=2]', this.element).prop('checked', true);
+      }
+    },
+
+    _createWeekdayPosString: function($boxes) {
+      var names = [];
+      $boxes.each(function() {
+        if ($(this).prop('checked')) {
+          names.push(RRule.SETPOS[$(this).attr('value')]);
+        }
+      });
+      if (names.length) {
+        return names.join(', ');
+      }
+      else {
+        return Drupal.t('(select a week)');
       }
     },
 
@@ -308,6 +352,8 @@
       if (this.interval_input.val() > 1) {
         this.element.find('#frequency_name').text(RRule.FREQUENCY_NAMES_PLURAL[frequency.val()]);
       }
+
+      this.element.find('.byweekday-pos-text').text(this._createWeekdayPosString(this.element.find('input[name=byweekday-pos]')));
 
       // display appropriate repeat options
       var repeatOptions = this.element.find('.repeat-options');
@@ -373,7 +419,7 @@
       options = {};
 
       if (_.has(values, 'byweekday-pos') && _.has(values, 'byweekday')) {
-        var weekdayPos = values['byweekday-pos'].split(',');
+        var weekdayPos = values['byweekday-pos'];
       }
       delete values['byweekday-pos'];
 
@@ -420,11 +466,6 @@
         }
         options[k] = v;
       }
-
-      //if (typeof options.dtstart === 'undefined' && typeof this.options.dtstart !== 'undefined') {
-      //    options.dtstart = this.options.dtstart;
-      //}
-
 
       var rule;
       try {
