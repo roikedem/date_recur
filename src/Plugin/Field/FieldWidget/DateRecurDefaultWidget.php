@@ -23,11 +23,14 @@ use RRule\RRule;
  */
 class DateRecurDefaultWidget extends DateRangeDefaultWidget {
 
+  protected $timezone;
+
   /**
    * {@inheritdoc}
    */
   public static function defaultSettings() {
     return array(
+      'timezone_override' => '',
     ) + parent::defaultSettings();
   }
 
@@ -36,6 +39,14 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $elements = parent::settingsForm($form, $form_state);
+
+    $elements['timezone_override'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Time zone override'),
+      '#description' => $this->t('The time zone selected here will always be used when interpreting the dates inserted in the widget. If empty, the user\'s timezone will be used.'),
+      '#options' => system_time_zones(TRUE),
+      '#default_value' => $this->getSetting('timezone_override'),
+    );
     return $elements;
   }
 
@@ -44,7 +55,19 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
    */
   public function settingsSummary() {
     $summary = parent::settingsSummary();
+    if ($override = $this->getSetting('timezone_override')) {
+      $summary[] = $this->t('Time zone: @timezone', array('@timezone' => $override));
+    }
     return $summary;
+  }
+
+  public function getTimezone() {
+    if ($this->getSetting('timezone_override')) {
+      return $this->getSetting('timezone_override');
+    }
+    else {
+      return drupal_get_user_timezone();
+    }
   }
 
   /**
@@ -52,11 +75,6 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
-
-    // date_recur omits timezone handling at the moment.
-    foreach (array('value', 'end_value') as $key) {
-      $element[$key]['#date_timezone'] = DATETIME_STORAGE_TIMEZONE;
-    }
 
     $element['#element_validate'][] = [$this, 'validateRrule'];
 
@@ -74,16 +92,21 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
   /**
    * Creates a date object for use as a default value.
    *
-   * This overrides DateRangeWidgetBase to remove timezone handling.
+   * This overrides DateRangeWidgetBase to change timezone override.
    *
    * @param \Drupal\Core\Datetime\DrupalDateTime $date
    * @param string $timezone
    * @return \Drupal\Core\Datetime\DrupalDateTime
    */
   protected function createDefaultValue($date, $timezone) {
+    // The date was created and verified during field_load(), so it is safe to
+    // use without further inspection.
     if ($this->getFieldSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE) {
+      // A date without time will pick up the current time, use the default
+      // time.
       datetime_date_default_time($date);
     }
+    $date->setTimezone(new \DateTimeZone($this->getTimezone()));
     return $date;
   }
 
@@ -123,6 +146,10 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
         if ($rule->isInfinite()) {
           $item['infinite'] = 1;
         }
+      }
+      $item['timezone'] = $this->getTimezone();
+      if (empty($item['end_value'])) {
+        $item['end_value'] = $item['value'];
       }
     }
     return parent::massageFormValues($values, $form, $form_state);

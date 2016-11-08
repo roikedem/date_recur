@@ -12,7 +12,6 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   public function postSave($update) {
     parent::postSave($update);
 
-
     // Prepare update operation.
     $table_name = date_recur_get_table_name($this->getFieldDefinition());
     $entity_id = $this->getEntity()->id();

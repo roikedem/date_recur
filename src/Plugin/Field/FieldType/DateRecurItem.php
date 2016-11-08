@@ -41,6 +41,9 @@ class DateRecurItem extends DateRangeItem {
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties = parent::propertyDefinitions($field_definition);
     // Prevent early t() calls by using the TranslatableMarkup.
+    $properties['timezone'] = DataDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Timezone'))
+      ->setRequired(FALSE);
     $properties['rrule'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('RRule'))
       ->setRequired(FALSE);
@@ -56,6 +59,7 @@ class DateRecurItem extends DateRangeItem {
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     $schema = parent::schema($field_definition);
+
     $schema['columns']['rrule'] = [
       'description' => 'The repeat rule.',
       'type' => 'varchar',
@@ -66,6 +70,11 @@ class DateRecurItem extends DateRangeItem {
       'type' => 'int',
       'size' => 'tiny',
     ];
+    $schema['columns']['timezone'] = [
+      'description' => 'The timezone',
+      'type' => 'varchar',
+      'length' => 255,
+    ];
 
     return $schema;
   }
@@ -75,6 +84,7 @@ class DateRecurItem extends DateRangeItem {
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
     $values = parent::generateSampleValue($field_definition);
+    return $values;
   }
 
   /**
@@ -149,7 +159,7 @@ class DateRecurItem extends DateRangeItem {
       if (empty($rule)) {
         return FALSE;
       }
-      $this->rruleObject = new DateRecurRRule($rule, $this->start_date, $this->end_date);
+      $this->rruleObject = new DateRecurRRule($rule, $this->start_date, $this->end_date, $this->timezone);
       return $this->rruleObject;
     }
   }
@@ -166,7 +176,7 @@ class DateRecurItem extends DateRangeItem {
    */
   public function getOccurrences($start = NULL, $end = NULL) {
     if (empty($this->rrule)) {
-      return [['value' => $this->start_date, 'end_value' => $this->end_date]];
+      return [];
     }
     return $this->getRRule()->getOccurrencesBetween($start, $end);
   }
@@ -181,7 +191,7 @@ class DateRecurItem extends DateRangeItem {
    */
   public function getNextOccurrences($start = 'now', $num = 5) {
     if (empty($this->rrule)) {
-      return [['value' => $this->start_date, 'end_value' => $this->end_date]];
+      return [];
     }
     if (is_string($start)) {
       $start = new \DateTime($start);

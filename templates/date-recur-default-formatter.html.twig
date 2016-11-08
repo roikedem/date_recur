@@ -4,20 +4,23 @@
  * Default theme implementation to display a recurring dates field.
  *
  * Available variables:
+ * - date: A single date (for non-repeating fields).
  * - repeatrule: The human readable repeat rule.
  * - occurrences: The actual date occurrences.
  *
  * @ingroup themeable
  */
 #}
-
-
-{% if repeatrule %}
-    <div class="date-recur-repeat-rule">{{ repeatrule }}</div>
+{% if date %}
+  <div class="date-recur-date">{{ date }}</div>
 {% endif %}
 
-{% if occurrences %}
-  <ul class="item-list date-recur-occurrences">
+{% if repeatrule %}
+  <div class="date-recur-repeat-rule">{{ repeatrule }}</div>
+{% endif %}
+
+{% if occurrences|length > 0 %}
+  <ul class="date-recur-occurrences {% if occurrences|length > 1 %} date-recur-multiple {% else %} date-recur-single {% endif %}">
     {% for item in occurrences %}
       <li>{{ item }}</li>
     {% endfor %}

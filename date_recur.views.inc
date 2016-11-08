@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides views data for the datetime module.
+ * Provides views data for the date_recur module.
  */
 
 use Drupal\field\FieldStorageConfigInterface;
@@ -18,6 +18,7 @@ function date_recur_field_views_data(FieldStorageConfigInterface $field_storage)
   }
   $field_name = $field_storage->getName();
   list($table_alias, $revision_table_alias) = array_keys($data);
+
   // @todo: Revision support.
   unset($data[$revision_table_alias]);
   $table_name = date_recur_get_table_name($field_storage);
