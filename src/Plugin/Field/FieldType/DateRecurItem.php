@@ -48,7 +48,7 @@ class DateRecurItem extends DateRangeItem {
       ->setLabel(new TranslatableMarkup('RRule'))
       ->setRequired(FALSE);
     $properties['infinite'] = DataDefinition::create('boolean')
-      ->setLabel(new TranslatableMarkup('Is the RRule an inifinite rule?'))
+      ->setLabel(new TranslatableMarkup('Is the RRule an infinite rule?'))
       ->setRequired(FALSE);
 
     return $properties;

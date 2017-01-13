@@ -70,7 +70,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     ];
 
     $form['occurrence_format_type'] = $form['format_type'];
-    $form['occurrence_format_type']['#title'] .=  ' ' . t('(Occurences)');
+    $form['occurrence_format_type']['#title'] .=  ' ' . t('(Occurrences)');
     $form['occurrence_format_type']['#default_value'] = $this->getSetting('occurrence_format_type');
     return $form;
   }
