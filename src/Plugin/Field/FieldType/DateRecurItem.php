@@ -218,6 +218,9 @@ class DateRecurItem extends DateRangeItem {
     }
 
     if (empty($this->rrule)) {
+      if (empty($this->end_date)) {
+        $this->end_date = $this->start_date;
+      }
       return [[
         'value' => DateRecurRRule::massageDateValueForStorage($this->start_date, $storageFormat),
         'end_value' => DateRecurRRule::massageDateValueForStorage($this->end_date, $storageFormat),

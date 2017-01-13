@@ -144,6 +144,9 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       '#theme' => 'date_recur_default_formatter'
     ];
 
+    if (empty($item->end_date)) {
+      $item->end_date = clone $item->start_date;
+    }
     $build['#date'] = $this->buildDateRangeValue($item->start_date, $item->end_date);
     if (!empty($item->rrule)) {
       if ($this->getSetting('show_rrule')) {
