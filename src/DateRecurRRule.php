@@ -164,7 +164,7 @@ class DateRecurRRule {
    * @return array
    */
   public function getOccurrencesBetween($start, $end) {
-    return $this->createOccurrences($start, $end);
+    return $this->getOccurrences($start, $end);
   }
 
   /**
@@ -175,7 +175,7 @@ class DateRecurRRule {
    * @return array
    */
   public function getNextOccurrences($start, $num) {
-    return $this->createOccurrences($start, NULL, $num);
+    return $this->getOccurrences($start, NULL, $num);
   }
 
   /**

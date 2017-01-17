@@ -2,20 +2,11 @@
 
 namespace Drupal\date_recur\Plugin\Field\FieldFormatter;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
-use Drupal\datetime\Plugin\Field\FieldFormatter\DateTimeDefaultFormatter;
-use Drupal\datetime\Plugin\Field\FieldFormatter\DateTimeFormatterBase;
 use Drupal\datetime_range\Plugin\Field\FieldFormatter\DateRangeDefaultFormatter;
-use Drupal\views\ResultRow;
-use Drupal\views\ViewExecutable;
-use RRule\RRule;
-use When\When;
 
 /**
  * Plugin implementation of the 'date_recur_default_formatter' formatter.
@@ -122,6 +113,10 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
+//    if (empty($GLOBALS['oonce'])) {
+//      ksm(debug_backtrace());
+//      $GLOBALS['oonce'] = TRUE;
+//    }
 
     foreach ($items as $delta => $item) {
       $elements[$delta] = $this->viewValue($item);
@@ -140,6 +135,9 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
    *   The textual output generated.
    */
   protected function viewValue(DateRecurItem $item) {
+//    dsm('view value: ' . $item->start_date->__toString());
+//    $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 6);
+//    ksm($bt);
     $build = [
       '#theme' => 'date_recur_default_formatter'
     ];
@@ -150,7 +148,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     $build['#date'] = $this->buildDateRangeValue($item->start_date, $item->end_date);
     if (!empty($item->rrule)) {
       if ($this->getSetting('show_rrule')) {
-        $build['#repeatrule'] = $item->getRRule()->humanReadable();
+        $build['#repeatrule'] = $item->getOccurrenceHandler()->humanReadable();
       }
       $occurrences = $item->getNextOccurrences('now', $this->getSetting('show_next'));
       foreach ($occurrences as $occurrence) {

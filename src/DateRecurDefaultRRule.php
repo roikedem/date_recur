@@ -43,7 +43,11 @@ class DateRecurDefaultRRule extends RRule {
     $parts = [];
 
     if (!empty($this->byweekday)) {
-      $parts['day'] = $daynames[reset($this->byweekday)];
+      $dayparts = [];
+      foreach ($this->byweekday as $day) {
+        $dayparts[] = $daynames[$day];
+      }
+      $parts['day'] = $this->_hrFormatList($dayparts);
     }
     elseif (!empty($this->byweekday_nth)) {
       $dayparts = $days = [];
@@ -70,6 +74,7 @@ class DateRecurDefaultRRule extends RRule {
     if (!empty($this->dtstart)) {
       $build['time'] = $this->formatDateForDisplay($this->dtstart, 'H:i');
     }
+
 
     if (!empty($build)) {
       return $this->t('complete', ['@rule' => $build['rule'], '@time' => $build['time']]);
