@@ -20,6 +20,7 @@ namespace Drupal\date_recur;
  */
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Component\Datetime\DateTimePlus;
 use RRule\RRule;
 
 class DateRecurRRule {
@@ -96,19 +97,6 @@ class DateRecurRRule {
   public function getParts() {
     return $this->parts;
   }
-
-//  public function getEndDate() {
-//    if (!empty($this->parts['UNTIL'])) {
-//      if ($this->parts['UNTIL'] instanceof \DateTime) {
-//        return DrupalDateTime::createFromDateTime($this->parts['UNTIL']);
-//      }
-//      else if (is_string($this->parts['UNTIL'])) {
-//        return DrupalDateTime::createFromTimestamp(strtotime($this->parts['UNTIL']));
-//      }
-//    }
-//    return FALSE;
-//  }
-
 
   /**
    * Parse an RFC rrule string and add a start date (DTSTART).
@@ -227,22 +215,6 @@ class DateRecurRRule {
       throw new \LogicException('Cannot get all occurrences of an infinite recurrence rule.');
     }
 
-    // If a start date was supplied, create a new rule object with the supplied
-    // start date.
-    // @todo: Not sure if this is more performant than iterating through all occurrences.
-    //    if (!empty($start)) {
-    //      $rrule = sprintf(
-    //        "DTSTART:%s\nRRULE:%s",
-    //        $start->format(self::RFC_DATE_FORMAT),
-    //        $this->originalRuleString
-    //      );
-    //      $parts = RRule::parseRfcString($rrule);
-    //      $rrule = new DateRecurDefaultRRule($parts);
-    //    }
-    //    else {
-    //      $rrule = $this->rrule;
-    //    }
-
     $occurrences = [];
     foreach ($this->rrule as $occurrence) {
       if ($start !== NULL && $occurrence < $start) {
@@ -260,8 +232,14 @@ class DateRecurRRule {
     return $occurrences;
   }
 
+  /**
+   * @param \DateTime $occurrence
+   * @param bool|TRUE $display
+   * @return array[[value => DrupalDateTime, end_value => DrupalDateTime], ...]
+   */
   protected function massageOccurrence(\DateTime $occurrence, $display = TRUE) {
-    $date = \DateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $this->recurTime, $this->startDate->getTimezone());
+    /** @var DateTimePlus $date */
+    $date = DrupalDateTime::createFromFormat('Ymd H:i', $occurrence->format('Ymd') . ' ' . $this->recurTime, $this->startDate->getTimezone());
     if ($display) {
       $date = $this->adjustDateForDisplay($date);
     }

@@ -2,6 +2,7 @@
 
 namespace Drupal\date_recur\Plugin\DateRecurOccurrenceHandler;
 
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\date_recur\DateRecurRRule;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerBase;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -15,6 +16,8 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Database\Driver\mysql\Connection;
 use Drupal\field\FieldStorageConfigInterface;
+use Zend\Stdlib\Exception\InvalidArgumentException;
+use Zend\Stdlib\Exception\LogicException;
 
 /**
  * @DateRecurOccurrenceHandler(
@@ -22,7 +25,7 @@ use Drupal\field\FieldStorageConfigInterface;
  *  label = @Translation("Default occurrence handler"),
  * )
  */
-class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase implements DateRecurOccurrenceHandlerInterface, ContainerFactoryPluginInterface {
+class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurOccurrenceHandlerInterface, ContainerFactoryPluginInterface {
 
   /**
    * Drupal\Core\Database\Driver\mysql\Connection definition.
@@ -37,16 +40,22 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
   protected $item;
 
   /**
+   * The repeat rule object.
+   *
    * @var DateRecurRRule
    */
   protected $rruleObject;
 
   /**
+   * Whether this is a repeating date.
+   *
    * @var bool
    */
   protected $isRecurring;
 
   /**
+   * The cache table name.
+   *
    * @var string
    */
   protected $tableName;
@@ -87,6 +96,9 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function init(DateRecurItem $item) {
     $this->item = $item;
     if (!empty($item->rrule)) {
@@ -99,27 +111,46 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
     $this->tableName = $this->getOccurrenceTableName($this->item->getFieldDefinition());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getOccurrencesForDisplay($start = NULL, $end = NULL, $num = NULL) {
-    if (!$this->isRecurring) {
+    if (empty($this->item) || !$this->isRecurring) {
       return [];
     }
     return $this->rruleObject->getOccurrences($start, $end, $num);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function humanReadable() {
-    if (!$this->isRecurring) {
+    if (empty($this->item) || !$this->isRecurring) {
       return '';
     }
     return $this->rruleObject->humanReadable();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isInfinite() {
-    if (!$this->isRecurring) {
+    if (empty($this->item) || !$this->isRecurring) {
       return 0;
     }
     return (int) $this->rruleObject->isInfinite();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function isRecurring() {
+    return $this->isRecurring;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function onSave($update, $field_delta) {
     $entity_id = $this->item->getEntity()->id();
     $revision_id = $this->item->getEntity()->getRevisionId();
@@ -156,14 +187,7 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
 
   protected function getOccurrencesForCacheStorage() {
     // Get storage format from settings.
-    switch ($this->item->getFieldDefinition()->getSetting('daterange_type')) {
-      case DateRangeItem::DATETIME_TYPE_DATE:
-        $storageFormat = DATETIME_DATE_STORAGE_FORMAT;
-        break;
-      default:
-        $storageFormat = DATETIME_DATETIME_STORAGE_FORMAT;
-        break;
-    }
+    $storageFormat = $this->item->getDateStorageFormat();
 
     if (!$this->isRecurring) {
       if (empty($this->item->end_date)) {
@@ -182,6 +206,24 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
 
   }
 
+  /**
+   * @param FieldStorageDefinitionInterface|FieldDefinitionInterface $field
+   * @throws InvalidArgumentException
+   * @return string
+   */
+  protected function getOccurrenceTableName($field) {
+    if (! ($field instanceof FieldStorageDefinitionInterface || $field instanceof FieldDefinitionInterface)) {
+      throw new InvalidArgumentException();
+    }
+    $entity_type = $field->getTargetEntityTypeId();
+    $field_name = $field->getName();
+    $table_name = 'date_recur__' . $entity_type . '__' . $field_name;
+    return $table_name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function onSaveMaxDelta($field_delta) {
     $this->database->delete($this->tableName)
       ->condition('entity_id', $this->item->getEntity()->id())
@@ -189,32 +231,45 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
       ->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function onDelete() {
     $table_name = $this->getOccurrenceTableName($this->item->getFieldDefinition());
     $this->database->delete($table_name)->condition('entity_id', $this->item->getEntity()->id());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function onDeleteRevision() {
     $table_name = $this->getOccurrenceTableName($this->item->getFieldDefinition());
     $this->database->delete($table_name)->condition('revision_id', $this->item->getEntity()->getRevisionId());
   }
 
-
-
-  public function onFieldCreate(FieldConfigInterface $field) {
+  /**
+   * {@inheritdoc}
+   */
+  public function onFieldCreate(FieldStorageConfigInterface $field) {
     $this->createOccurrenceTable($field);
   }
 
-  public function onFieldUpdate(FieldConfigInterface $field) {
+  /**
+   * {@inheritdoc}
+   */
+  public function onFieldUpdate(FieldStorageConfigInterface $field) {
     // Nothing to do.
   }
 
-  public function onFieldDelete(FieldConfigInterface $field) {
+  /**
+   * {@inheritdoc}
+   */
+  public function onFieldDelete(FieldStorageConfigInterface $field) {
     $this->dropOccurrenceTable($field);
   }
 
 
-  protected function createOccurrenceTable(FieldDefinitionInterface $field) {
+  protected function createOccurrenceTable(FieldStorageDefinitionInterface $field) {
     $entity_type = $field->getTargetEntityTypeId();
     $field_name = $field->getName();
     $table_name = $this->getOccurrenceTableName($field);
@@ -225,13 +280,13 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
     $schema->createTable($table_name, $spec);
   }
 
-  protected function dropOccurrenceTable(FieldConfigInterface $field) {
+  protected function dropOccurrenceTable(FieldStorageConfigInterface $field) {
     $table_name = $this->getOccurrenceTableName($field);
     $schema = $this->database->schema();
     $schema->dropTable($table_name);
   }
 
-  public function getOccurrenceTableSchema(FieldDefinitionInterface $field) {
+  public function getOccurrenceTableSchema(FieldStorageDefinitionInterface $field) {
     $field_name = $field->getName();
     $schema = [
       'fields' => [
@@ -275,9 +330,10 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
     return $schema;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function viewsData(FieldStorageConfigInterface $field_storage, $data) {
-    dsm('init');
-    ksm($data);
     if (empty($data)) {
       return [];
     }
@@ -301,9 +357,6 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
     foreach ($columns_to_move as $column) {
       unset($field_table[$column]);
     }
-
-    // todo: Add in RRULE support.
-
 
     // Remove fields not present in date_recur tables and change the join to
     // the date_recur cache table.
@@ -329,8 +382,6 @@ class DefaultDateRecurOccurrenceHandler extends DateRecurOccurrenceHandlerBase i
     }
 
     $return_data = [$recur_table_name => $recur_table, $table_alias => $field_table];
-    dsm('ret');
-    ksm($return_data);
     return $return_data;
   }
 }

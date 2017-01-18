@@ -53,24 +53,23 @@ function date_recur_create_occurrence_handler($field) {
   }
   $pluginName = $field->getSetting('occurrence_handler_plugin');
   /** @var DateRecurOccurrenceHandlerManager $manager */
-  $manager = \Drupal::getContainer()->get('plugin.manager.date_recur_occurrence_handler');
+  $manager = \Drupal::getContainer()
+    ->get('plugin.manager.date_recur_occurrence_handler');
   return $manager->createInstance($pluginName);
 }
 
 /**
  * Implements hook_ENTITY_TYPE_insert() for 'field_config'.
  */
-function date_recur_field_config_insert(FieldConfigInterface $field) {
+function date_recur_field_storage_config_insert(FieldStorageConfigInterface $field) {
   if ($field->getType() == 'date_recur') {
     $plugin = date_recur_create_occurrence_handler($field);
     $plugin->onFieldCreate($field);
   }
 }
 
-/**
- * Implements hook_ENTITY_TYPE_update() for 'field_config'.
- */
-function date_recur_field_config_update(FieldConfigInterface $field) {
+
+function date_recur_field_storage_config_update(FieldStorageConfigInterface $field) {
   if ($field->getType() == 'date_recur') {
     $plugin = date_recur_create_occurrence_handler($field);
     $plugin->onFieldUpdate($field);
@@ -80,22 +79,21 @@ function date_recur_field_config_update(FieldConfigInterface $field) {
 /**
  * Implements hook_ENTITY_TYPE_delete() for 'field_config'.
  */
-function date_recur_field_config_delete(FieldConfigInterface $field) {
+function date_recur_field_storage_config_delete(FieldStorageConfigInterface $field) {
   if ($field->getType() == 'date_recur') {
     $plugin = date_recur_create_occurrence_handler($field);
     $plugin->onFieldDelete($field);
   }
 }
 
-
 /**
  * Implements hook_cron().
  */
 //function date_recur_cron() {
-  // @todo Implement like this:
-  // - Check if some timespan since last run has passed (e.g. 1 month).
-  // - Use EntityQuery to load all items with infinite = 1.
-  // - Load those entities.
-  // - Call DateRecurFieldItemList::postSave().
+// @todo Implement like this:
+// - Check if some timespan since last run has passed (e.g. 1 month).
+// - Use EntityQuery to load all items with infinite = 1.
+// - Load those entities.
+// - Call DateRecurFieldItemList::postSave().
 //}
 

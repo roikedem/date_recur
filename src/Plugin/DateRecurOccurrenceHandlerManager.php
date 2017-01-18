@@ -11,7 +11,6 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
  */
 class DateRecurOccurrenceHandlerManager extends DefaultPluginManager {
 
-
   /**
    * Constructor for DateRecurOccurrenceHandlerManager objects.
    *
@@ -25,9 +24,7 @@ class DateRecurOccurrenceHandlerManager extends DefaultPluginManager {
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
     parent::__construct('Plugin/DateRecurOccurrenceHandler', $namespaces, $module_handler, 'Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface', 'Drupal\date_recur\Annotation\DateRecurOccurrenceHandler');
-
     $this->alterInfo('date_recur_date_recur_occurrence_handler_info');
     $this->setCacheBackend($cache_backend, 'date_recur_date_recur_occurrence_handler_plugins');
   }
-
 }

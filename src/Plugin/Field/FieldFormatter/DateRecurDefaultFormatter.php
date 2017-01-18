@@ -80,6 +80,13 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
   }
 
   protected function buildDateRangeValue($start_date, $end_date, $isOccurrence = FALSE) {
+    // Protection. @todo: Find out why sometimes a \DateTime arrives.
+    if ($start_date instanceof \DateTime) {
+      $start_date = DrupalDateTime::createFromDateTime($start_date);
+    }
+    if ($end_date instanceof \DateTime) {
+      $end_date = DrupalDateTime::createFromDateTime($end_date);
+    }
     if ($isOccurrence) {
       $start_date->_dateRecurIsOccurrence = $end_date->_dateRecurIsOccurrence = TRUE;
     }
@@ -113,10 +120,6 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
-//    if (empty($GLOBALS['oonce'])) {
-//      ksm(debug_backtrace());
-//      $GLOBALS['oonce'] = TRUE;
-//    }
 
     foreach ($items as $delta => $item) {
       $elements[$delta] = $this->viewValue($item);
@@ -135,9 +138,6 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
    *   The textual output generated.
    */
   protected function viewValue(DateRecurItem $item) {
-//    dsm('view value: ' . $item->start_date->__toString());
-//    $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 6);
-//    ksm($bt);
     $build = [
       '#theme' => 'date_recur_default_formatter'
     ];
@@ -146,17 +146,12 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       $item->end_date = clone $item->start_date;
     }
     $build['#date'] = $this->buildDateRangeValue($item->start_date, $item->end_date);
-    if (!empty($item->rrule)) {
-      if ($this->getSetting('show_rrule')) {
-        $build['#repeatrule'] = $item->getOccurrenceHandler()->humanReadable();
-      }
-      $occurrences = $item->getNextOccurrences('now', $this->getSetting('show_next'));
-      foreach ($occurrences as $occurrence) {
-        if (!empty($occurrence['value'])) {
-          $build['#occurrences'][] = $this->buildDateRangeValue(DrupalDateTime::createFromDateTime($occurrence['value']), DrupalDateTime::createFromDateTime($occurrence['end_value']), TRUE);
-        }
-      }
+
+    if ($this->getSetting('show_rrule') && !empty($item->rrule)) {
+      $build['#repeatrule'] = $item->getOccurrenceHandler()->humanReadable();
     }
+
+    $build['#occurrences'] = $this->viewOccurrences($item);
 
     if (!empty($item->_attributes)) {
       $build += $item->_attributes;
@@ -165,6 +160,18 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       unset($item->_attributes);
     }
 
+    return $build;
+  }
+
+  protected function viewOccurrences(DateRecurItem $item) {
+    $build = [];
+    $start = new \DateTime('now');
+    $occurrences = $item->getOccurrenceHandler()->getOccurrencesForDisplay($start, NULL, $this->getSetting('show_next'));
+    foreach ($occurrences as $occurrence) {
+      if (!empty($occurrence['value'])) {
+        $build[] = $this->buildDateRangeValue($occurrence['value'], $occurrence['end_value'], TRUE);
+      }
+    }
     return $build;
   }
 }

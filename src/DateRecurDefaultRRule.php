@@ -108,6 +108,7 @@ class DateRecurDefaultRRule extends RRule {
   }
 
   protected function _hrFormatPosList($list) {
+    // Sort like this: 1, 2, 3, 4, 5, -1, -2, -3.
     usort($list, function($a, $b) {
       if ($a >= 0 && $b >= 0) {
         return $a > $b;
@@ -119,6 +120,7 @@ class DateRecurDefaultRRule extends RRule {
         return 1;
       }
      });
+    // Append a dot for positive, get a string for ultimates.
     $list = array_map(function($i) {
       if ($i > 0) {
         return $i . '.';
@@ -130,9 +132,19 @@ class DateRecurDefaultRRule extends RRule {
         return $i;
       }
     }, $list);
+    // Format as list.
     return $this->_hrFormatList($list);
   }
 
+  /**
+   * Format a variable-length list into a sentence style string.
+   *
+   * Like this, for a list with 4 items: A, B, C and D
+   * Or with 2 items: A and B
+   *
+   * @param string[] $list
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   */
   protected function _hrFormatList($list) {
     if (is_string($list)) {
       return $list;

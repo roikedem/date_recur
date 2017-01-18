@@ -2,13 +2,11 @@
 
 namespace Drupal\date_recur\Plugin\Field\FieldType;
 
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\date_recur\DateRecurRRule;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManager;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -32,7 +30,6 @@ class DateRecurItem extends DateRangeItem {
    */
   protected $occurrenceHandler;
 
-
   /**
    * {@inheritdoc}
    */
@@ -48,7 +45,6 @@ class DateRecurItem extends DateRangeItem {
     $properties['infinite'] = DataDefinition::create('boolean')
       ->setLabel(new TranslatableMarkup('Is the RRule an infinite rule?'))
       ->setRequired(FALSE);
-
     return $properties;
   }
 
@@ -144,7 +140,6 @@ class DateRecurItem extends DateRangeItem {
     return $element;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -153,13 +148,32 @@ class DateRecurItem extends DateRangeItem {
   }
 
   /**
+   * Get the date storage format of this field.
+   *
+   * @return string
+   */
+  public function getDateStorageFormat() {
+    switch ($this->getSetting('daterange_type')) {
+      case DateRangeItem::DATETIME_TYPE_DATE:
+        return DATETIME_DATE_STORAGE_FORMAT;
+        break;
+      default:
+        return DATETIME_DATETIME_STORAGE_FORMAT;
+        break;
+    }
+  }
+
+  /**
+   * Get the occurrence handler and initialize it.
+   *
    * @return DateRecurOccurrenceHandlerInterface|bool
    */
   public function getOccurrenceHandler() {
     if (empty($this->occurrenceHandler)) {
       $pluginName = $this->getSetting('occurrence_handler_plugin');
       /** @var DateRecurOccurrenceHandlerManager $manager */
-      $manager = \Drupal::getContainer()->get('plugin.manager.date_recur_occurrence_handler');
+      $manager = \Drupal::getContainer()
+        ->get('plugin.manager.date_recur_occurrence_handler');
       /** @var DateRecurOccurrenceHandlerInterface $occurrenceHandler */
       $this->occurrenceHandler = $manager->createInstance($pluginName);
       $this->occurrenceHandler->init($this);
@@ -170,27 +184,17 @@ class DateRecurItem extends DateRangeItem {
   /**
    * {@inheritdoc}
    */
+  public function onChange($property_name, $notify = TRUE) {
+    // Enforce that the occurrence handler is re-initialized.
+    $this->occurrenceHandler = NULL;
+    parent::onChange($property_name, $notify);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function preSave() {
     parent::preSave();
     $this->infinite = $this->getOccurrenceHandler()->isInfinite();
-  }
-
-
-  /**
-   * Get next occurrences from some date.
-   *
-   * @param string|\DateTime $start
-   * @param int $num
-   * @return array
-   */
-  public function getNextOccurrences($start = 'now', $num = 5) {
-    if (empty($this->rrule)) {
-      return [];
-    }
-    if (is_string($start)) {
-      $start = new \DateTime($start);
-    }
-    return $this->getOccurrenceHandler()
-      ->getOccurrencesForDisplay($start, NULL, $num);
   }
 }

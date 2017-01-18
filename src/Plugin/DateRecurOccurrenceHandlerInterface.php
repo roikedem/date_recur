@@ -3,7 +3,7 @@
 namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\field\FieldConfigInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 
@@ -12,29 +12,90 @@ use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
  */
 interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface {
 
-  public function onFieldCreate(FieldConfigInterface $field);
-
-  public function onFieldUpdate(FieldConfigInterface $field);
-
-  public function onFieldDelete(FieldConfigInterface $field);
-
+  /**
+   * Init the handler with a field item.
+   *
+   * @param \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item
+   */
   public function init(DateRecurItem $item);
 
-  public function getOccurrencesForDisplay($start = NULL, $end = NULL, $num = NULL);
-  public function humanReadable();
-
-
-  public function viewsData(FieldStorageConfigInterface $field_storage, $data);
+  /**
+   * Does the handler have a recurring date?
+   *
+   * @return bool
+   */
+  public function isRecurring();
 
   /**
+   * Does the handler have an infinitely recurring date?
+   *
+   * @return bool
+   */
+  public function isInfinite();
+
+  /**
+   * Get a list of occurrences for display.
+   *
+   * Must return an empty array for non-recurring dates.
+   * For recurring dates, an array of ocurrences must be returned,
+   * each defining at least the following keys:
+   *  - value - DrupalDateTime
+   *  - end_value - DrupalDateTime
+   *  Additional keys may be included and may be supported by specific formatters.
+   *
+   * @param null|\DateTime|DrupalDateTime $start
+   * @param null|\DateTime|DrupalDateTime $end
+   * @param null|\DateTime|DrupalDateTime $num
+   * @return array
+   */
+  public function getOccurrencesForDisplay($start = NULL, $end = NULL, $num = NULL);
+
+  /**
+   * Get a human-readable representation of the repeat rule.
+   *
+   * @return string
+   */
+  public function humanReadable();
+
+  /**
+   * React when a field item is saved.
+   *
    * @param bool $update
    * @param int $field_delta
    */
   public function onSave($update, $field_delta);
+
+  /**
+   * React after a field item list was saved.
+   *
+   * This is used to clear obsolete deltas.
+   *
+   * @param int $field_delta The highest existing field delta.
+   */
   public function onSaveMaxDelta($field_delta);
 
+  /**
+   * React when a field item is deleted.
+   */
   public function onDelete();
 
+  /**
+   * React when a field item revision is deleted.
+   */
   public function onDeleteRevision();
 
+  public function onFieldCreate(FieldStorageConfigInterface $field);
+
+  public function onFieldUpdate(FieldStorageConfigInterface $field);
+
+  public function onFieldDelete(FieldStorageConfigInterface $field);
+
+  /**
+   * Modify field views data to include occurrences.
+   *
+   * @param \Drupal\field\FieldStorageConfigInterface $field_storage
+   * @param array $data
+   * @return array The views data.
+   */
+  public function viewsData(FieldStorageConfigInterface $field_storage, $data);
 }
