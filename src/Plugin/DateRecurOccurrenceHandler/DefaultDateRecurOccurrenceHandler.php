@@ -4,20 +4,15 @@ namespace Drupal\date_recur\Plugin\DateRecurOccurrenceHandler;
 
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\date_recur\DateRecurRRule;
-use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerBase;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
-
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
-use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
-use Drupal\field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Database\Driver\mysql\Connection;
 use Drupal\field\FieldStorageConfigInterface;
 use Zend\Stdlib\Exception\InvalidArgumentException;
-use Zend\Stdlib\Exception\LogicException;
 
 /**
  * @DateRecurOccurrenceHandler(
@@ -225,10 +220,11 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    * {@inheritdoc}
    */
   public function onSaveMaxDelta($field_delta) {
-    $this->database->delete($this->tableName)
-      ->condition('entity_id', $this->item->getEntity()->id())
-      ->condition('field_delta', $field_delta, '>')
-      ->execute();
+    $q = $this->database->delete($this->tableName);
+    $q->condition('entity_id', $this->item->getEntity()->id());
+    $q->condition('revision_id', $this->item->getEntity()->getRevisionId());
+    $q->condition('field_delta', $field_delta, '>');
+    $q->execute();
   }
 
   /**
@@ -236,7 +232,9 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    */
   public function onDelete() {
     $table_name = $this->getOccurrenceTableName($this->item->getFieldDefinition());
-    $this->database->delete($table_name)->condition('entity_id', $this->item->getEntity()->id());
+    $q = $this->database->delete($table_name);
+    $q->condition('entity_id', $this->item->getEntity()->id());
+    $q->execute();
   }
 
   /**
@@ -244,7 +242,10 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    */
   public function onDeleteRevision() {
     $table_name = $this->getOccurrenceTableName($this->item->getFieldDefinition());
-    $this->database->delete($table_name)->condition('revision_id', $this->item->getEntity()->getRevisionId());
+    $q = $this->database->delete($table_name);
+    $q->condition('entity_id', $this->item->getEntity()->id());
+    $q->condition('revision_id', $this->item->getEntity()->getRevisionId());
+    $q->execute();
   }
 
   /**
