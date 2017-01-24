@@ -87,6 +87,10 @@
     },
 
     _create: function () {
+      this._exinc = {};
+      this._exinc.exclude = [];
+      this._exinc.include = [];
+
       //set up inputs
       var tmpl = '';
       //frequency
@@ -197,6 +201,22 @@
 
       tmpl += '</div>';
 
+      // exclude/include
+      tmpl += '<div class="exlude-include-options controls">';
+      tmpl += '<label for="exclude-include">';
+      tmpl += Drupal.t('Exclude/include dates', {}, {context: 'Date recur'});
+      tmpl += ' </label>';
+      tmpl += '<label class="inline">';
+      tmpl += '<select name="exinc-type">';
+      tmpl += '<option value="exclude">' + Drupal.t('Exclude') + '</option>';
+      tmpl += '<option value="include">' + Drupal.t('Include') + '</option>';
+      tmpl += '</select>';
+      tmpl += '<input type="date" name="exinc-date" />';
+      tmpl += '<input type="button" name="exinc-add" value="Add" />';
+      tmpl += '</label>';
+      tmpl += '<div class="exinc-dates-container"></div>'
+      tmpl += '</div>';
+
       // summary
       tmpl += '<label for="output">';
       tmpl += Drupal.t('Summary', {}, {context: 'Date recur'})
@@ -217,6 +237,9 @@
       //bind event handlers
       this._on(this.element.find('select, input'), {
         change: this._refresh
+      });
+      this._on(this.element.find('input[name=exinc-add]'), {
+        "click": this._addExcludeInclude
       });
 
       // Handle byweekday_pos popup.
@@ -248,12 +271,14 @@
       this.interval_input.val(1);
 
       // setup default.
+      var rrule;
       var rruleOpts = {};
       if (this.options.dtstart) {
         rruleOpts.dtstart = this.options.dtstart;
       }
       if (this.options.rrule.length) {
-        rruleOpts = RRule.parseString(this.options.rrule)
+        rrule = RRule.rrulestr(this.options.rrule, {forceset: true});
+        rruleOpts = rrule._rrule[0].options;
       }
       else {
         rruleOpts.freq = RRule.WEEKLY;
@@ -261,8 +286,11 @@
           rruleOpts.byweekday = [6, 0, 1, 2, 3, 4, 5][this.options.dtstart.getDay()];
         }
       }
+      if (typeof rrule == 'undefined') {
+        rrule = new RRule.RRuleSet();
+        rrule.rrule(new RRule(rruleOpts));
+      }
       try {
-        var rrule = new RRule(rruleOpts);
         this._applyRRule(rrule);
       } catch (_error) {
         e = _error;
@@ -277,7 +305,7 @@
     },
 
     _applyRRule: function (rrule) {
-      var opts = rrule.options;
+      var opts = rrule._rrule[0].options;
       var freq = RRule.FREQUENCY_NAMES[opts.freq].toLowerCase();
 
       // split byweekday.
@@ -329,6 +357,13 @@
         $('input[name=until]', this.element)[0].valueAsDate = opts.until;
         $('input[name="' + this.end_input_name + '"][value=2]', this.element).prop('checked', true);
       }
+
+      for (key in rrule._rdate) {
+        this._exinc.include.push(rrule._rdate[key]);
+      }
+      for (key in rrule._exdate) {
+        this._exinc.exclude.push(rrule._exdate[key]);
+      }
     },
 
     _createWeekdayPosString: function($boxes) {
@@ -346,11 +381,21 @@
       }
     },
 
+    _addExcludeInclude: function() {
+      var date = this.element.find('input[name=exinc-date]').val();
+      if (date) {
+        var type = this.element.find('select[name=exinc-type]').val();
+        this._exinc[type].push(date);
+        this._refresh();
+      }
+    },
+
     // called on create and when changing options
     _refresh: function () {
+      var that = this;
       //determine selected frequency
       var frequency = this.frequency_select.find("option:selected");
-      var frequency_text = frequency.attr('data-freq-base')
+      var frequency_text = frequency.attr('data-freq-base');
       // fill in frequency-name span
       this.element.find('#frequency_name').text(RRule.FREQUENCY_NAMES[frequency.val()]);
       // and pluralize
@@ -392,14 +437,64 @@
           break;
       }
 
+      // set up exclude/include
+      var exincTpl = {};
+      var exincStr = '';
+      var type, dateKey;
+      for (type in this._exinc) {
+        exincTpl[type] = [];
+        for (dateKey in this._exinc[type]) {
+          var date = this._exinc[type][dateKey];
+          exincTpl[type].push(
+            '<span class="excinc-date-val" data-exinc-date="' + date + '" data-exinc-type="' + type + '">'
+            + this._formatDate(this._parseExincDate(date))
+            + ' <span class="exinc-date-remove">&#x2718;</span>'
+            + '</span>'
+          );
+        }
+      }
+      if (exincTpl.exclude.length) {
+        exincStr += '<div class="container-inline"><label>Exclude:</label> ' + exincTpl.exclude.join(', ') + '</div>'
+      }
+      if (exincTpl.include.length) {
+        exincStr += '<div class="container-inline"><label>Include:</label> ' + exincTpl.include.join(', ') + '</div>'
+      }
+      this.element.find('.exinc-dates-container').html(exincStr);
+      this.element.find('.exinc-date-remove').click(function() {
+        var parent = $(this).parent()[0];
+        var type = $(parent).data('exinc-type');
+        var date = $(parent).data('exinc-date');
+        that._exinc[type] = _.without(that._exinc[type], _.findWhere(that._exinc[type], date));
+        that._refresh();
+      });
+
       //determine rrule
       var rrule = this._getRRule();
 
       if (rrule) {
-        $('.rrule-output', this.element).text(rrule.toString());
-        $('.text-output', this.element).text(rrule.toText());
+        $('.rrule-output', this.element).text(rrule.valueOf().join("\n"));
+        $('.text-output', this.element).text(this._getHumanReadable(rrule));
         this.element.trigger('rrule-update');
       }
+    },
+
+    _getHumanReadable: function(rrule) {
+      var that = this;
+      var text = '';
+      if (rrule._rrule[0]) {
+        text = text + rrule._rrule[0].toText();
+      }
+      if (rrule._rdate.length) {
+        text = text + ', and also on: ' + _.map(rrule._rdate, function(el) {
+            return that._formatDate(el);
+          }).join(', ');
+      }
+      if (rrule._exdate.length) {
+        text = text + ', but not on: ' + _.map(rrule._exdate, function(el) {
+            return that._formatDate(el);
+          }).join(', ');
+      }
+      return text;
     },
 
     _getFormValues: function ($form) {
@@ -417,16 +512,19 @@
       });
       return paramObj;
     },
+
     _getRRule: function () {
       //modified from rrule/tests/demo/demo.js
       //ignore 'end', because it's part of the ui but not the spec
       var values = this._getFormValues($(this.element).find('select, input[class!="end-radio"]'));
-      options = {};
+      var options = {};
 
       if (_.has(values, 'byweekday-pos') && _.has(values, 'byweekday')) {
         var weekdayPos = values['byweekday-pos'];
       }
       delete values['byweekday-pos'];
+      delete values['exinc-type'];
+      delete values['exinc-date'];
 
       var getDay = function (i) {
         var days = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU];
@@ -445,8 +543,7 @@
           continue;
         }
         if (_.contains(["dtstart", "until"], k)) {
-          d = new Date(Date.parse(v));
-          v = new Date(d.getTime() + (d.getTimezoneOffset() * 60 * 1000));
+          v = this._parseDate(v);
         } else if (k === 'byweekday') {
           if (v instanceof Array) {
             v = _.flatten(_.map(v, getDay), true);
@@ -472,11 +569,30 @@
         options[k] = v;
       }
 
-      var rule;
+      // get exclude/include dates.
+      var dates = {include: [], exclude: []};
+      var that = this;
+      this.element.find('[data-exinc-date]').each(function() {
+        var type = $(this).data('exinc-type');
+        dates[type].push(that._parseExincDate($(this).data('exinc-date')));
+      });
+
+      var rule, type, key;
       try {
-        rule = new RRule(options);
+        rule = new RRule.RRuleSet();
+        rule.rrule(new RRule(options));
+        for (type in dates) {
+          for (key in dates[type]) {
+            if (type == 'include') {
+              rule.rdate(dates[type][key]);
+            }
+            if (type == 'exclude') {
+              rule.exdate(dates[type][key]);
+            }
+          }
+        }
       } catch (_error) {
-        e = _error;
+        var e = _error;
         $(".text-output", this.element).append($('<pre class="error"/>').text('=> ' + String(e || null)));
         return;
       }
@@ -488,6 +604,24 @@
     _setOptions: function () {
       this._superApply(arguments);
       this._refresh();
+    },
+
+    _parseDate: function(dateval) {
+      var d = new Date(Date.parse(dateval));
+      return new Date(d.getTime() + (d.getTimezoneOffset() * 60 * 1000));
+    },
+
+    _parseExincDate: function(dateval) {
+      var d = new Date(Date.parse(dateval));
+      return d;
+    },
+
+    _formatDate: function(dateobj) {
+      return Drupal.t('!day.!month.!year', {
+        '!day': dateobj.getDate(),
+        '!month': dateobj.getMonth() + 1,
+        '!year': dateobj.getFullYear()
+      }, {context: 'Date recur'});
     },
 
     destroy: function () {

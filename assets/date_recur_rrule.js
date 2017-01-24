@@ -9,7 +9,7 @@
 
   Drupal.behaviors.dateRecurRruleWidget = {
     attach: function (context, settings) {
-      $('input[data-date-recur-rrule]', context).each(function (idx, el) {
+      $('textarea[data-date-recur-rrule]', context).each(function (idx, el) {
         var $rrule = $(el);
         if ($rrule.data('date-recur-init')) {
           return;

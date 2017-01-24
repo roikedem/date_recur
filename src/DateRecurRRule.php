@@ -22,6 +22,7 @@ namespace Drupal\date_recur;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Component\Datetime\DateTimePlus;
 use RRule\RRule;
+use RRule\RSet;
 
 class DateRecurRRule {
 
@@ -61,6 +62,11 @@ class DateRecurRRule {
   /**
    * @var array
    */
+  protected $setParts;
+
+  /**
+   * @var array
+   */
   protected $occurrences;
 
   protected $timezone;
@@ -82,8 +88,27 @@ class DateRecurRRule {
     $this->startDateEnd = $startDateEnd;
     $this->recurDiff = $this->startDate->diff($startDateEnd);
 
-    $this->parts = self::parseRrule($rrule, $startDate);
-    $this->rrule = new DateRecurDefaultRRule($this->parts);
+    $this::parseRrule($rrule, $startDate);
+
+    $this->rrule = new DateRecurDefaultRSet();
+    $this->rrule->addRRule(new DateRecurDefaultRRule($this->parts));
+    if (!empty($this->setParts)) {
+      foreach ($this->setParts as $type => $type_parts) {
+        foreach ($type_parts as $part) {
+          list(, $part) = explode(':', $part);
+          switch ($type) {
+            case 'RDATE':
+              $this->rrule->addDate($part);
+              break;
+            case 'EXDATE':
+              $this->rrule->addExDate($part);
+              break;
+            case 'EXRULE':
+              $this->rrule->addExRule($part);
+          }
+        }
+      }
+    }
 
     if ($timezone) {
       $this->timezone = $timezone;
@@ -103,20 +128,48 @@ class DateRecurRRule {
    *
    * @param string $rrule
    * @param \DateTime|DrupalDateTime $startDate
+   * @throws \InvalidArgumentException
    * @return array An array of rrule parts.
    */
-  public static function parseRrule($rrule, $startDate) {
-    $rrule = sprintf(
-      "DTSTART:%s\nRRULE:%s",
-      $startDate->format(self::RFC_DATE_FORMAT),
-      $rrule
-    );
+  public function parseRrule($rrule, $startDate, $check_only = FALSE) {
+    // Correct formatting.
+    if (strpos($rrule, "\n") === FALSE && strpos($rrule, 'RRULE:') !== 0) {
+      $rrule = "RRULE:$rrule";
+    }
+    $dtstart = 'DTSTART:' . $startDate->format(self::RFC_DATE_FORMAT);
 
-    $parts = RRule::parseRfcString($rrule);
+    // Check for unsupported parts.
+    $set_keys = ['RDATE', 'EXRULE', 'EXDATE'];
+    $rules = $set_parts = [];
+    foreach (explode("\n", $rrule) as $key => $part) {
+      $els = explode(':', $part);
+      if (in_array($els[0], $set_keys)) {
+        $set_parts[$els[0]][] = $part;
+      }
+      else if ($els[0] == 'RRULE') {
+        $rules[] = $part;
+      }
+      else if ($els[0] == 'DTSTART') {
+        $dtstart = $part;
+      }
+      else {
+        throw new \InvalidArgumentException("Unsupported line: " . $part);
+      }
+    }
+
+    if (!count($rules)) {
+      throw new \InvalidArgumentException("Missing RRULE line: " . $rrule);
+    }
+    if (count($rules) > 1) {
+      throw new \InvalidArgumentException("More than one RRULE line is not supported.");
+    }
+    $rrule = $dtstart . "\n" . $rules[0];
+
     if (empty($parts['WKST'])) {
       $parts['WKST'] = 'MO';
     }
-    return $parts;
+    $this->parts = RRule::parseRfcString($rrule);
+    $this->setParts = $set_parts;
   }
 
   /**
@@ -126,9 +179,11 @@ class DateRecurRRule {
    * @param string $rrule
    * @param \DateTime|DrupalDateTime $startDate
    * @throws \InvalidArgumentException
+   * @return bool
    */
   public static function validateRule($rrule, $startDate) {
-    self::parseRrule($rrule, $startDate);
+    $rule = new self($rrule, $startDate);
+    return TRUE;
   }
 
 

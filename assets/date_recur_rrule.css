@@ -69,3 +69,15 @@
 .date-recur-widget .byweekday-pos-input label {
     display: block;
 }
+
+.date-recur-widget .exinc-date-remove {
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+.date-recur-widget .exinc-date-remove:hover {
+    background: #ddd;
+    border-color: #ddd;
+}

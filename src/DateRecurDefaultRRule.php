@@ -11,6 +11,15 @@ class DateRecurDefaultRRule extends RRule {
 
   protected $timezoneOffset;
 
+  public function getStartDate() {
+    if (!empty($this->dtstart)) {
+      return $this->dtstart;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
   /**
    * Set a timezone offset to add to all dates for display.
    *
@@ -163,10 +172,10 @@ class DateRecurDefaultRRule extends RRule {
     return t($this->getString($string), $args);
   }
 
-  protected function formatDateForDisplay(\DateTime $date, $format) {
+  protected function formatDateForDisplay(\DateTime $date, $format = 'H:i') {
     if (empty($this->timezone)) {
-      return $date->format('H:i');
+      return $date->format($format);
     }
-    return $date->setTimezone(new \DateTimeZone($this->timezone))->format('H:i');
+    return $date->setTimezone(new \DateTimeZone($this->timezone))->format($format);
   }
 }

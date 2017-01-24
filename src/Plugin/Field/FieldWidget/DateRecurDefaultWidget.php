@@ -81,7 +81,7 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
     $element['end_value']['#required'] = FALSE;
 
     $element['rrule'] = array(
-      '#type' => 'textfield',
+      '#type' => 'textarea',
       '#default_value' => isset($items[$delta]->rrule) ? $items[$delta]->rrule : NULL,
       '#title' => $this->t('Repeat rule (RRULE)'),
       '#value_callback' => [$this, 'rruleValueCallback']
@@ -142,9 +142,14 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
         $item['rrule'] = '';
       }
       else {
-        $rule = new DateRecurRRule($item['rrule'], $item['value']);
-        if ($rule->isInfinite()) {
-          $item['infinite'] = 1;
+        try {
+          $rule = new DateRecurRRule($item['rrule'], $item['value']);
+          if ($rule->isInfinite()) {
+            $item['infinite'] = 1;
+          }
+        }
+        catch (\InvalidArgumentException $e) {
+          // No-op, this is handled in validateRrule().
         }
       }
       $item['timezone'] = $this->getTimezone();
