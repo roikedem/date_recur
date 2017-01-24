@@ -37,7 +37,7 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * Get a list of occurrences for display.
    *
    * Must return an empty array for non-recurring dates.
-   * For recurring dates, an array of ocurrences must be returned,
+   * For recurring dates, an array of occurrences must be returned,
    * each defining at least the following keys:
    *  - value - DrupalDateTime
    *  - end_value - DrupalDateTime

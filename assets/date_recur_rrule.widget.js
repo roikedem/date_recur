@@ -454,10 +454,10 @@
         }
       }
       if (exincTpl.exclude.length) {
-        exincStr += '<div class="container-inline"><label>Exclude:</label> ' + exincTpl.exclude.join(', ') + '</div>'
+        exincStr += '<div class="container-inline"><label>' + Drupal.t('Exclude:') + '</label> ' + exincTpl.exclude.join(', ') + '</div>';
       }
       if (exincTpl.include.length) {
-        exincStr += '<div class="container-inline"><label>Include:</label> ' + exincTpl.include.join(', ') + '</div>'
+        exincStr += '<div class="container-inline"><label>' + Drupal.t('Include:') + '</label> ' + exincTpl.include.join(', ') + '</div>';
       }
       this.element.find('.exinc-dates-container').html(exincStr);
       this.element.find('.exinc-date-remove').click(function() {
@@ -485,14 +485,20 @@
         text = text + rrule._rrule[0].toText();
       }
       if (rrule._rdate.length) {
-        text = text + ', and also on: ' + _.map(rrule._rdate, function(el) {
+        text = Drupal.t('!text, and also on: !dates', {
+          '!text': text,
+          '!dates': _.map(rrule._rdate, function(el) {
             return that._formatDate(el);
-          }).join(', ');
+          }).join(', ')
+        });
       }
       if (rrule._exdate.length) {
-        text = text + ', but not on: ' + _.map(rrule._exdate, function(el) {
+        text = Drupal.t('!text, but not on: !dates', {
+          '!text': text,
+          '!dates': _.map(rrule._exdate, function(el) {
             return that._formatDate(el);
-          }).join(', ');
+          }).join(', ')
+        });
       }
       return text;
     },
