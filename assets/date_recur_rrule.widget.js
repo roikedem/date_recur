@@ -11,6 +11,8 @@
 
 (function ($, Drupal, RRule) {
 
+  var widget_count = 0;
+
   RRule.FREQUENCY_ADVERBS = [
     Drupal.t('yearly', {}, {context: 'Date recur: Freq'}),
     Drupal.t('monthly', {}, {context: 'Date recur: Freq'}),
@@ -174,21 +176,22 @@
 
 
       // end on
+      this.end_input_name = 'end-' + widget_count;
       tmpl += '<div class="end-options controls">';
-      tmpl += '<label for="end">';
+      tmpl += '<label for="' + this.end_input_name + '">';
       tmpl += Drupal.t('End', {}, {context: 'Date recur'})
       tmpl += ' </label>';
 
       tmpl += '<label class="inline">';
-      tmpl += '<input type="radio" name="end" value="0" checked="checked"/> ';
+      tmpl += '<input type="radio" name="' + this.end_input_name + '" value="0" checked="checked" class="end-radio"/> ';
       tmpl += Drupal.t('Never', {}, {context: 'Date recur'})
       tmpl += '</label>';
       tmpl += '<label class="inline">';
-      tmpl += '<input type="radio" name="end" value="1" /> ';
+      tmpl += '<input type="radio" name="' + this.end_input_name + '" value="1" class="end-radio" /> ';
       tmpl += Drupal.t('After !count occurrences', {'!count': '<input type="number" max="1000" min="1" value="" name="count"/> '}, {context: 'Date recur'})
       tmpl += '</label>';
       tmpl += '<label class="inline">';
-      tmpl += '<input type="radio" name="end" value="2"> ';
+      tmpl += '<input type="radio" name="' + this.end_input_name + '" value="2" class="end-radio"> ';
       tmpl += Drupal.t('On date !date', {'!date': '<input type="date" name="until"/>'}, {context: 'Date recur'})
       tmpl += '</label>';
 
@@ -208,7 +211,7 @@
       //save input references to widget for later use
       this.frequency_select = this.element.find('select[name="freq"]');
       this.interval_input = this.element.find('input[name="interval"]');
-      this.end_input = this.element.find('input[type="radio"][name="end"]');
+      this.end_input = this.element.find('input[type="radio"][name="' + this.end_input_name + '"]');
       this.byweekday_pos_input = this.element.find('.byweekday-pos-input');
 
       //bind event handlers
@@ -267,6 +270,8 @@
         return;
       }
 
+      widget_count++;
+
       //refresh
       this._refresh();
     },
@@ -318,11 +323,11 @@
       }
       if (opts.count) {
         $('input[name=count]', this.element).val(opts.count);
-        $('input[name=end][value=1]', this.element).prop('checked', true);
+        $('input[name="' + this.end_input_name + '"][value=1]', this.element).prop('checked', true);
       }
       if (opts.until) {
         $('input[name=until]', this.element)[0].valueAsDate = opts.until;
-        $('input[name=end][value=2]', this.element).prop('checked', true);
+        $('input[name="' + this.end_input_name + '"][value=2]', this.element).prop('checked', true);
       }
     },
 
@@ -415,7 +420,7 @@
     _getRRule: function () {
       //modified from rrule/tests/demo/demo.js
       //ignore 'end', because it's part of the ui but not the spec
-      var values = this._getFormValues($(this.element).find('select, input[name!=end]'));
+      var values = this._getFormValues($(this.element).find('select, input[class!="end-radio"]'));
       options = {};
 
       if (_.has(values, 'byweekday-pos') && _.has(values, 'byweekday')) {
