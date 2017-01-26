@@ -623,11 +623,15 @@
     },
 
     _formatDate: function(dateobj) {
-      return Drupal.t('!day.!month.!year', {
-        '!day': dateobj.getDate(),
-        '!month': dateobj.getMonth() + 1,
-        '!year': dateobj.getFullYear()
+      return Drupal.t('!month/!day/!year', {
+        '!day': this._pad(dateobj.getDate()),
+        '!month': this._pad(dateobj.getMonth() + 1),
+        '!year': this._pad(dateobj.getFullYear())
       }, {context: 'Date recur'});
+    },
+
+    _pad: function(n) {
+      return (n < 10) ? ("0" + n) : n;
     },
 
     destroy: function () {
