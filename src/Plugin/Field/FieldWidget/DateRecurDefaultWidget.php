@@ -142,14 +142,15 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
         $item['rrule'] = '';
       }
       else {
-        try {
-          $rule = new DateRecurRRule($item['rrule'], $item['value']);
-          if ($rule->isInfinite()) {
-            $item['infinite'] = 1;
+        if (!empty($item['value']) && $item['value'] instanceof DrupalDateTime) {
+          try {
+            $rule = new DateRecurRRule($item['rrule'], $item['value']);
+            if ($rule->isInfinite()) {
+              $item['infinite'] = 1;
+            }
+          } catch (\InvalidArgumentException $e) {
+            // No-op, this is handled in validateRrule().
           }
-        }
-        catch (\InvalidArgumentException $e) {
-          // No-op, this is handled in validateRrule().
         }
       }
       $item['timezone'] = $this->getTimezone();
