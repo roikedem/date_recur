@@ -361,7 +361,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
 
     // Remove fields not present in date_recur tables and change the join to
     // the date_recur cache table.
-    $join_key = reset(array_keys($field_table['table']['join']));
+    $join_key = array_keys($field_table['table']['join'])[0];
     $recur_table['table']['join'] = $field_table['table']['join'];
     $recur_table['table']['join'][$join_key]['table'] = $recur_table_name;
     $recur_table['table']['join'][$join_key]['extra'] = array();
