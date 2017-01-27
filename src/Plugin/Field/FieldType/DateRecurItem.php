@@ -7,6 +7,9 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\TypedData\ListDataDefinition;
+use Drupal\Core\TypedData\MapDataDefinition;
+use Drupal\date_recur\DateRecurOccurrencesComputed;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManager;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -45,6 +48,19 @@ class DateRecurItem extends DateRangeItem {
     $properties['infinite'] = DataDefinition::create('boolean')
       ->setLabel(new TranslatableMarkup('Is the RRule an infinite rule?'))
       ->setRequired(FALSE);
+
+    $occurrence = MapDataDefinition::create()
+      ->setPropertyDefinition('value', DataDefinition::create('datetime_iso8601')
+        ->setLabel(t('Occurrence start date')))
+    ->setPropertyDefinition('end_value', DataDefinition::create('datetime_iso8601')
+      ->setLabel(t('Occurrence end date')));
+
+    $properties['occurrences'] = ListDataDefinition::create('map')
+      ->setItemDefinition($occurrence)
+      ->setLabel(t('Occurrences'))
+      ->setComputed(true)
+      ->setClass(DateRecurOccurrencesComputed::class);
+
     return $properties;
   }
 
