@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\FieldConfigInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -44,7 +45,7 @@ function date_recur_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * @param FieldConfigInterface|FieldStorageConfigInterface $field
+ * @param FieldConfigInterface|FieldStorageConfigInterface|FieldStorageDefinitionInterface $field
  * @return DateRecurOccurrenceHandlerInterface
  */
 function date_recur_create_occurrence_handler($field) {

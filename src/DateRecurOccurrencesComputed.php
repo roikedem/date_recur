@@ -30,16 +30,10 @@ class DateRecurOccurrencesComputed extends ItemList {
     /** @var DateRecurItem $item */
     $item = $this->getParent();
     $handler = $item->getOccurrenceHandler();
-    $occurrences = $handler->getOccurrencesForDisplay();
-    $values = [];
-    foreach ($occurrences as $delta => $occurrence) {
-      $values[] = [
-        'value' => $occurrence['value'],
-        'end_value' => $occurrence['end_value'],
-      ];
-    }
+    $values = $handler->getOccurrencesForComputedProperty();
     $this->setValue($values);
     return parent::getValue();
+
   }
 
 }

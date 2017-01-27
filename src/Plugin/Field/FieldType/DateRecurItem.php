@@ -49,17 +49,8 @@ class DateRecurItem extends DateRangeItem {
       ->setLabel(new TranslatableMarkup('Is the RRule an infinite rule?'))
       ->setRequired(FALSE);
 
-    $occurrence = MapDataDefinition::create()
-      ->setPropertyDefinition('value', DataDefinition::create('datetime_iso8601')
-        ->setLabel(t('Occurrence start date')))
-    ->setPropertyDefinition('end_value', DataDefinition::create('datetime_iso8601')
-      ->setLabel(t('Occurrence end date')));
-
-    $properties['occurrences'] = ListDataDefinition::create('map')
-      ->setItemDefinition($occurrence)
-      ->setLabel(t('Occurrences'))
-      ->setComputed(true)
-      ->setClass(DateRecurOccurrencesComputed::class);
+    $handler = date_recur_create_occurrence_handler($field_definition);
+    $properties['occurrences'] = $handler->occurrencePropertyDefinition($field_definition);
 
     return $properties;
   }

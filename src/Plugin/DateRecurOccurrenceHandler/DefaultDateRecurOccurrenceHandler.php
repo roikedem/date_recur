@@ -3,6 +3,11 @@
 namespace Drupal\date_recur\Plugin\DateRecurOccurrenceHandler;
 
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\TypedData\ListDataDefinition;
+use Drupal\Core\TypedData\MapDataDefinition;
+use Drupal\Core\TypedData\Plugin\DataType\ItemList;
+use Drupal\date_recur\DateRecurOccurrencesComputed;
 use Drupal\date_recur\DateRecurRRule;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -114,6 +119,21 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
       return [];
     }
     return $this->rruleObject->getOccurrences($start, $end, $num);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function getOccurrencesForComputedProperty() {
+    $occurrences = $this->getOccurrencesForDisplay();
+    $values = [];
+    foreach ($occurrences as $delta => $occurrence) {
+      $values[] = [
+        'value' => $occurrence['value'],
+        'end_value' => $occurrence['end_value'],
+      ];
+    }
+    return $values;
   }
 
   /**
@@ -384,5 +404,24 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
 
     $return_data = [$recur_table_name => $recur_table, $table_alias => $field_table];
     return $return_data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function occurrencePropertyDefinition(FieldStorageDefinitionInterface $field_definition) {
+    $occurrence = MapDataDefinition::create()
+      ->setPropertyDefinition('value', DataDefinition::create('datetime_iso8601')
+        ->setLabel(t('Occurrence start date')))
+      ->setPropertyDefinition('end_value', DataDefinition::create('datetime_iso8601')
+        ->setLabel(t('Occurrence end date')));
+
+    $occurrences = ListDataDefinition::create('map')
+      ->setItemDefinition($occurrence)
+      ->setLabel(t('Occurrences'))
+      ->setComputed(true)
+      ->setClass(DateRecurOccurrencesComputed::class);
+
+    return $occurrences;
   }
 }

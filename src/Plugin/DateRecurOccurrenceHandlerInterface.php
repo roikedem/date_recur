@@ -3,9 +3,12 @@
 namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
+use Drupal\Core\TypedData\Plugin\DataType\ItemList;
 
 /**
  * Defines an interface for Date recur occurrence handler plugins.
@@ -49,6 +52,11 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * @return array
    */
   public function getOccurrencesForDisplay($start = NULL, $end = NULL, $num = NULL);
+
+  /**
+   * @return array
+   */
+  public function getOccurrencesForComputedProperty();
 
   /**
    * Get a human-readable representation of the repeat rule.
@@ -98,4 +106,10 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * @return array The views data.
    */
   public function viewsData(FieldStorageConfigInterface $field_storage, $data);
+
+  /**
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_definition
+   * @return DataDefinitionInterface
+   */
+  public function occurrencePropertyDefinition(FieldStorageDefinitionInterface $field_definition);
 }
