@@ -9,7 +9,7 @@
  * Modified and adapted to Drupal 8 by Frando, 2016.
  */
 
-(function ($, Drupal, RRule) {
+(function ($, Drupal, Modernizr, RRule) {
 
   var widget_count = 0;
 
@@ -227,6 +227,17 @@
 
       //render template
       this.element.append(tmpl);
+
+      // attach datepicker if needed.
+      if (Modernizr.inputtypes.date !== true) {
+        this.element.find("input[type=date]").once('datePicker').each(function() {
+          var datepickerSettings = {
+            dateFormat: 'yy-mm-dd'
+          };
+          $(this).datepicker(datepickerSettings);
+        })
+      }
+
 
       //save input references to widget for later use
       this.frequency_select = this.element.find('select[name="freq"]');
@@ -647,4 +658,4 @@
       $.Widget.prototype.destroy.apply(this);
     }
   });
-}(jQuery, Drupal, RRule));
+}(jQuery, Drupal, Modernizr, RRule));

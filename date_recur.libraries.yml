@@ -19,4 +19,6 @@ rrule_widget:
   dependencies:
     - date_recur/rrule
     - core/underscore
+    - core/modernizr
+    - core/jquery.ui.datepicker
     - core/jquery.ui.widget
