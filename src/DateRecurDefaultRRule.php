@@ -85,7 +85,7 @@ class DateRecurDefaultRRule extends RRule {
     }
 
 
-    if (!empty($build)) {
+    if (!empty($build['rule'])) {
       return $this->t('complete', ['@rule' => $build['rule'], '@time' => $build['time']]);
     }
     else {

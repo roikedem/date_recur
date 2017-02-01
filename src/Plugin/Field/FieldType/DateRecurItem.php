@@ -7,9 +7,6 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\TypedData\ListDataDefinition;
-use Drupal\Core\TypedData\MapDataDefinition;
-use Drupal\date_recur\DateRecurOccurrencesComputed;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManager;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -27,7 +24,6 @@ use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
  * )
  */
 class DateRecurItem extends DateRangeItem {
-
   /**
    * @var DateRecurOccurrenceHandlerInterface;
    */
@@ -203,5 +199,9 @@ class DateRecurItem extends DateRangeItem {
   public function preSave() {
     parent::preSave();
     $this->infinite = $this->getOccurrenceHandler()->isInfinite();
+  }
+
+  public function getDelta() {
+    return (int) $this->name;
   }
 }
