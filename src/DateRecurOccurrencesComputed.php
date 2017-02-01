@@ -33,7 +33,15 @@ class DateRecurOccurrencesComputed extends ItemList {
     $values = $handler->getOccurrencesForComputedProperty();
     $this->setValue($values);
     return parent::getValue();
+  }
 
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEmpty() {
+    $this->getValue();
+    return parent::isEmpty();
   }
 
 }
