@@ -32,7 +32,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
     parent::deleteRevision();
     /** @var DateRecurItem $item */
     foreach ($this as $field_delta => $item) {
-      $item->getOccurrenceHandler()->onDelete();
+      $item->getOccurrenceHandler()->onDeleteRevision();
     }
   }
 }

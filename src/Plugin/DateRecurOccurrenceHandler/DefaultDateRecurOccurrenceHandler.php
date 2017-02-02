@@ -6,7 +6,6 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
-use Drupal\Core\TypedData\Plugin\DataType\ItemList;
 use Drupal\date_recur\DateRecurOccurrencesComputed;
 use Drupal\date_recur\DateRecurRRule;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -125,15 +124,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    * @inheritdoc
    */
   public function getOccurrencesForComputedProperty() {
-    $occurrences = $this->getOccurrencesForDisplay();
-    $values = [];
-    foreach ($occurrences as $delta => $occurrence) {
-      $values[] = [
-        'value' => $occurrence['value'],
-        'end_value' => $occurrence['end_value'],
-      ];
-    }
-    return $values;
+    return $this->getOccurrencesForDisplay();
   }
 
   /**

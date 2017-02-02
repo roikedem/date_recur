@@ -8,7 +8,6 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
-use Drupal\Core\TypedData\Plugin\DataType\ItemList;
 
 /**
  * Defines an interface for Date recur occurrence handler plugins.
@@ -48,12 +47,17 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    *
    * @param null|\DateTime|DrupalDateTime $start
    * @param null|\DateTime|DrupalDateTime $end
-   * @param null|\DateTime|DrupalDateTime $num
+   * @param int $num
    * @return array
    */
   public function getOccurrencesForDisplay($start = NULL, $end = NULL, $num = NULL);
 
   /**
+   * Get a list of occurrences that fits the occurrence property schema.
+   *
+   * The returned array should match the schema that is returned by
+   * occurrencePropertyDefinition().
+   *
    * @return array
    */
   public function getOccurrencesForComputedProperty();

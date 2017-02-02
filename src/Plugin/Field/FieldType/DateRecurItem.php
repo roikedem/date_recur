@@ -201,6 +201,13 @@ class DateRecurItem extends DateRangeItem {
     $this->infinite = $this->getOccurrenceHandler()->isInfinite();
   }
 
+  /**
+   * Get the item's delta.
+   *
+   * Field items have their name property set to the delta.
+   *
+   * @return int
+   */
   public function getDelta() {
     return (int) $this->name;
   }
