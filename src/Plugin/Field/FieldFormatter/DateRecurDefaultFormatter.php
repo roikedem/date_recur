@@ -21,6 +21,9 @@ use Drupal\datetime_range\Plugin\Field\FieldFormatter\DateRangeDefaultFormatter;
  */
 class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
 
+  /** @var int */
+  protected $occurrenceCounter;
+
   /**
    * {@inheritdoc}
    */
@@ -30,6 +33,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       'show_rrule' => TRUE,
       'show_next' => 5,
       'occurrence_format_type' => 'medium',
+      'count_per_item' => TRUE,
     ) + parent::defaultSettings();
   }
 
@@ -58,6 +62,12 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       '#options' => $this->showNextOptions(),
       '#title' => $this->t('Show next occurrences'),
       '#default_value' => $this->getSetting('show_next'),
+    ];
+    $form['count_per_item'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Limit occurrences per field item'),
+      '#default_value' => $this->getSetting('count_per_item'),
+      '#description' => $this->t('If disabled, the number of occurrences shown is limited across all field items.')
     ];
 
     $form['occurrence_format_type'] = $form['format_type'];
@@ -121,6 +131,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
 
+    $this->occurrenceCounter = 0;
     foreach ($items as $delta => $item) {
       $elements[$delta] = $this->viewValue($item);
     }
@@ -166,12 +177,22 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
   protected function viewOccurrences(DateRecurItem $item) {
     $build = [];
     $start = new \DateTime('now');
-    $occurrences = $item->getOccurrenceHandler()->getOccurrencesForDisplay($start, NULL, $this->getSetting('show_next'));
+
+    $count = $this->getSetting('show_next');
+    if (!$this->getSetting('count_per_item')) {
+      $count = $count - $this->occurrenceCounter;
+    }
+    if ($count <= 0) {
+      return $build;
+    }
+
+    $occurrences = $item->getOccurrenceHandler()->getOccurrencesForDisplay($start, NULL, $count);
     foreach ($occurrences as $occurrence) {
       if (!empty($occurrence['value'])) {
         $build[] = $this->buildDateRangeValue($occurrence['value'], $occurrence['end_value'], TRUE);
       }
     }
+    $this->occurrenceCounter += count($occurrences);
     return $build;
   }
 }
