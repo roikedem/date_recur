@@ -39,6 +39,7 @@ function date_recur_theme($existing, $type, $theme, $path) {
         'occurrences' => [],
         'repeatrule' => NULL,
         'date' => NULL,
+        'isRecurring' => FALSE,
       ],
     ],
   );

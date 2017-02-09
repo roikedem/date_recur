@@ -158,6 +158,13 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     }
     $build['#date'] = $this->buildDateRangeValue($item->start_date, $item->end_date);
 
+    if (empty($item->rrule)) {
+      $build['#isRecurring'] = FALSE;
+    }
+    else {
+      $build['#isRecurring'] = TRUE;
+    }
+
     if ($this->getSetting('show_rrule') && !empty($item->rrule)) {
       $build['#repeatrule'] = $item->getOccurrenceHandler()->humanReadable();
     }
