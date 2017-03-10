@@ -119,6 +119,13 @@ class DateRecurRRule {
     }
   }
 
+  public function getTimezoneOffset() {
+    if (!empty($this->timezoneOffset)) {
+      return $this->timezoneOffset;
+    }
+    return FALSE;
+  }
+
   public function getParts() {
     return $this->parts;
   }
