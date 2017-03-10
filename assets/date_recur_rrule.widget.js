@@ -546,9 +546,13 @@
       var getDay = function (i) {
         var days = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR, RRule.SA, RRule.SU];
         if (typeof weekdayPos !== 'undefined') {
-          return _.map(weekdayPos, function (pos) {
-            return days[i].nth(pos)
-          });
+          if (weekdayPos instanceof Array) {
+            return _.map(weekdayPos, function (pos) {
+              return days[i].nth(pos)
+            });
+          }else {
+            return days[i].nth(weekdayPos);
+          }
         }
         return [days[i]];
       };
