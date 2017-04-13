@@ -29,9 +29,9 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
    * {@inheritdoc}
    */
   public static function defaultSettings() {
-    return array(
+    return [
       'timezone_override' => '',
-    ) + parent::defaultSettings();
+    ] + parent::defaultSettings();
   }
 
   /**
@@ -40,13 +40,13 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $elements = parent::settingsForm($form, $form_state);
 
-    $elements['timezone_override'] = array(
+    $elements['timezone_override'] = [
       '#type' => 'select',
       '#title' => $this->t('Time zone override'),
       '#description' => $this->t('The time zone selected here will always be used when interpreting the dates inserted in the widget. If empty, the user\'s timezone will be used.'),
       '#options' => system_time_zones(TRUE),
       '#default_value' => $this->getSetting('timezone_override'),
-    );
+    ];
     return $elements;
   }
 
@@ -56,7 +56,7 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
   public function settingsSummary() {
     $summary = parent::settingsSummary();
     if ($override = $this->getSetting('timezone_override')) {
-      $summary[] = $this->t('Time zone: @timezone', array('@timezone' => $override));
+      $summary[] = $this->t('Time zone: @timezone', ['@timezone' => $override]);
     }
     return $summary;
   }
@@ -80,12 +80,12 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
 
     $element['end_value']['#required'] = FALSE;
 
-    $element['rrule'] = array(
+    $element['rrule'] = [
       '#type' => 'textarea',
       '#default_value' => isset($items[$delta]->rrule) ? $items[$delta]->rrule : NULL,
       '#title' => $this->t('Repeat rule (RRULE)'),
       '#value_callback' => [$this, 'rruleValueCallback']
-    );
+    ];
     return $element;
   }
 

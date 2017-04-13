@@ -88,9 +88,9 @@ class DateRecurItem extends DateRangeItem {
    * {@inheritdoc}
    */
   public static function defaultStorageSettings() {
-    return array(
+    return [
       'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
-    ) + parent::defaultStorageSettings();
+    ] + parent::defaultStorageSettings();
   }
 
   /**

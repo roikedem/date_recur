@@ -375,7 +375,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
     $join_key = array_keys($field_table['table']['join'])[0];
     $recur_table['table']['join'] = $field_table['table']['join'];
     $recur_table['table']['join'][$join_key]['table'] = $recur_table_name;
-    $recur_table['table']['join'][$join_key]['extra'] = array();
+    $recur_table['table']['join'][$join_key]['extra'] = [];
 
     // Update table name references.
     $handler_keys = ['argument', 'filter', 'sort', 'field'];

@@ -28,13 +28,13 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
    * {@inheritdoc}
    */
   public static function defaultSettings() {
-    return array(
+    return [
       // Implement default settings.
       'show_rrule' => TRUE,
       'show_next' => 5,
       'occurrence_format_type' => 'medium',
       'count_per_item' => TRUE,
-    ) + parent::defaultSettings();
+    ] + parent::defaultSettings();
   }
 
   protected function showNextOptions() {
@@ -85,7 +85,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     $summary[] = $this->t('Show next occurrences') . ': ' . $this->showNextOptions()[$this->getSetting('show_next')];
     $date = new DrupalDateTime();
     $date->_dateRecurIsOccurrence = TRUE;
-    $summary[] = t('Occurrence format: @display', array('@display' => $this->formatDate($date)));
+    $summary[] = t('Occurrence format: @display', ['@display' => $this->formatDate($date)]);
     return $summary;
   }
 

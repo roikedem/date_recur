@@ -41,7 +41,7 @@ class DateRecurDefaultRRule extends RRule {
    * @param array $opt
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
    */
-  public function humanReadable(array $opt = array()) {
+  public function humanReadable(array $opt = []) {
     $build = [];
 
     $daynames = DateHelper::weekDays(TRUE);
