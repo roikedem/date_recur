@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\date_recur\DateRecurRRule
- */
-
 namespace Drupal\date_recur;
 
 /**
