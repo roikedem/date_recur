@@ -24,7 +24,7 @@ use Drupal\Component\Datetime\DateTimePlus;
 use RRule\RRule;
 use RRule\RSet;
 
-class DateRecurRRule {
+class DateRecurRRule implements \Iterator {
 
   const RFC_DATE_FORMAT = 'Ymd\THis\Z';
 
@@ -342,5 +342,44 @@ class DateRecurRRule {
    */
   public function humanReadable() {
     return $this->rrule->humanReadable();
+  }
+
+  /**
+   * Return the current element
+   */
+  public function current() {
+    if ($date = $this->rrule->current()) {
+      return $this->massageOccurrence($date);
+    }
+  }
+
+  /**
+   * Move forward to next element
+   */
+  public function next() {
+    if ($date = $this->rrule->next()) {
+      return $this->massageOccurrence($date);
+    }
+  }
+
+  /**
+   * Return the key of the current element
+   */
+  public function key() {
+    return $this->rrule->key();
+  }
+
+  /**
+   * Checks if current position is valid
+   */
+  public function valid() {
+    return $this->rrule->valid();
+  }
+
+  /**
+   * Rewind the Iterator to the first element
+   */
+  public function rewind() {
+    $this->rrule->rewind();
   }
 }

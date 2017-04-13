@@ -24,7 +24,7 @@ use Zend\Stdlib\Exception\InvalidArgumentException;
  *  label = @Translation("Default occurrence handler"),
  * )
  */
-class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurOccurrenceHandlerInterface, ContainerFactoryPluginInterface {
+class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurOccurrenceHandlerInterface, ContainerFactoryPluginInterface, \Iterator {
 
   /**
    * Drupal\Core\Database\Driver\mysql\Connection definition.
@@ -414,5 +414,53 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
       ->setClass(DateRecurOccurrencesComputed::class);
 
     return $occurrences;
+  }
+
+  /**
+   * Return the current element
+   */
+  public function current() {
+    if (empty($this->rruleObject)) {
+      return NULL;
+    }
+    return $this->rruleObject->current();
+  }
+
+  /**
+   * Move forward to next element
+   */
+  public function next() {
+    if (!empty($this->rruleObject)) {
+      $this->rruleObject->next();
+    }
+  }
+
+  /**
+   * Return the key of the current element
+   */
+  public function key() {
+    if (empty($this->rruleObject)) {
+      return NULL;
+    }
+    return $this->rruleObject->key();
+  }
+
+  /**
+   * Checks if current position is valid
+   */
+  public function valid() {
+    if (empty($this->rruleObject)) {
+      return FALSE;
+    }
+    return $this->rruleObject->valid();
+  }
+
+  /**
+   * Rewind the Iterator to the first element
+   */
+  public function rewind() {
+    if (!empty($this->rruleObject)) {
+      $this->rruleObject->rewind();
+    }
   }
 }
