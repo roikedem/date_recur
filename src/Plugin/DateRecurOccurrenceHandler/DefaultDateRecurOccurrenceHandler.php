@@ -356,22 +356,10 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
     unset($data[$revision_table_alias]);
     $recur_table_name = $this->getOccurrenceTableName($field_storage);
 
-    $columns_to_move = [
-      $field_name,
-      $field_name . '_value',
-      $field_name . '_end_value',
-    ];
 
     $field_table = $data[$table_alias];
     $recur_table = $field_table;
 
-    // Remove date columns from field data table.
-    foreach ($columns_to_move as $column) {
-      unset($field_table[$column]);
-    }
-
-    // Remove fields not present in date_recur tables and change the join to
-    // the date_recur cache table.
     $join_key = array_keys($field_table['table']['join'])[0];
     $recur_table['table']['join'] = $field_table['table']['join'];
     $recur_table['table']['join'][$join_key]['table'] = $recur_table_name;
@@ -380,14 +368,23 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
     // Update table name references.
     $handler_keys = ['argument', 'filter', 'sort', 'field'];
     foreach ($recur_table as $column_name => &$column_data) {
-      if (!in_array($column_name, array_merge($columns_to_move, ['table']))) {
+      if ($column_name == 'table') {
+        continue;
+      }
+      if (!$this->viewsDataCheckIfMoveColumnName($field_name, $column_name, $column_data)) {
         unset($recur_table[$column_name]);
       }
-      else if ($column_name != 'table') {
+      else {
+        unset($field_table[$column_name]);
         foreach ($handler_keys as $key) {
           if (!empty($column_data[$key]['table'])) {
             $column_data[$key]['table'] = $recur_table_name;
-            $column_data[$key]['additional fields'] = ['field_date_value', 'field_date_end_value', 'delta', 'field_delta'];
+            $column_data[$key]['additional fields'] = [
+              'field_date_value',
+              'field_date_end_value',
+              'delta',
+              'field_delta'
+            ];
           }
         }
       }
@@ -395,6 +392,21 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
 
     $return_data = [$recur_table_name => $recur_table, $table_alias => $field_table];
     return $return_data;
+  }
+
+  protected function viewsDataCheckIfMoveColumnName($fieldName, $columnName, $columnData) {
+    $fieldsToMove = [
+      $fieldName,
+      $fieldName . '_value',
+      $fieldName . '_end_value',
+    ];
+    if (in_array($columnName, $fieldsToMove)) {
+      return TRUE;
+    }
+    else if (strpos($columnName, $fieldName . '_value') === 0) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**
