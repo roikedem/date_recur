@@ -163,8 +163,13 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    */
   public function onSave($update, $field_delta) {
     $entity_id = $this->item->getEntity()->id();
-    $revision_id = $this->item->getEntity()->getRevisionId();
     $field_name = $this->item->getFieldDefinition()->getName();
+
+    if ($this->item->getEntity()->getRevisionId()) {
+      $revision_id = $this->item->getEntity()->getRevisionId();
+    } else {
+      $revision_id = $this->item->getEntity()->id();
+    }
 
     if ($update) {
       $this->database->delete($this->tableName)
