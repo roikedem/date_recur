@@ -17,7 +17,9 @@ namespace Drupal\date_recur;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Component\Datetime\DateTimePlus;
 use RRule\RRule;
+use RRule\RfcParser;
 use RRule\RSet;
+
 
 class DateRecurRRule implements \Iterator {
 
@@ -170,7 +172,7 @@ class DateRecurRRule implements \Iterator {
     if (empty($parts['WKST'])) {
       $parts['WKST'] = 'MO';
     }
-    $this->parts = RRule::parseRfcString($rrule);
+    $this->parts = RfcParser::parseRRule($rrule);
     $this->setParts = $set_parts;
   }
 
@@ -326,6 +328,37 @@ class DateRecurRRule implements \Iterator {
     $date->setTimezone(new \DateTimeZone(DATETIME_STORAGE_TIMEZONE));
     // Adjust the date for storage.
     return $date->format($format);
+  }
+
+  public function getWeekdays() {
+
+    $weekdays = [];
+    $byday = $this->parts['BYDAY'];
+    if (!is_array($byday) ) {
+      $byday = explode(',', $byday);
+    }
+
+    $this->byweekday = array();
+    $this->byweekday_nth = array();
+    foreach ($byday as $value) {
+      $value = trim(strtoupper($value));
+      $valid = preg_match('/^([+-]?[0-9]+)?([A-Z]{2})$/', $value, $matches);
+
+      if (!empty($matches[2])) {
+        $day = RRule::$week_days[$matches[2]];
+        $weekdays[$day] = $day;
+      }
+    }
+    return $weekdays;
+
+    if (!empty($this->parts['BYDAY'])) {
+      $days = explode(',', $this->parts['BYDAY']);
+      foreach ($days as $day) {
+        $day = preg_replace('/[\+\-0-9]*/', '', $day);
+        $weekdays[$day] = $day;
+      }
+    }
+    return $weekdays;
   }
 
   /**

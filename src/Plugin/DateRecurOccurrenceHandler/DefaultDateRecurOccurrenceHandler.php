@@ -137,6 +137,10 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
     return $this->rruleObject->humanReadable();
   }
 
+  public function getWeekdays() {
+    return $this->rruleObject->getWeekdays();
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -386,6 +390,9 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
               'field_delta'
             ];
           }
+        }
+        if ($column_name == $field_name . '_value') {
+          $column_data['field']['click sortable'] = TRUE;
         }
       }
     }
