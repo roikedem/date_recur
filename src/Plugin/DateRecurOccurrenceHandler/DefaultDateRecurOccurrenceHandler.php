@@ -402,6 +402,11 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
       }
     }
 
+    $custom_handler_name = $field_name . '_simple_render';
+    $recur_table[$custom_handler_name] = $recur_table[$field_name];
+    $recur_table[$custom_handler_name]['title'] .= $this->t(' (simple render)');
+    $recur_table[$custom_handler_name]['field']['id'] = 'date_recur_field_simple_render';
+
     $return_data = [$recur_table_name => $recur_table, $table_alias => $field_table];
     return $return_data;
   }
