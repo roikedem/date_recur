@@ -33,6 +33,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       'show_rrule' => TRUE,
       'show_next' => 5,
       'occurrence_format_type' => 'medium',
+      'same_end_date_format_type' => 'medium',
       'count_per_item' => TRUE,
     ] + parent::defaultSettings();
   }
@@ -73,6 +74,9 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     $form['occurrence_format_type'] = $form['format_type'];
     $form['occurrence_format_type']['#title'] .=  ' ' . t('(Occurrences)');
     $form['occurrence_format_type']['#default_value'] = $this->getSetting('occurrence_format_type');
+    $form['same_end_date_format_type'] = $form['format_type'];
+    $form['same_end_date_format_type']['#title'] .=  ' ' . t('(End date if same day as start date)');
+    $form['same_end_date_format_type']['#default_value'] = $this->getSetting('same_end_date_format_type');
     return $form;
   }
 
@@ -100,6 +104,9 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
     if ($isOccurrence) {
       $start_date->_dateRecurIsOccurrence = $end_date->_dateRecurIsOccurrence = TRUE;
     }
+    if ($start_date->format('Ymd') == $end_date->format('Ymd')) {
+      $end_date->_same_end_date = TRUE;
+    }
     if ($start_date->format('U') !== $end_date->format('U')) {
       $element = [
         'start_date' => $this->buildDateWithIsoAttribute($start_date),
@@ -114,7 +121,10 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
   }
 
   protected function formatDate($date) {
-    if (empty($date->_dateRecurIsOccurrence)) {
+    if (!empty($date->_same_end_date)) {
+      $format_type = $this->getSetting('same_end_date_format_type');
+    }
+    else if (empty($date->_dateRecurIsOccurrence)) {
       $format_type = $this->getSetting('format_type');
     }
     else {
