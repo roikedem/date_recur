@@ -389,8 +389,8 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
           if (!empty($column_data[$key]['table'])) {
             $column_data[$key]['table'] = $recur_table_name;
             $column_data[$key]['additional fields'] = [
-              'field_date_value',
-              'field_date_end_value',
+              $field_name . '_value',
+              $field_name . '_end_value',
               'delta',
               'field_delta'
             ];
