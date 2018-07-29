@@ -1,0 +1,19 @@
+field.value.date_recur:
+  type: field.value.daterange
+  label: 'Default value'
+
+field.storage_settings.date_recur:
+  type: field.storage_settings.daterange
+  label: 'Date recur settings'
+  mapping:
+    occurrence_handler_plugin:
+      type: string
+      label: 'Occurrence handler plugin'
+
+field.field_settings.date_recur:
+  type: mapping
+  label: 'Integer'
+  mapping:
+    precreate:
+      type: string
+      label: 'Precreate interval'
