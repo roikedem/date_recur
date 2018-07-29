@@ -11,11 +11,11 @@ rrule:
 
 rrule_widget:
   js:
-    assets/date_recur_rrule.widget.js: {}
-    assets/date_recur_rrule.js: {}
+    js/date_recur_rrule.widget.js: {}
+    js/date_recur_rrule.js: {}
   css:
     base:
-      assets/date_recur_rrule.css: {}
+      css/date_recur_rrule.css: {}
   dependencies:
     - date_recur/rrule
     - core/underscore
