@@ -15,7 +15,6 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class DateRecurTest extends KernelTestBase {
 
-
   /**
    * {@inheritdoc}
    */
@@ -31,7 +30,7 @@ class DateRecurTest extends KernelTestBase {
   /**
    * Tests adding a field, setting values, reading occurrences.
    */
-  public function testXyzAbc() {
+  public function testGetOccurrencesForDisplay() {
     $field_storage = FieldStorageConfig::create([
       'entity_type' => 'entity_test',
       'field_name' => 'abc',
@@ -54,19 +53,21 @@ class DateRecurTest extends KernelTestBase {
     $entity->abc = [
       'value' => '2014-06-15T23:00:00',
       'end_value' => '2014-06-16T07:00:00',
-      'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=1',
+      'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
       'infinite' => '1',
       'timezone' => 'Australia/Sydney',
     ];
 
+    // No need to save the entity.
+    $this->assertTrue($entity->isNew());
     /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
     $item = $entity->abc;
     $occurrences = $item[0]->getOccurrenceHandler()
       ->getOccurrencesForDisplay(NULL, NULL, 2);
     $this->assertEquals('Tue, 17 Jun 2014 09:00:00 +1000', $occurrences[0]['value']->format('r'));
     $this->assertEquals('Tue, 17 Jun 2014 17:00:00 +1000', $occurrences[0]['end_value']->format('r'));
-    $this->assertEquals('Tue, 24 Jun 2014 09:00:00 +1000', $occurrences[1]['value']->format('r'));
-    $this->assertEquals('Tue, 24 Jun 2014 17:00:00 +1000', $occurrences[1]['end_value']->format('r'));
+    $this->assertEquals('Wed, 18 Jun 2014 09:00:00 +1000', $occurrences[1]['value']->format('r'));
+    $this->assertEquals('Wed, 18 Jun 2014 17:00:00 +1000', $occurrences[1]['end_value']->format('r'));
   }
 
 }
