@@ -2,6 +2,7 @@
 
 namespace Drupal\date_recur\Plugin\DateRecurOccurrenceHandler;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\ListDataDefinition;
@@ -14,10 +15,11 @@ use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Database\Driver\mysql\Connection;
 use Zend\Stdlib\Exception\InvalidArgumentException;
 
 /**
+ * Provides the default occurrence handler.
+ *
  * @DateRecurOccurrenceHandler(
  *  id = "date_recur_occurrence_handler",
  *  label = @Translation("Default occurrence handler"),
@@ -26,9 +28,9 @@ use Zend\Stdlib\Exception\InvalidArgumentException;
 class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurOccurrenceHandlerInterface, ContainerFactoryPluginInterface, \Iterator {
 
   /**
-   * Drupal\Core\Database\Driver\mysql\Connection definition.
+   * The database connection.
    *
-   * @var \Drupal\Core\Database\Driver\mysql\Connection
+   * @var \Drupal\Core\Database\Connection
    */
   protected $database;
 
@@ -59,7 +61,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
   protected $tableName;
 
   /**
-   * Construct.
+   * Construct a new DefaultDateRecurOccurrenceHandler.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -67,15 +69,10 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    *   The plugin_id for the plugin instance.
    * @param string $plugin_definition
    *   The plugin implementation definition.
-   * @param Connection $database
-   *   The database service.
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database connection.
    */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    Connection $database
-  ) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, Connection $database) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->database = $database;
     // Assume no recurrence until declared otherwise in init().
