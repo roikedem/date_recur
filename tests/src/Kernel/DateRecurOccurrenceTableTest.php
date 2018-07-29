@@ -74,7 +74,7 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
    * Ensure occurrence table rows are created.
    */
   public function testTableRows() {
-    $field_storage = FieldStorageConfig::create([
+    $fieldStorage = FieldStorageConfig::create([
       'entity_type' => 'entity_test',
       'field_name' => 'abc',
       'type' => 'date_recur',
@@ -83,18 +83,18 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
         'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
       ],
     ]);
-    $field_storage->save();
+    $fieldStorage->save();
 
     $preCreate = 'P1Y';
-    $field = [
+    $fieldConfig = FieldConfig::create([
       'field_name' => 'abc',
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
       'settings' => [
         'precreate' => $preCreate,
       ],
-    ];
-    FieldConfig::create($field)->save();
+    ]);
+    $fieldConfig->save();
 
     $entity = EntityTest::create();
     $entity->abc = [
