@@ -100,15 +100,3 @@ function date_recur_field_storage_config_delete(FieldStorageConfigInterface $fie
   $entityHooks = \Drupal::service('date_recur.entity_hooks');
   $entityHooks->fieldStorageConfigDelete($fieldStorage);
 }
-
-/**
- * Implements hook_cron().
- */
-//function date_recur_cron() {
-// @todo Implement like this:
-// - Check if some timespan since last run has passed (e.g. 1 month).
-// - Use EntityQuery to load all items with infinite = 1.
-// - Load those entities.
-// - Call DateRecurFieldItemList::postSave().
-//}
-
