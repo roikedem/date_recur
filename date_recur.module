@@ -2,32 +2,12 @@
 
 /**
  * @file
- * Contains date_recur.module..
+ * Contains hooks for date_recur module.
  */
 
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\FieldConfigInterface;
 use Drupal\field\FieldStorageConfigInterface;
-use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
-use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManager;
 use Zend\Stdlib\Exception\InvalidArgumentException;
-
-/**
- * Implements hook_help().
- */
-function date_recur_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    // Main module help for the date_recur module.
-    case 'help.page.date_recur':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Recurring date field.') . '</p>';
-      return $output;
-
-    default:
-  }
-}
 
 /**
  * Implements hook_theme().
