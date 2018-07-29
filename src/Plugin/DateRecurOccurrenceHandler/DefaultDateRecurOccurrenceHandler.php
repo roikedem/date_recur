@@ -15,7 +15,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Database\Driver\mysql\Connection;
-use Drupal\field\FieldStorageConfigInterface;
 use Zend\Stdlib\Exception\InvalidArgumentException;
 
 /**
@@ -271,40 +270,51 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
   /**
    * {@inheritdoc}
    */
-  public function onFieldCreate(FieldStorageConfigInterface $field) {
-    $this->createOccurrenceTable($field);
+  public function onFieldCreate(FieldStorageDefinitionInterface $fieldDefinition) {
+    $this->createOccurrenceTable($fieldDefinition);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onFieldUpdate(FieldStorageConfigInterface $field) {
+  public function onFieldUpdate(FieldStorageDefinitionInterface $fieldDefinition) {
     // Nothing to do.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onFieldDelete(FieldStorageConfigInterface $field) {
-    $this->dropOccurrenceTable($field);
+  public function onFieldDelete(FieldStorageDefinitionInterface $fieldDefinition) {
+    $this->dropOccurrenceTable($fieldDefinition);
   }
 
+  /**
+   * Creates an occurrence table.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
+   */
+  protected function createOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition) {
+    $entity_type = $fieldDefinition->getTargetEntityTypeId();
+    $field_name = $fieldDefinition->getName();
+    $table_name = $this->getOccurrenceTableName($fieldDefinition);
 
-  protected function createOccurrenceTable(FieldStorageDefinitionInterface $field) {
-    $entity_type = $field->getTargetEntityTypeId();
-    $field_name = $field->getName();
-    $table_name = $this->getOccurrenceTableName($field);
-
-    $spec = $this->getOccurrenceTableSchema($field);
+    $spec = $this->getOccurrenceTableSchema($fieldDefinition);
     $spec['description'] = 'Date recur cache for ' . $entity_type . '.' . $field_name;
     $schema = $this->database->schema();
     $schema->createTable($table_name, $spec);
   }
 
-  protected function dropOccurrenceTable(FieldStorageConfigInterface $field) {
-    $table_name = $this->getOccurrenceTableName($field);
+  /**
+   * Drops an occurrence table.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
+   */
+  protected function dropOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition) {
+    $tableName = $this->getOccurrenceTableName($fieldDefinition);
     $schema = $this->database->schema();
-    $schema->dropTable($table_name);
+    $schema->dropTable($tableName);
   }
 
   public function getOccurrenceTableSchema(FieldStorageDefinitionInterface $field) {
@@ -354,16 +364,16 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
   /**
    * {@inheritdoc}
    */
-  public function viewsData(FieldStorageConfigInterface $field_storage, $data) {
+  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, $data) {
     if (empty($data)) {
       return [];
     }
-    $field_name = $field_storage->getName();
+    $field_name = $fieldDefinition->getName();
     list($table_alias, $revision_table_alias) = array_keys($data);
 
     // @todo: Revision support.
     unset($data[$revision_table_alias]);
-    $recur_table_name = $this->getOccurrenceTableName($field_storage);
+    $recur_table_name = $this->getOccurrenceTableName($fieldDefinition);
 
 
     $field_table = $data[$table_alias];

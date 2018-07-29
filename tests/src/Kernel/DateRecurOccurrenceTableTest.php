@@ -36,6 +36,41 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
   ];
 
   /**
+   * Ensure occurrence table is created and deleted for field storage entities.
+   */
+  public function testTableCreateDeleteOnFieldStorageCreate() {
+    $tableName = 'date_recur__entity_test__abc';
+
+    $actualExists = $this->container->get('database')
+      ->schema()
+      ->tableExists($tableName);
+    $this->assertFalse($actualExists);
+
+    $fieldStorage = FieldStorageConfig::create([
+      'entity_type' => 'entity_test',
+      'field_name' => 'abc',
+      'type' => 'date_recur',
+      'settings' => [
+        'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
+        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
+      ],
+    ]);
+    $fieldStorage->save();
+
+    $actualExists = $this->container->get('database')
+      ->schema()
+      ->tableExists($tableName);
+    $this->assertTrue($actualExists);
+
+    $fieldStorage->delete();
+
+    $actualExists = $this->container->get('database')
+      ->schema()
+      ->tableExists($tableName);
+    $this->assertFalse($actualExists);
+  }
+
+  /**
    * Ensure occurrence table rows are created.
    */
   public function testTableRows() {

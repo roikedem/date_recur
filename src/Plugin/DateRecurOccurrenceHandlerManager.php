@@ -9,10 +9,10 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 /**
  * Provides the Date recur occurrence handler plugin manager.
  */
-class DateRecurOccurrenceHandlerManager extends DefaultPluginManager {
+class DateRecurOccurrenceHandlerManager extends DefaultPluginManager implements DateRecurOccurrenceHandlerManagerInterface {
 
   /**
-   * Constructor for DateRecurOccurrenceHandlerManager objects.
+   * Creates a new DateRecurOccurrenceHandlerManager.
    *
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths
@@ -27,4 +27,5 @@ class DateRecurOccurrenceHandlerManager extends DefaultPluginManager {
     $this->alterInfo('date_recur_date_recur_occurrence_handler_info');
     $this->setCacheBackend($cache_backend, 'date_recur_date_recur_occurrence_handler_plugins');
   }
+
 }

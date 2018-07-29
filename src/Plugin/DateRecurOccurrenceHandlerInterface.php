@@ -3,10 +3,7 @@
 namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\Core\TypedData\DataDefinitionInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\FieldStorageConfigInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 
 /**
@@ -96,20 +93,40 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    */
   public function onDeleteRevision();
 
-  public function onFieldCreate(FieldStorageConfigInterface $field);
+  /**
+   * Reacts to field creation.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
+   */
+  public function onFieldCreate(FieldStorageDefinitionInterface $fieldDefinition);
 
-  public function onFieldUpdate(FieldStorageConfigInterface $field);
+  /**
+   * Reacts to field definition update.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
+   */
+  public function onFieldUpdate(FieldStorageDefinitionInterface $fieldDefinition);
 
-  public function onFieldDelete(FieldStorageConfigInterface $field);
+  /**
+   * Reacts to field deletion.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
+   */
+  public function onFieldDelete(FieldStorageDefinitionInterface $fieldDefinition);
 
   /**
    * Modify field views data to include occurrences.
    *
-   * @param \Drupal\field\FieldStorageConfigInterface $field_storage
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
    * @param array $data
-   * @return array The views data.
+   * @return array
+   *   The views data.
    */
-  public function viewsData(FieldStorageConfigInterface $field_storage, $data);
+  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, $data);
 
   /**
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_definition

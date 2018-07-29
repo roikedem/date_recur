@@ -2,3 +2,7 @@ services:
   plugin.manager.date_recur_occurrence_handler:
     class: Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManager
     parent: default_plugin_manager
+
+  date_recur.entity_hooks:
+    class: Drupal\date_recur\DateRecurEntityHooks
+    arguments: ['@plugin.manager.date_recur_occurrence_handler']

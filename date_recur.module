@@ -46,46 +46,59 @@ function date_recur_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * @param FieldConfigInterface|FieldStorageConfigInterface|FieldStorageDefinitionInterface $field
- * @return DateRecurOccurrenceHandlerInterface
+ * Creates an occurrence handler from a field definition.
+ *
+ * @deprecated in alpha. Will be removed before beta.
+ *
+ * @internal
  */
-function date_recur_create_occurrence_handler($field) {
+function date_recur_create_occurrence_handler(FieldStorageDefinitionInterface $field) {
   if ($field->getType() != 'date_recur') {
     throw new InvalidArgumentException("Expected field of type date_recur.");
   }
   $pluginName = $field->getSetting('occurrence_handler_plugin');
-  /** @var DateRecurOccurrenceHandlerManager $manager */
-  $manager = \Drupal::getContainer()
-    ->get('plugin.manager.date_recur_occurrence_handler');
+  /** @var \Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManagerInterface $manager */
+  $manager = \Drupal::service('plugin.manager.date_recur_occurrence_handler');
   return $manager->createInstance($pluginName);
 }
 
 /**
- * Implements hook_ENTITY_TYPE_insert() for 'field_config'.
+ * Implements hook_ENTITY_TYPE_insert().
+ *
+ * ENTITY_TYPE: 'field_storage_config'.
+ *
+ * @see \Drupal\date_recur\DateRecurEntityHooks::fieldStorageConfigInsert
  */
-function date_recur_field_storage_config_insert(FieldStorageConfigInterface $field) {
-  if ($field->getType() == 'date_recur') {
-    $plugin = date_recur_create_occurrence_handler($field);
-    $plugin->onFieldCreate($field);
-  }
-}
-
-
-function date_recur_field_storage_config_update(FieldStorageConfigInterface $field) {
-  if ($field->getType() == 'date_recur') {
-    $plugin = date_recur_create_occurrence_handler($field);
-    $plugin->onFieldUpdate($field);
-  }
+function date_recur_field_storage_config_insert(FieldStorageConfigInterface $fieldStorage) {
+  /** @var \Drupal\date_recur\DateRecurEntityHooks $entityHooks */
+  $entityHooks = \Drupal::service('date_recur.entity_hooks');
+  $entityHooks->fieldStorageConfigInsert($fieldStorage);
 }
 
 /**
- * Implements hook_ENTITY_TYPE_delete() for 'field_config'.
+ * Implements hook_ENTITY_TYPE_update().
+ *
+ * ENTITY_TYPE: 'field_storage_config'.
+ *
+ * @see \Drupal\date_recur\DateRecurEntityHooks::fieldStorageConfigUpdate
  */
-function date_recur_field_storage_config_delete(FieldStorageConfigInterface $field) {
-  if ($field->getType() == 'date_recur') {
-    $plugin = date_recur_create_occurrence_handler($field);
-    $plugin->onFieldDelete($field);
-  }
+function date_recur_field_storage_config_update(FieldStorageConfigInterface $fieldStorage) {
+  /** @var \Drupal\date_recur\DateRecurEntityHooks $entityHooks */
+  $entityHooks = \Drupal::service('date_recur.entity_hooks');
+  $entityHooks->fieldStorageConfigUpdate($fieldStorage);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ *
+ * ENTITY_TYPE: 'field_storage_config'.
+ *
+ * @see \Drupal\date_recur\DateRecurEntityHooks::fieldStorageConfigDelete
+ */
+function date_recur_field_storage_config_delete(FieldStorageConfigInterface $fieldStorage) {
+  /** @var \Drupal\date_recur\DateRecurEntityHooks $entityHooks */
+  $entityHooks = \Drupal::service('date_recur.entity_hooks');
+  $entityHooks->fieldStorageConfigDelete($fieldStorage);
 }
 
 /**
