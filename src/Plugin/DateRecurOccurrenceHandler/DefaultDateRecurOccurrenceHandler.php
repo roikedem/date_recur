@@ -103,7 +103,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
     else {
       $this->isRecurring = FALSE;
     }
-    $this->tableName = $this->getOccurrenceTableName($this->item->getFieldDefinition());
+    $this->tableName = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition()->getFieldStorageDefinition());
   }
 
   /**
@@ -218,18 +218,16 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
   }
 
   /**
-   * @param FieldStorageDefinitionInterface|FieldDefinitionInterface $field
-   * @throws InvalidArgumentException
+   * Get the name of the table containing occurrences for a field.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   The field definition.
+   *
    * @return string
+   *   A table name.
    */
-  protected function getOccurrenceTableName($field) {
-    if (! ($field instanceof FieldStorageDefinitionInterface || $field instanceof FieldDefinitionInterface)) {
-      throw new InvalidArgumentException();
-    }
-    $entity_type = $field->getTargetEntityTypeId();
-    $field_name = $field->getName();
-    $table_name = 'date_recur__' . $entity_type . '__' . $field_name;
-    return $table_name;
+  public static function getOccurrenceCacheStorageTableName(FieldStorageDefinitionInterface $fieldDefinition) {
+    return sprintf('date_recur__%s__%s', $fieldDefinition->getTargetEntityTypeId(), $fieldDefinition->getName());
   }
 
   /**
@@ -247,7 +245,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    * {@inheritdoc}
    */
   public function onDelete() {
-    $table_name = $this->getOccurrenceTableName($this->item->getFieldDefinition());
+    $table_name = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition());
     $q = $this->database->delete($table_name);
     $q->condition('entity_id', $this->item->getEntity()->id());
     $q->execute();
@@ -257,7 +255,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    * {@inheritdoc}
    */
   public function onDeleteRevision() {
-    $table_name = $this->getOccurrenceTableName($this->item->getFieldDefinition());
+    $table_name = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition());
     $q = $this->database->delete($table_name);
     $q->condition('entity_id', $this->item->getEntity()->id());
     $q->condition('revision_id', $this->item->getEntity()->getRevisionId());
@@ -294,7 +292,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
   protected function createOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition) {
     $entity_type = $fieldDefinition->getTargetEntityTypeId();
     $field_name = $fieldDefinition->getName();
-    $table_name = $this->getOccurrenceTableName($fieldDefinition);
+    $table_name = $this->getOccurrenceCacheStorageTableName($fieldDefinition);
 
     $spec = $this->getOccurrenceTableSchema($fieldDefinition);
     $spec['description'] = 'Date recur cache for ' . $entity_type . '.' . $field_name;
@@ -309,7 +307,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    *   The field definition.
    */
   protected function dropOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition) {
-    $tableName = $this->getOccurrenceTableName($fieldDefinition);
+    $tableName = $this->getOccurrenceCacheStorageTableName($fieldDefinition);
     $schema = $this->database->schema();
     $schema->dropTable($tableName);
   }
@@ -370,8 +368,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
 
     // @todo: Revision support.
     unset($data[$revision_table_alias]);
-    $recur_table_name = $this->getOccurrenceTableName($fieldDefinition);
-
+    $recur_table_name = $this->getOccurrenceCacheStorageTableName($fieldDefinition);
 
     $field_table = $data[$table_alias];
     $recur_table = $field_table;
