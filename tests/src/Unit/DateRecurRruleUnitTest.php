@@ -131,7 +131,8 @@ class DateRecurRruleUnitTest extends UnitTestCase {
   public function testGenerateOccurrences() {
     $tz = new \DateTimeZone('Africa/Cairo');
     $start = new \DateTime('11pm 7 June 2005', $tz);
-    $end = (clone $start)->modify('+2 hours');
+    $end = clone $start;
+    $end->modify('+2 hours');
     $rule = $this->newRule('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', $start, $end);
 
     $generator = $rule->generateOccurrences();

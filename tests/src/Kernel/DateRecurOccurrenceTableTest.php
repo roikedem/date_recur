@@ -124,7 +124,8 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
     $countDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     $count = 0;
     do {
-      $end = (clone $day)->modify('+8 hours');
+      $end = clone $day;
+      $end->modify('+8 hours');
       if (in_array($day->format('D'), $countDays)) {
         $count++;
       }

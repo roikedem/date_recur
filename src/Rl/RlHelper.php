@@ -119,7 +119,8 @@ class RlHelper implements DateRecurHelperInterface {
   public function generateOccurrences(\DateTimeInterface $rangeStart = NULL, \DateTimeInterface $rangeEnd = NULL) {
     foreach ($this->set as $occurrenceStart) {
       /** @var \DateTime $occurrence */
-      $occurrenceEnd = (clone $occurrenceStart)->add($this->recurDiff);
+      $occurrenceEnd = clone $occurrenceStart;
+      $occurrenceEnd->add($this->recurDiff);
 
       if ($rangeStart) {
         if ($occurrenceStart < $rangeStart && $occurrenceEnd < $rangeStart) {
@@ -173,7 +174,8 @@ class RlHelper implements DateRecurHelperInterface {
    */
   public function current() {
     $occurrenceStart = $this->set->current();
-    $occurrenceEnd = (clone $occurrenceStart)->add($this->recurDiff);
+    $occurrenceEnd = clone $occurrenceStart;
+    $occurrenceEnd->add($this->recurDiff);
     return new DateRange($occurrenceStart, $occurrenceEnd);
   }
 
