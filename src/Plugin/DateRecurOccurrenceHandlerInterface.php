@@ -4,7 +4,6 @@ namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\date_recur\DateRecurHelperInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 
 /**
@@ -32,6 +31,7 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * Does the handler have a recurring date?
    *
    * @return bool
+   *   Whether the date is recurring.
    */
   public function isRecurring();
 
@@ -39,6 +39,7 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * Get a human-readable representation of the repeat rule.
    *
    * @return string
+   *   A human-readable representation of the repeat rule.
    */
   public function humanReadable();
 
@@ -46,7 +47,9 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * React when a field item is saved.
    *
    * @param bool $update
+   *   Whether the save is new (FALSE) or an update (TRUE).
    * @param int $field_delta
+   *   The field delta.
    */
   public function onSave($update, $field_delta);
 
@@ -55,7 +58,8 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    *
    * This is used to clear obsolete deltas.
    *
-   * @param int $field_delta The highest existing field delta.
+   * @param int $field_delta
+   *   The highest existing field delta.
    */
   public function onSaveMaxDelta($field_delta);
 
@@ -99,16 +103,21 @@ interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface 
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
    *   The field definition.
    * @param array $data
+   *   The views data.
+   *
    * @return array
    *   The views data.
    */
-  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, $data);
+  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, array $data);
 
   /**
    * Provides the definition for 'occurrences' property on date_recur fields.
    *
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_definition
-   * @return DataDefinitionInterface
+   *   The field definition.
+   *
+   * @return \Drupal\Core\TypedData\DataDefinitionInterface
+   *   The data definition.
    */
   public static function occurrencePropertyDefinition(FieldStorageDefinitionInterface $field_definition);
 

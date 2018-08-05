@@ -7,6 +7,7 @@ use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\date_recur\DateRange;
 use Drupal\date_recur\DateRecurHelper;
+use Drupal\date_recur\Rl\RlHelper;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -65,63 +66,6 @@ class DateRecurRruleUnitTest extends UnitTestCase {
     $data[] = [new \DateTimeZone('Australia/Sydney')];
     return $data;
   }
-//
-//  /**
-//   * Tests get parts method.
-//   *
-//   * @covers ::getParts
-//   */
-//  public function testGetParts() {
-//    $start = new \DateTime('11pm 7 June 2005', new \DateTimeZone('America/Los_Angeles'));
-//    $rule = $this->newRule('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1', $start);
-//    $assertActual = [
-//      'FREQ' => 'WEEKLY',
-//      'DTSTART' => $start,
-//      'BYDAY' => 'MO,TU,WE,TH,FR',
-//      'INTERVAL' => 1,
-//    ];
-//    $this->assertArrayEquals($assertActual, $rule->getParts());
-//  }
-
-  /**
-   * Tests common methods.
-   */
-//  public function testProxy() {
-//    $start = new \DateTime('11pm 7 June 2005', new \DateTimeZone('America/Los_Angeles'));
-//    $rule = $this->newRule('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1', $start);
-//    $this->assertTrue($rule->isInfinite());
-////    $this->assertTrue($start == $rule->getStartDate());
-////    $this->assertEquals('Every week on Monday, Tuesday, Wednesday, Thursday and Friday at 23:00', (string) $rule->humanReadable());
-//    $rule = $this->newRule('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1;COUNT=2', $start);
-//    $this->assertFalse($rule->isInfinite());
-//    // @todo many of these proxy should just do asserts on DateRecurDefaultRSet
-//
-////    $tzString = 'Indian/Maldives';
-////    $date = new \DateTime('11pm 7 June 2005', new \DateTimeZone($tzString));
-////    $rule = $this->newRule('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1', $date);
-////    $this->assertEquals($tzString, $rule->getTimezone()->getName());
-//  }
-//
-//  /**
-//   * Tests get weekdays method.
-//   *
-//   * @covers ::getWeekdays
-//   */
-//  public function testGetWeekdays() {
-//    $start = new \DateTime('11pm 7 June 2005', new \DateTimeZone('America/Los_Angeles'));
-//    $rule = $this->newRule('FREQ=WEEKLY;BYDAY=MO,WE,TH,FR,SU', $start);
-//    $actualWeekdays = [
-//      1 => 'MO',
-//      3 => 'WE',
-//      4 => 'TH',
-//      5 => 'FR',
-//      7 => 'SU',
-//    ];
-//    $this->assertEquals($actualWeekdays, $rule->getWeekdays());
-//    // Test ordering and de-duplication.
-//    $rule2 = $this->newRule('FREQ=WEEKLY;BYDAY=MO,FR,WE,WE,WE,SU,WE,TH', $start);
-//    $this->assertEquals($actualWeekdays, $rule2->getWeekdays());
-//  }
 
   /**
    * Tests list.
@@ -193,12 +137,12 @@ class DateRecurRruleUnitTest extends UnitTestCase {
    *
    * @deprecated will remove.
    */
-    public function testHumanReadable() {
-      $start = new \DateTime('11pm 7 June 2005', new \DateTimeZone('America/Los_Angeles'));
-      $rrule = 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1';
-      $rule = \Drupal\date_recur\Rl\RlHelper::createInstance($rrule, $start);
-      $this->assertEquals('Every week on Monday, Tuesday, Wednesday, Thursday and Friday at 23:00', (string) $rule->getRlRuleset()->humanReadable());
-    }
+  public function testHumanReadable() {
+    $start = new \DateTime('11pm 7 June 2005', new \DateTimeZone('America/Los_Angeles'));
+    $rrule = 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1';
+    $rule = RlHelper::createInstance($rrule, $start);
+    $this->assertEquals('Every week on Monday, Tuesday, Wednesday, Thursday and Friday at 23:00', (string) $rule->getRlRuleset()->humanReadable());
+  }
 
   /**
    * Constructs a new DateRecurHelper object.

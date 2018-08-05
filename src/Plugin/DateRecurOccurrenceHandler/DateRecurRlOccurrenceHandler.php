@@ -48,6 +48,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    * Else if item is not actually required, rework args or make static.
    *
    * @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem
+   *   The field item.
    */
   protected $item;
 
