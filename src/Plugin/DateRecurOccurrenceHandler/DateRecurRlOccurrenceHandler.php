@@ -375,7 +375,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
   /**
    * {@inheritdoc}
    */
-  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, $data) {
+  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, array $data) {
     if (empty($data)) {
       return [];
     }
