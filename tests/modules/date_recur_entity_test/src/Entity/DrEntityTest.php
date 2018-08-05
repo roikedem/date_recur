@@ -52,7 +52,7 @@ class DrEntityTest extends EntityTest {
   /**
    * {@inheritdoc}
    */
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['dr'] = BaseFieldDefinition::create('date_recur')
