@@ -245,7 +245,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    * {@inheritdoc}
    */
   public function onDelete() {
-    $table_name = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition());
+    $table_name = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition()->getFieldStorageDefinition());
     $q = $this->database->delete($table_name);
     $q->condition('entity_id', $this->item->getEntity()->id());
     $q->execute();
@@ -255,7 +255,7 @@ class DefaultDateRecurOccurrenceHandler extends PluginBase implements DateRecurO
    * {@inheritdoc}
    */
   public function onDeleteRevision() {
-    $table_name = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition());
+    $table_name = $this->getOccurrenceCacheStorageTableName($this->item->getFieldDefinition()->getFieldStorageDefinition());
     $q = $this->database->delete($table_name);
     $q->condition('entity_id', $this->item->getEntity()->id());
     $q->condition('revision_id', $this->item->getEntity()->getRevisionId());
