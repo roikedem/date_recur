@@ -1,6 +1,6 @@
 name: Date Recur
 type: module
-description: Recurring date field.
+description: Provides a recurring/repeating dates field.
 core: 8.x
 php: 5.6
 package: Field types

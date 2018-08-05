@@ -1,6 +1,8 @@
-# Date Recur (Drupal 8)
+Date Recur
 
-Recurring dates, i.e. date repeat, for Drupal 8.
+Provides a recurring/repeating dates field.
+
+# Features
 
 * Provides a new field type that supports repeating dates via recurrence rules (RRule). For RRule compilation, [php-rrule](https://github.com/rlanvin/php-rrule) is used.
 * Provides an interactive widget featuring a dynamic repeat rule entry form. Makes use of [rrule.js](https://github.com/jkbrzt/rrule/) which is included with the module.
@@ -10,9 +12,20 @@ Recurring dates, i.e. date repeat, for Drupal 8.
 
 Functionality is there and basically works. Misses testing and tests. Several edge cases are not yet covered.
 
-**This is an alpha release. Do not use in production. Until beta, data model changes may occur without an upgrade path.** This means that the field may have to be deleted and recreated.
+# License
 
-_Funding for further development is welcome. Contact me via the [contact form](https://www.drupal.org/user/21850/contact) in case you are interested._
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software 
+Foundation; either version 2 of the License, or (at your option) any later 
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY 
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with 
+this program; if not, write to the Free Software Foundation, Inc., 51 Franklin 
+Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 ## Status and implementation notes
 
