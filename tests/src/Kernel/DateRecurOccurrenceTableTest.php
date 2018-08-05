@@ -104,6 +104,7 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
 
     $entity = EntityTest::create();
     $entity->abc = [
+      // The duration is 8 hours.
       'value' => '2014-06-15T23:00:00',
       'end_value' => '2014-06-16T07:00:00',
       'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
@@ -116,16 +117,19 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
     // interval.
     $day = new \DateTime('2014-06-15T23:00:00');
     $until = new \DateTime('now');
-    $until->add(new \DateInterval($preCreate));
+    $until
+      ->add(new \DateInterval($preCreate))
+      ->modify('+8 hours');
     // See BYDAY above.
     $countDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     $count = 0;
-    while ($day < $until) {
+    do {
+      $end = (clone $day)->modify('+8 hours');
       if (in_array($day->format('D'), $countDays)) {
         $count++;
       }
       $day->modify('+1 day');
-    }
+    } while ($end <= $until);
 
     $tableName = 'date_recur__entity_test__abc';
     $actualCount = $this->container->get('database')
