@@ -1,13 +1,20 @@
 <?php
 
-namespace Drupal\date_recur;
+namespace Drupal\date_recur\Rl;
 
-use Drupal\Core\Datetime\DateHelper;
-use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use RRule\RRule;
+use RRule\RRuleInterface;
 
-class DateRecurDefaultRRule extends RRule {
+/**
+ * Wrapper around rlanvin/RRule.
+ *
+ * @ingroup RLanvinPhpRrule
+ */
+class RlRRule extends RRule implements RRuleInterface {
+
+  use StringTranslationTrait;
 
   protected $timezoneOffset;
 
@@ -44,10 +51,32 @@ class DateRecurDefaultRRule extends RRule {
   public function humanReadable(array $opt = []) {
     $build = [];
 
-    $daynames = DateHelper::weekDays(TRUE);
+    $daynames = [
+      new TranslatableMarkup('Sunday'),
+      new TranslatableMarkup('Monday'),
+      new TranslatableMarkup('Tuesday'),
+      new TranslatableMarkup('Wednesday'),
+      new TranslatableMarkup('Thursday'),
+      new TranslatableMarkup('Friday'),
+      new TranslatableMarkup('Saturday'),
+    ];
+
     array_push($daynames, $daynames[0]);
     unset($daynames[0]);
-    $monthnames = DateHelper::monthNames(TRUE);
+    $monthnames = [
+      1  => new TranslatableMarkup('January'),
+      2  => new TranslatableMarkup('February'),
+      3  => new TranslatableMarkup('March'),
+      4  => new TranslatableMarkup('April'),
+      5  => new TranslatableMarkup('May'),
+      6  => new TranslatableMarkup('June'),
+      7  => new TranslatableMarkup('July'),
+      8  => new TranslatableMarkup('August'),
+      9  => new TranslatableMarkup('September'),
+      10 => new TranslatableMarkup('October'),
+      11 => new TranslatableMarkup('November'),
+      12 => new TranslatableMarkup('December'),
+    ];
 
     $parts = [];
 
@@ -64,7 +93,7 @@ class DateRecurDefaultRRule extends RRule {
         $days[$info[0]][] = $info[1];
       }
       foreach ($days as $day => $pos) {
-        $dayparts[] = $this->t('pos_day', [
+        $dayparts[] = $this->getString('pos_day', [
           '@pos' => $this->_hrFormatPosList($pos),
           '@day' => $daynames[$day],
         ]);
@@ -73,10 +102,10 @@ class DateRecurDefaultRRule extends RRule {
     }
     switch ($this->freq) {
       case self::WEEKLY:
-        $build['rule'] = $this->t('weekly', ['@day' => $parts['day']]);
+        $build['rule'] = $this->getString('weekly', ['@day' => $parts['day']]);
         break;
       case self::MONTHLY:
-        $build['rule'] = $this->t('monthly', ['@posday' => $parts['day']]);
+        $build['rule'] = $this->getString('monthly', ['@posday' => $parts['day']]);
         break;
     }
 
@@ -86,7 +115,7 @@ class DateRecurDefaultRRule extends RRule {
 
 
     if (!empty($build['rule'])) {
-      return $this->t('complete', ['@rule' => $build['rule'], '@time' => $build['time']]);
+      return $this->getString('complete', ['@rule' => $build['rule'], '@time' => $build['time']]);
     }
     else {
       $string = parent::humanReadable($opt);
@@ -95,25 +124,22 @@ class DateRecurDefaultRRule extends RRule {
 
   }
 
-  protected function getString($string) {
+  protected function getString($string, $args) {
     /** @var TranslatableMarkup[] $strings */
     $strings = [
-      'complete' => t('@rule at @time'),
-      'and' => t('@a and @b'),
-      'daily' => t('Every day'),
-      'weekly' => t('Every week on @day'),
-      'monthly' => t('On the @posday each month'),
-      'pos_day' => t('@pos @day'),
-      'last_1' => t('last'),
-      'last_2' => t('second to last'),
+      'complete' => new TranslatableMarkup('@rule at @time'),
+      'and' => new TranslatableMarkup('@a and @b'),
+      'daily' => new TranslatableMarkup('Every day'),
+      'weekly' => new TranslatableMarkup('Every week on @day'),
+      'monthly' => new TranslatableMarkup('On the @posday each month'),
+      'pos_day' => new TranslatableMarkup('@pos @day'),
+      'last_1' => new TranslatableMarkup('last'),
+      'last_2' => new TranslatableMarkup('second to last'),
     ];
 
-    if (!empty($strings[$string])) {
-      return $strings[$string]->getUntranslatedString();
-    }
-    else {
-      return '';
-    }
+    $string = !empty($strings[$string]) ? $strings[$string]->getUntranslatedString() : '';
+
+    return $this->t($string, $args);
   }
 
   protected function _hrFormatPosList($list) {
@@ -164,12 +190,8 @@ class DateRecurDefaultRRule extends RRule {
     else {
       $args['@b'] = array_pop($list);
       $args['@a'] = implode(', ', $list);
-      return $this->t('and', $args);
+      return $this->getString('and', $args);
     }
-  }
-
-  protected function t($string, $args) {
-    return t($this->getString($string), $args);
   }
 
   protected function formatDateForDisplay(\DateTime $date, $format = 'H:i') {

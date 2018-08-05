@@ -1,11 +1,21 @@
 <?php
-namespace Drupal\date_recur;
+
+namespace Drupal\date_recur\Rl;
 
 use RRule\RRule;
+use RRule\RRuleInterface;
 use RRule\RSet;
 
-class DateRecurDefaultRSet extends RSet {
+/**
+ * Wrapper around rlanvin/RSet.
+ *
+ * @ingroup RLanvinPhpRrule
+ */
+class RlRSet extends RSet implements RRuleInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   public function humanReadable() {
     $text = $this->rrules[0]->humanReadable();
     if (!empty($this->rdates)) {
@@ -35,11 +45,15 @@ class DateRecurDefaultRSet extends RSet {
     }
   }
 
+  /**
+   * Get the timezone.
+   *
+   * @return \DateTimeZone
+   *   The timezone of the start date.
+   */
   public function getTimezone() {
-    if (!empty($this->rrules[0]->timezone)) {
-      return $this->rrules[0]->timezone;
-    }
-    return FALSE;
+    $rrule = reset($this->rrules);
+    return $rrule->getStartDate()->getTimezone();
   }
 
   public function addDate($datestr) {
@@ -63,7 +77,6 @@ class DateRecurDefaultRSet extends RSet {
       $dates = [$datestr];
     }
 
-    /** @var \DateTime $dtstart */
     $dtstart = $this->getStartDate();
 
     foreach ($dates as $key => $datestr) {
@@ -90,4 +103,5 @@ class DateRecurDefaultRSet extends RSet {
     }
     return $date->setTimezone(new \DateTimeZone($this->getTimezone()))->format($format);
   }
+
 }

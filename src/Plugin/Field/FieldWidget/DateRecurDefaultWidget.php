@@ -5,10 +5,9 @@ namespace Drupal\date_recur\Plugin\Field\FieldWidget;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\date_recur\DateRecurRRule;
+use Drupal\date_recur\DateRecurHelper;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime_range\Plugin\Field\FieldWidget\DateRangeDefaultWidget;
-use RRule\RRule;
 
 /**
  * Plugin implementation of the 'date_recur_default_widget' widget.
@@ -90,21 +89,16 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
   }
 
   /**
-   * Creates a date object for use as a default value.
-   *
-   * This overrides DateRangeWidgetBase to change timezone override.
-   *
-   * @param \Drupal\Core\Datetime\DrupalDateTime $date
-   * @param string $timezone
-   * @return \Drupal\Core\Datetime\DrupalDateTime
+   * {@inheritdoc}
    */
   protected function createDefaultValue($date, $timezone) {
+    parent::createDefaultValue($date, $timezone);
     // The date was created and verified during field_load(), so it is safe to
     // use without further inspection.
     if ($this->getFieldSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE) {
       // A date without time will pick up the current time, use the default
       // time.
-      datetime_date_default_time($date);
+      $date->setDefaultDateTime();
     }
     $date->setTimezone(new \DateTimeZone($this->getTimezone()));
     return $date;
@@ -124,9 +118,10 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
   public function validateRrule(array &$element, FormStateInterface $form_state, array &$complete_form) {
     if (!empty($element['rrule']['#value']) && $element['value']['#value']['object'] instanceof DrupalDateTime) {
       try {
-        DateRecurRRule::validateRule($element['rrule']['#value'], $element['value']['#value']['object']);
+        DateRecurHelper::create($element['rrule']['#value'], $element['value']['#value']['object']);
       }
-      catch (\InvalidArgumentException $e) {
+      catch (\Exception $e) {
+        // @fixme Exceptions shouldnt be exposed, and are not translatable.
         $form_state->setError($element, $this->t('Invalid repeat rule: %message', ['%message' => $e->getMessage()]));
       }
     }
@@ -144,7 +139,7 @@ class DateRecurDefaultWidget extends DateRangeDefaultWidget {
       else {
         if (!empty($item['value']) && $item['value'] instanceof DrupalDateTime) {
           try {
-            $rule = new DateRecurRRule($item['rrule'], $item['value']);
+            $rule = DateRecurHelper::create($item['rrule'], $item['value']);
             if ($rule->isInfinite()) {
               $item['infinite'] = 1;
             }
