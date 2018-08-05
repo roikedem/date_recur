@@ -9,7 +9,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\date_recur\DateRange;
 use Drupal\date_recur\Plugin\Field\DateRecurOccurrencesComputed;
-use Drupal\date_recur\LegacyDateRecurRRule;
 use Drupal\date_recur\DateRecurUtility;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -168,15 +167,17 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
       $fields[] = 'revision_id';
     }
 
-    $dates = $this->getOccurrencesForCacheStorage();
+    $occurrences = $this->getOccurrencesForCacheStorage();
     $delta = 0;
     $rows = [];
-    foreach ($dates as $date) {
+    foreach ($occurrences as $delta => $occurrence) {
+      $value = $this->massageDateValueForStorage($occurrence->getStart());
+      $endValue = $this->massageDateValueForStorage($occurrence->getEnd());
       $row = [
         'entity_id' => $entity_id,
         'field_delta' => $field_delta,
-        $field_name . '_value' => $date['value'],
-        $field_name . '_end_value' => $date['end_value'],
+        $field_name . '_value' => $value,
+        $field_name . '_end_value' => $endValue,
         'delta' => $delta,
       ];
       if ($entityIsRevisionable) {
@@ -184,7 +185,6 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
         $row['revision_id'] = $entity->getRevisionId();
       }
       $rows[] = $row;
-      $delta++;
     }
     $q = $this->database->insert($tableName)->fields($fields);
     foreach ($rows as $row) {
@@ -193,16 +193,23 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
     $q->execute();
   }
 
+  /**
+   * Get occurrences for storage.
+   *
+   * @return \Drupal\date_recur\DateRange[]
+   *   Date range objects.
+   *
+   * @internal
+   */
   protected function getOccurrencesForCacheStorage() {
-    $storageFormat = $this->item->getDateStorageFormat();
     if (!$this->isRecurring) {
+      // @todo block needs tests.
       if (empty($this->item->end_date)) {
         $this->item->end_date = $this->item->start_date;
       }
-      return [[
-        'value' => LegacyDateRecurRRule::massageDateValueForStorage($this->item->start_date, $storageFormat),
-        'end_value' => LegacyDateRecurRRule::massageDateValueForStorage($this->item->end_date, $storageFormat),
-      ]];
+      return [
+        new DateRange($this->item->start_date, $this->item->end_date),
+      ];
     }
     else {
       if ($this->getHelper()->isInfinite()) {
@@ -212,18 +219,20 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
       else {
         $until = NULL;
       }
-
-      $occurrences = $this->getHelper()->getOccurrences(NULL, $until);
-      return array_map(
-        function (DateRange $occurrence) use ($storageFormat) {
-          return [
-            'value' => LegacyDateRecurRRule::massageDateValueForStorage($occurrence->getStart(), $storageFormat),
-            'end_value' => LegacyDateRecurRRule::massageDateValueForStorage($occurrence->getEnd(), $storageFormat),
-          ];
-        }, $occurrences
-      );
+      return $this->getHelper()->getOccurrences(NULL, $until);
     }
 
+  }
+
+  protected function massageDateValueForStorage(\DateTime $date) {
+    $date->setTimezone(new \DateTimeZone(DateRecurItem::STORAGE_TIMEZONE));
+
+    $storageFormat = $this->item->getDateStorageFormat();
+    if ($storageFormat == DateRecurItem::DATE_STORAGE_FORMAT) {
+      $date->setTime(12, 0, 0);
+    }
+
+    return $date->format($storageFormat);
   }
 
   /**
