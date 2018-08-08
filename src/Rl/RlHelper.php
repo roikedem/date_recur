@@ -136,8 +136,6 @@ class RlHelper implements DateRecurHelperInterface {
 
       yield new DateRange($occurrenceStart, $occurrenceEnd);
     }
-
-    return NULL;
   }
 
   /**
