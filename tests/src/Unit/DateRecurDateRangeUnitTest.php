@@ -22,7 +22,7 @@ class DateRecurDateRangeUnitTest extends UnitTestCase {
       $this->setExpectedException(\ArgumentCountError::class);
     }
     else {
-      $this->setExpectedException(Error::class);
+      $this->setExpectedException(\PHPUnit_Framework_Error::class);
     }
     $this->createDateRange();
   }
