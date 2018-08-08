@@ -4,6 +4,7 @@ namespace Drupal\Tests\date_recur\Unit;
 
 use Drupal\date_recur\DateRange;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Error\Error;
 
 /**
  * Tests date range class.
@@ -17,7 +18,12 @@ class DateRecurDateRangeUnitTest extends UnitTestCase {
    * Test arguments required.
    */
   public function testRequiredConstructorArguments() {
-    // $this->setExpectedException(\ArgumentCountError::class).
+    if (version_compare(phpversion(), "7.0.0", ">=")) {
+      $this->setExpectedException(\ArgumentCountError::class);
+    }
+    else {
+      $this->setExpectedException(Error::class);
+    }
     $this->createDateRange();
   }
 
