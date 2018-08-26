@@ -194,9 +194,11 @@ class DateRecurItem extends DateRangeItem {
    */
   public function preSave() {
     parent::preSave();
-    // @todo test infinite prop is set.
-    $isInfinite = $this->getOccurrenceHandler()->getHelper()->isInfinite();
-    $this->get('infinite')->setValue($isInfinite);
+    if ($this->rrule) {
+      // @todo test infinite prop is set.
+      $isInfinite = $this->getOccurrenceHandler()->getHelper()->isInfinite();
+      $this->get('infinite')->setValue($isInfinite);
+    }
   }
 
   /**
