@@ -4,7 +4,6 @@ namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 
 /**
  * Defines an interface for Date recur occurrence handler plugins.
@@ -12,18 +11,15 @@ use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 interface DateRecurOccurrenceHandlerInterface extends PluginInspectionInterface {
 
   /**
-   * Init the handler with a field item.
-   *
-   * @param \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item
-   *   A field item.
-   */
-  public function init(DateRecurItem $item);
-
-  /**
    * Get the helper.
+   *
+   * Must always return a helper even if field value is non-recurring.
    *
    * @return \Drupal\date_recur\DateRecurHelperInterface
    *   The helper.
+   *
+   * @throws \Exception
+   *   If a helper could not be created due to faulty field value.
    */
   public function getHelper();
 

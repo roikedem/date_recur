@@ -3,11 +3,13 @@
 namespace Drupal\date_recur\Plugin\DateRecurOccurrenceHandler;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\date_recur\DateRange;
+use Drupal\date_recur\DateRecurNonRecurringHelper;
 use Drupal\date_recur\Plugin\Field\DateRecurOccurrencesComputed;
 use Drupal\date_recur\DateRecurUtility;
 use Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface;
@@ -53,13 +55,6 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
   protected $item;
 
   /**
-   * Whether this is a repeating date.
-   *
-   * @var bool
-   */
-  protected $isRecurring;
-
-  /**
    * Construct a new DateRecurRlOccurrenceHandler.
    *
    * @param array $configuration
@@ -73,9 +68,8 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Connection $database) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->item = isset($configuration['field_item']) ? $configuration['field_item'] : NULL;
     $this->database = $database;
-    // Assume no recurrence until declared otherwise in init().
-    $this->isRecurring = FALSE;
   }
 
   /**
@@ -93,15 +87,6 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
   /**
    * {@inheritdoc}
    */
-  public function init(DateRecurItem $item) {
-    // @todo remove init and move to configuration?
-    $this->item = $item;
-    $this->isRecurring = !empty($item->rrule);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getHelper() {
     if (isset($this->helper)) {
       return $this->helper;
@@ -113,12 +98,23 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
 
     // Set the timezone to the same as the source timezone for convenience.
     $tz = new \DateTimeZone($this->item->timezone);
-    $startDate = DateRecurUtility::toPhpDateTime($this->item->start_date);
-    $startDateEnd = DateRecurUtility::toPhpDateTime($this->item->end_date);
-    $startDate->setTimezone($tz);
-    $startDateEnd->setTimezone($tz);
-    $this->isRecurring = TRUE;
-    $this->helper = RlHelper::createInstance($this->item->rrule, $startDate, $startDateEnd);
+
+    $startDate = NULL;
+    $startDateEnd = NULL;
+    if ($this->item->start_date instanceof DrupalDateTime) {
+      $startDate = DateRecurUtility::toPhpDateTime($this->item->start_date);
+      $startDate->setTimezone($tz);
+    }
+    else {
+      throw new \Exception('Start date is required.');
+    }
+    if ($this->item->end_date instanceof DrupalDateTime) {
+      $startDateEnd = DateRecurUtility::toPhpDateTime($this->item->end_date);
+      $startDateEnd->setTimezone($tz);
+    }
+    $this->helper = $this->item->isRecurring() ?
+      RlHelper::createInstance($this->item->rrule, $startDate, $startDateEnd) :
+      DateRecurNonRecurringHelper::createInstance('', $startDate, $startDateEnd);
     return $this->helper;
   }
 
@@ -136,7 +132,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    * {@inheritdoc}
    */
   public function isRecurring() {
-    return $this->isRecurring;
+    return $this->item->isRecurring();
   }
 
   /**
@@ -203,7 +199,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    * @internal
    */
   protected function getOccurrencesForCacheStorage() {
-    if (!$this->isRecurring) {
+    if (!$this->item->isRecurring()) {
       // @todo block needs tests.
       if (empty($this->item->end_date)) {
         $this->item->end_date = $this->item->start_date;

@@ -55,9 +55,11 @@ class DateRecurItem extends DateRangeItem {
       ->setLabel(new TranslatableMarkup('Whether the RRule is an infinite rule. Derived value from RRULE.'))
       ->setRequired(FALSE);
 
-    // @todo inject or something.
-    $properties['occurrences'] = date_recur_create_occurrence_handler($field_definition)
-      ->occurrencePropertyDefinition($field_definition);
+    // Occurrences definition.
+    $pluginName = $field_definition->getSetting('occurrence_handler_plugin');
+    $occurrenceHandlerPluginManager = \Drupal::service('plugin.manager.date_recur_occurrence_handler');
+    $pluginClass = $occurrenceHandlerPluginManager->getPluginClass($pluginName);
+    $properties['occurrences'] = $pluginClass::occurrencePropertyDefinition($field_definition);
 
     return $properties;
   }
@@ -173,8 +175,7 @@ class DateRecurItem extends DateRangeItem {
   public function getOccurrenceHandler() {
     // @todo rename, its long.
     if (!isset($this->occurrenceHandler)) {
-      $this->occurrenceHandler = $this->getPlugin();
-      $this->occurrenceHandler->init($this);
+      $this->occurrenceHandler = $this->getPlugin($this);
     }
     return $this->occurrenceHandler;
   }
@@ -194,11 +195,19 @@ class DateRecurItem extends DateRangeItem {
    */
   public function preSave() {
     parent::preSave();
-    if ($this->rrule) {
-      // @todo test infinite prop is set.
-      $isInfinite = $this->getOccurrenceHandler()->getHelper()->isInfinite();
-      $this->get('infinite')->setValue($isInfinite);
-    }
+    // @todo test infinite prop is set.
+    $isInfinite = $this->getOccurrenceHandler()->getHelper()->isInfinite();
+    $this->get('infinite')->setValue($isInfinite);
+  }
+
+  /**
+   * Determine whether the field value is recurring/repeating.
+   *
+   * @return bool
+   *   Whether the field value is recurring.
+   */
+  public function isRecurring() {
+    return !empty($this->rrule);
   }
 
   /**
@@ -246,13 +255,11 @@ class DateRecurItem extends DateRangeItem {
    *
    * @return \Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerInterface
    *   Todo.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  protected function getPlugin() {
+  protected function getPlugin(DateRecurItem $fieldItem) {
     $pluginName = $this->getSetting('occurrence_handler_plugin');
     return $this->getOccurrenceHandlerPluginManager()
-      ->createInstance($pluginName);
+      ->createInstance($pluginName, ['field_item' => $fieldItem]);
   }
 
 }

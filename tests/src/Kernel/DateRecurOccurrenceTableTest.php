@@ -113,24 +113,22 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
     ];
     $entity->save();
 
-    // Calculate number of weekdays between first occurence and end of precreate
-    // interval.
-    $day = new \DateTime('2014-06-15T23:00:00');
+    // Calculate number of weekdays between first occurrence and end of
+    // pre-create interval.
+    $tz = new \DateTimeZone('Australia/Sydney');
+    $day = new \DateTime('9am 16th June 2014', $tz);
     $until = new \DateTime('now');
     $until
-      ->add(new \DateInterval($preCreate))
-      ->modify('+8 hours');
+      ->add(new \DateInterval($preCreate));
     // See BYDAY above.
     $countDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     $count = 0;
-    do {
-      $end = clone $day;
-      $end->modify('+8 hours');
+    while ($day <= $until) {
       if (in_array($day->format('D'), $countDays)) {
         $count++;
       }
       $day->modify('+1 day');
-    } while ($end <= $until);
+    }
 
     $tableName = 'date_recur__entity_test__abc';
     $actualCount = $this->container->get('database')

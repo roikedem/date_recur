@@ -31,4 +31,12 @@ class DateRecurOccurrenceHandlerManager extends DefaultPluginManager implements 
     $this->setCacheBackend($cache_backend, 'date_recur_date_recur_occurrence_handler_plugins');
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getPluginClass($type) {
+    $plugin_definition = $this->getDefinition($type, FALSE);
+    return $plugin_definition['class'];
+  }
+
 }
