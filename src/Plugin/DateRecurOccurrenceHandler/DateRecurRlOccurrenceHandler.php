@@ -199,26 +199,12 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    * @internal
    */
   protected function getOccurrencesForCacheStorage() {
-    if (!$this->item->isRecurring()) {
-      // @todo block needs tests.
-      if (empty($this->item->end_date)) {
-        $this->item->end_date = $this->item->start_date;
-      }
-      return [
-        new DateRange($this->item->start_date, $this->item->end_date),
-      ];
+    $until = NULL;
+    if ($this->getHelper()->isInfinite()) {
+      $until = (new \DateTime('now'))
+        ->add(new \DateInterval($this->item->getFieldDefinition()->getSetting('precreate')));
     }
-    else {
-      if ($this->getHelper()->isInfinite()) {
-        $until = (new \DateTime('now'))
-          ->add(new \DateInterval($this->item->getFieldDefinition()->getSetting('precreate')));
-      }
-      else {
-        $until = NULL;
-      }
-      return $this->getHelper()->getOccurrences(NULL, $until);
-    }
-
+    return $this->getHelper()->getOccurrences(NULL, $until);
   }
 
   protected function massageDateValueForStorage(\DateTime $date) {
