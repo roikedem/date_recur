@@ -133,19 +133,6 @@ class DateRecurRruleUnitTest extends UnitTestCase {
   }
 
   /**
-   * Tests human readable.
-   *
-   * @deprecated will remove.
-   */
-  public function testHumanReadable() {
-    //@todo fixme.
-    $start = new \DateTime('11pm 7 June 2005', new \DateTimeZone('America/Los_Angeles'));
-    $rrule = 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=1';
-    $rule = RlHelper::createInstance($rrule, $start);
-    $this->assertEquals('Every week on Monday, Tuesday, Wednesday, Thursday and Friday at 23:00', (string) $rule->getRlRuleset()->humanReadable());
-  }
-
-  /**
    * Constructs a new DateRecurHelper object.
    *
    * @param string $rrule

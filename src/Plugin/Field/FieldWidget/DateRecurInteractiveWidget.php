@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\date_recur\Plugin\Field\FieldWidget;
+
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -17,6 +18,10 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class DateRecurInteractiveWidget extends DateRecurDefaultWidget {
+
+  /**
+   * {@inheritdoc}
+   */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
     $id = Html::getUniqueId('date-recur');
@@ -36,6 +41,9 @@ class DateRecurInteractiveWidget extends DateRecurDefaultWidget {
     return $element;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function preRenderFormElement(array $element) {
     $keys = ['value', 'end_value'];
     $weight = 0;
@@ -47,5 +55,5 @@ class DateRecurInteractiveWidget extends DateRecurDefaultWidget {
     }
     return $element;
   }
-}
 
+}

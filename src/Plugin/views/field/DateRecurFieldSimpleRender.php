@@ -12,13 +12,14 @@ use Drupal\views\ResultRow;
  * A handler to provide a field that is completely custom by the administrator.
  *
  * @ingroup views_field_handlers
-
  * @ViewsField("date_recur_field_simple_render")
  */
 class DateRecurFieldSimpleRender extends EntityField {
 
   /**
-   * @var EntityViewDisplay The entity display.
+   * The entity display.
+   *
+   * @var \Drupal\Core\Entity\Entity\EntityViewDisplay
    */
   protected $display;
 
@@ -30,13 +31,6 @@ class DateRecurFieldSimpleRender extends EntityField {
 
     $options['hide_alter_empty'] = ['default' => FALSE];
     return $options;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    parent::buildOptionsForm($form, $form_state);
   }
 
   /**
@@ -95,7 +89,7 @@ class DateRecurFieldSimpleRender extends EntityField {
     if (!empty($this->aliases[$field_name . '_end_value'])) {
       $item->end_value = $values->{$this->aliases[$field_name . '_end_value']};
     }
-    $entity->{$field_name}->filter(function(DateRecurItem $item) {
+    $entity->{$field_name}->filter(function (DateRecurItem $item) {
       if ($item->getDelta() === 0) {
         return TRUE;
       }

@@ -4,7 +4,6 @@ namespace Drupal\Tests\date_recur\Unit;
 
 use Drupal\date_recur\DateRange;
 use Drupal\Tests\UnitTestCase;
-use PHPUnit\Framework\Error\Error;
 
 /**
  * Tests date range class.

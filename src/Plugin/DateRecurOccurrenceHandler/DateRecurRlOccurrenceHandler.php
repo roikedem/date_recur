@@ -50,7 +50,6 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    * Else if item is not actually required, rework args or make static.
    *
    * @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem
-   *   The field item.
    */
   protected $item;
 
@@ -190,7 +189,16 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
     return $this->getHelper()->getOccurrences(NULL, $until);
   }
 
-  protected function massageDateValueForStorage(\DateTime $date) {
+  /**
+   * Massage date value for storage.
+   *
+   * @param \DateTime $date
+   *   A date time object.
+   *
+   * @return string
+   *   The date value for storage.
+   */
+  protected function massageDateValueForStorage(\DateTimeInterface $date) {
     $date->setTimezone(new \DateTimeZone(DateRecurItem::STORAGE_TIMEZONE));
 
     $storageFormat = $this->item->getDateStorageFormat();
@@ -377,7 +385,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
               $field_name . '_value',
               $field_name . '_end_value',
               'delta',
-              'field_delta'
+              'field_delta',
             ];
           }
         }
@@ -389,26 +397,23 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
 
     $custom_handler_name = $field_name . '_simple_render';
     $recur_table[$custom_handler_name] = $recur_table[$field_name];
-    $recur_table[$custom_handler_name]['title'] .= $this->t(' (simple render)');
+    $recur_table[$custom_handler_name]['title'] .= ' (simple render)';
     $recur_table[$custom_handler_name]['field']['id'] = 'date_recur_field_simple_render';
 
     $return_data = [$recur_table_name => $recur_table, $table_alias => $field_table];
     return $return_data;
   }
 
+  /**
+   * Check if views data move column name.
+   */
   protected function viewsDataCheckIfMoveColumnName($fieldName, $columnName, $columnData) {
     $fieldsToMove = [
       $fieldName,
       $fieldName . '_value',
       $fieldName . '_end_value',
     ];
-    if (in_array($columnName, $fieldsToMove)) {
-      return TRUE;
-    }
-    else if (strpos($columnName, $fieldName . '_value') === 0) {
-      return TRUE;
-    }
-    return FALSE;
+    return in_array($columnName, $fieldsToMove) || (strpos($columnName, $fieldName . '_value') === 0);
   }
 
   /**
@@ -416,7 +421,6 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
    */
   public static function occurrencePropertyDefinition(FieldStorageDefinitionInterface $field_definition) {
     $occurrences = ListDataDefinition::create('any')
-//      ->setItemDefinition($occurrence)
       ->setLabel(new TranslatableMarkup('Occurrences'))
       ->setComputed(TRUE)
       ->setClass(DateRecurOccurrencesComputed::class);
