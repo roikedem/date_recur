@@ -67,7 +67,7 @@ class DateRecurInterpreter extends ConfigEntityBase implements DateRecurInterpre
   /**
    * The plugin collection.
    *
-   * @var
+   * @var \Drupal\date_recur\Plugin\DateRecurInterpreterPluginCollection
    */
   protected $pluginCollection;
 
