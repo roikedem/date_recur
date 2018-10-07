@@ -348,18 +348,28 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
   /**
    * {@inheritdoc}
    */
-  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition, array $data) {
+  public function viewsData(FieldStorageDefinitionInterface $fieldDefinition) {
+    $return_data = [];
+
+    $entityType = \Drupal::entityTypeManager()->getDefinition($fieldDefinition->getTargetEntityTypeId());
+    $storage = _views_field_get_entity_type_storage($fieldDefinition);
+    /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $tableMapping */
+    $tableMapping = $storage->getTableMapping();
+
+    $entityViewsTable = $entityType->getDataTable() ?: $entityType->getBaseTable();
+    $fieldName = $fieldDefinition->getName();
+    $fieldTable = $tableMapping->getDedicatedDataTableName($fieldDefinition);
+
+    module_load_include('inc', 'datetime', 'datetime.views');
+    $data = datetime_field_views_data($fieldDefinition);
     if (empty($data)) {
       return [];
     }
-    $field_name = $fieldDefinition->getName();
-    list($table_alias, $revision_table_alias) = array_keys($data);
 
     // @todo: Revision support.
-    unset($data[$revision_table_alias]);
     $recur_table_name = $this->getOccurrenceCacheStorageTableName($fieldDefinition);
 
-    $field_table = $data[$table_alias];
+    $field_table = $data[$fieldTable];
     $recur_table = $field_table;
 
     $join_key = array_keys($field_table['table']['join'])[0];
@@ -373,7 +383,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
       if ($column_name == 'table') {
         continue;
       }
-      if (!$this->viewsDataCheckIfMoveColumnName($field_name, $column_name, $column_data)) {
+      if (!$this->viewsDataCheckIfMoveColumnName($fieldName, $column_name, $column_data)) {
         unset($recur_table[$column_name]);
       }
       else {
@@ -382,25 +392,27 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
           if (!empty($column_data[$key]['table'])) {
             $column_data[$key]['table'] = $recur_table_name;
             $column_data[$key]['additional fields'] = [
-              $field_name . '_value',
-              $field_name . '_end_value',
+              $fieldName . '_value',
+              $fieldName . '_end_value',
               'delta',
               'field_delta',
             ];
           }
         }
-        if ($column_name == $field_name . '_value') {
+        if ($column_name == $fieldName . '_value') {
           $column_data['field']['click sortable'] = TRUE;
         }
       }
     }
 
-    $custom_handler_name = $field_name . '_simple_render';
-    $recur_table[$custom_handler_name] = $recur_table[$field_name];
+    $custom_handler_name = $fieldName . '_simple_render';
+    $recur_table[$custom_handler_name] = $recur_table[$fieldName];
     $recur_table[$custom_handler_name]['title'] .= ' (simple render)';
     $recur_table[$custom_handler_name]['field']['id'] = 'date_recur_field_simple_render';
 
-    $return_data = [$recur_table_name => $recur_table, $table_alias => $field_table];
+    $return_data[$recur_table_name] = $recur_table;
+    $return_data[$fieldTable] = $field_table;
+
     return $return_data;
   }
 

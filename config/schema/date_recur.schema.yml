@@ -69,3 +69,14 @@ date_recur.interpreter.settings.rl:
       type: string
     show_infinite:
       type: boolean
+
+views.filter.date_recur_occurrences_filter:
+  type: views.filter.string
+  label: 'Date recur occurrences filter'
+  mapping:
+    value_granularity:
+      type: string
+    value_min:
+      type: string
+    value_max:
+      type: string
