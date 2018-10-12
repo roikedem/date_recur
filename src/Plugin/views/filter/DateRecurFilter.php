@@ -56,7 +56,7 @@ class DateRecurFilter extends FilterPluginBase {
   protected $largestDate;
 
   /**
-   * The currrent user.
+   * The current user.
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
@@ -76,6 +76,7 @@ class DateRecurFilter extends FilterPluginBase {
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
    *   The entity field manager.
    * @param \Drupal\Core\Session\AccountInterface $currentUser
+   *   The current user.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Connection $database, EntityFieldManagerInterface $entityFieldManager, AccountInterface $currentUser) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
