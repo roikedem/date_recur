@@ -84,6 +84,9 @@ class DateRecurBasicWidget extends DateRangeDefaultWidget {
     $element['first_occurrence'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('First occurrence'),
+      // Needs a weight otherwise children do not show up within single
+      // cardinality widgets.
+      '#weight' => 0,
     ];
     $firstOccurrenceParents = array_merge(
       $element['#field_parents'],

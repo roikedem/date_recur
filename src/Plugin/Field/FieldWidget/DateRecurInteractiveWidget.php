@@ -28,31 +28,7 @@ class DateRecurInteractiveWidget extends DateRecurBasicWidget {
     $element['value']['#attributes']['data-date-recur-start'] = $id;
     $element['rrule']['#attributes']['data-date-recur-rrule'] = $id;
     $element['#attached']['library'][] = 'date_recur/rrule_widget';
-
-    $element['#pre_render'][] = [get_class($this), 'preRenderFormElement'];
-
-    $element['date_group'] = [
-      '#type' => 'container',
-      '#weight' => -10,
-      '#attributes' => [
-        'class' => ['date-recur-container-inline', 'clearfix'],
-      ],
-    ];
-    return $element;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function preRenderFormElement(array $element) {
-    $keys = ['value', 'end_value'];
-    $weight = 0;
-    foreach ($keys as $key) {
-      $element['date_group'][$key] = $element[$key];
-      $element['date_group'][$key]['#weight'] = $weight;
-      $weight += 2;
-      unset($element[$key]);
-    }
+    $element['first_occurrence']['#weight'] = -10;
     return $element;
   }
 
