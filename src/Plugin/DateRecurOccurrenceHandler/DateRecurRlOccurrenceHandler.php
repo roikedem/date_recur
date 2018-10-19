@@ -8,7 +8,6 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\ListDataDefinition;
-use Drupal\date_recur\DateRange;
 use Drupal\date_recur\DateRecurNonRecurringHelper;
 use Drupal\date_recur\Plugin\Field\DateRecurOccurrencesComputed;
 use Drupal\date_recur\DateRecurUtility;
@@ -192,7 +191,7 @@ class DateRecurRlOccurrenceHandler extends PluginBase implements DateRecurOccurr
   /**
    * Massage date value for storage.
    *
-   * @param \DateTime $date
+   * @param \DateTimeInterface $date
    *   A date time object.
    *
    * @return string

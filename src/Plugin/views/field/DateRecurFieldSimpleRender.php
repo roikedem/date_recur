@@ -3,7 +3,6 @@
 namespace Drupal\date_recur\Plugin\views\field;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 use Drupal\views\Plugin\views\field\EntityField;
 use Drupal\views\ResultRow;
