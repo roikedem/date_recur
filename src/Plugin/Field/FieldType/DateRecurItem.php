@@ -16,7 +16,7 @@ use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
  *   id = "date_recur",
  *   label = @Translation("Date Recur"),
  *   description = @Translation("Recurring dates field"),
- *   default_widget = "date_recur_default_widget",
+ *   default_widget = "date_recur_interactive_widget",
  *   default_formatter = "date_recur_default_formatter",
  *   list_class = "\Drupal\date_recur\Plugin\Field\FieldType\DateRecurFieldItemList"
  * )
@@ -195,9 +195,17 @@ class DateRecurItem extends DateRangeItem {
    */
   public function preSave() {
     parent::preSave();
-    // @todo test infinite prop is set.
     $isInfinite = $this->getOccurrenceHandler()->getHelper()->isInfinite();
     $this->get('infinite')->setValue($isInfinite);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setValue($values, $notify = TRUE) {
+    // Cast infinite to boolean on load.
+    $values['infinite'] = !empty($values['infinite']);
+    parent::setValue($values, $notify);
   }
 
   /**

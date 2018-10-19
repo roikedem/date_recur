@@ -17,7 +17,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   }
  * )
  */
-class DateRecurInteractiveWidget extends DateRecurDefaultWidget {
+class DateRecurInteractiveWidget extends DateRecurBasicWidget {
 
   /**
    * {@inheritdoc}

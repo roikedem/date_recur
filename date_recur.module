@@ -13,6 +13,9 @@ use Drupal\field\FieldStorageConfigInterface;
  */
 function date_recur_theme($existing, $type, $theme, $path) {
   return [
+    'date_recur_basic_widget' => [
+      'render element' => 'element',
+    ],
     'date_recur_default_formatter' => [
       'variables' => [
         'date' => NULL,
