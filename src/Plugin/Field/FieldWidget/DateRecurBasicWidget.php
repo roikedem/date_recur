@@ -25,7 +25,7 @@ use Drupal\datetime_range\Plugin\Field\FieldWidget\DateRangeDefaultWidget;
  *   }
  * )
  */
-class DateRecurDefaultWidget extends DateRangeDefaultWidget {
+class DateRecurBasicWidget extends DateRangeDefaultWidget {
 
   /**
    * {@inheritdoc}
