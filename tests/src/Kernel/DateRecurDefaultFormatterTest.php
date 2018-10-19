@@ -218,13 +218,14 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
       'view_mode' => 'full',
     ];
 
-    $now = new \DateTime('now');
-    $formatSample = $now->format($this->dateFormat->getPattern());
-
     /** @var \Drupal\Core\Field\FormatterPluginManager $fieldFormatterManager */
     $fieldFormatterManager = $this->container->get('plugin.manager.field.formatter');
     $instance = $fieldFormatterManager->getInstance($options);
     $summary = $instance->settingsSummary();
+
+    // Generate after summary to prevent random test failures.
+    $now = new \DateTime('now');
+    $formatSample = $now->format($this->dateFormat->getPattern());
 
     $this->assertEquals('Format: ' . $formatSample, $summary[0]);
     $this->assertEquals('Separator: <em class="placeholder">' . $separator . '</em>', $summary[1]);
