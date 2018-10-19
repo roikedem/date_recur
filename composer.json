@@ -12,5 +12,8 @@
   },
   "require": {
     "rlanvin/php-rrule": "1.*"
+  },
+  "suggest": {
+    "drupal/date_recur_interactive": "Provides an interactive recurring date widget."
   }
 }

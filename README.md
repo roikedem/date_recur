@@ -6,8 +6,6 @@ Provides a recurring/repeating dates field.
 
  * Provides a new field type that supports repeating dates via recurrence rules
    (RRule). For RRule compilation, [php-rrule][rlanvin-php-rrule] is used.
- * Provides an interactive widget featuring a dynamic repeat rule entry form. 
-   Makes use of [rrule.js][rrule-js] which is included with the module.
  * Provides a simple formatter that can display the next occurrences and the
    repeat rule in human readable form. First start of human readable display
    with support for Drupal-based localization is there. Falls back to
@@ -62,7 +60,6 @@ Installation without composer is unsupported. If the command fails, make sure yo
 
 ## Usage
 
-Enable the module and add a new field of type "Date recur". You likely want to select the "Date recur interactive widget" as widget. Create content as usual. Build views the same way as you would build regular date views.
+Enable the module and add a new field of type "Date recur". Create content as usual. Build views the same way as you would build regular date views.
 
   [rlanvin-php-rrule]: https://github.com/rlanvin/php-rrule
-  [rrule-js]: https://github.com/jkbrzt/rrule/
