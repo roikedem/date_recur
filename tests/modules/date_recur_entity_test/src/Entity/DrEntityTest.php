@@ -62,7 +62,6 @@ class DrEntityTest extends EntityTest {
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setSettings([
         'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
       ]);
 
     return $fields;

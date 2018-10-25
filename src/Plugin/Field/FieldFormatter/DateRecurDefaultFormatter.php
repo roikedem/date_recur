@@ -353,7 +353,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
       $interpreterId = $this->getSetting('interpreter');
       if ($interpreterId && ($interpreter = $this->dateRecurInterpreterStorage->load($interpreterId))) {
         /** @var \Drupal\date_recur\Entity\DateRecurInterpreterInterface $interpreter */
-        $rules = $item->getOccurrenceHandler()->getHelper()->getRules();
+        $rules = $item->getHelper()->getRules();
         $plugin = $interpreter->getPlugin();
         $cacheability->addCacheableDependency($interpreter);
         $build['#interpretation'] = $plugin->interpret($rules, 'en');
@@ -440,8 +440,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
    */
   protected function getOccurrences(DateRecurItem $item, $maxOccurrences) {
     $start = new \DateTime('now');
-    return $item->getOccurrenceHandler()
-      ->getHelper()
+    return $item->getHelper()
       ->getOccurrences($start, NULL, $maxOccurrences);
   }
 

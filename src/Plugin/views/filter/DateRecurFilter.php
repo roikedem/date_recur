@@ -7,8 +7,8 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\date_recur\DateRecurOccurrences;
 use Drupal\date_recur\DateRecurUtility;
-use Drupal\date_recur\Plugin\DateRecurOccurrenceHandler\DateRecurRlOccurrenceHandler;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\views\Plugin\views\filter\FilterPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -131,7 +131,7 @@ class DateRecurFilter extends FilterPluginBase {
     $dateRecurFieldName = $this->configuration['date recur field name'];
     $entityIdFieldName = $this->configuration['field base entity_id'];
     $fieldDefinitions = $this->entityFieldManager->getFieldStorageDefinitions($this->configuration['entity_type']);
-    $occurrenceTableName = DateRecurRlOccurrenceHandler::getOccurrenceCacheStorageTableName($fieldDefinitions[$dateRecurFieldName]);
+    $occurrenceTableName = DateRecurOccurrences::getOccurrenceCacheStorageTableName($fieldDefinitions[$dateRecurFieldName]);
     $storageTimezone = new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE);
     $storageFormat = DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
 

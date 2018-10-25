@@ -2,25 +2,29 @@
 
 namespace Drupal\date_recur\Plugin\Field\FieldType;
 
+use Drupal\date_recur\Event\DateRecurEvents;
+use Drupal\date_recur\Event\DateRecurValueEvent;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeFieldItemList;
 
 /**
- * Represents a configurable entity date_recur field.
+ * Recurring date field item list.
  */
 class DateRecurFieldItemList extends DateRangeFieldItemList {
+
+  /**
+   * An event dispatcher, primarily for unit testing purposes.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|null
+   */
+  protected $eventDispatcher = NULL;
 
   /**
    * {@inheritdoc}
    */
   public function postSave($update) {
     parent::postSave($update);
-    foreach ($this as $field_delta => $item) {
-      /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
-      $item->getOccurrenceHandler()->onSave($update, $field_delta);
-    }
-    if ($update && isset($field_delta)) {
-      $item->getOccurrenceHandler()->onSaveMaxDelta($field_delta);
-    }
+    $event = new DateRecurValueEvent($this, !$update);
+    $this->getDispatcher()->dispatch(DateRecurEvents::FIELD_VALUE_SAVE, $event);
   }
 
   /**
@@ -28,10 +32,8 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
    */
   public function delete() {
     parent::delete();
-    /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
-    foreach ($this as $field_delta => $item) {
-      $item->getOccurrenceHandler()->onDelete();
-    }
+    $event = new DateRecurValueEvent($this, FALSE);
+    $this->getDispatcher()->dispatch(DateRecurEvents::FIELD_ENTITY_DELETE, $event);
   }
 
   /**
@@ -39,10 +41,31 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
    */
   public function deleteRevision() {
     parent::deleteRevision();
-    /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
-    foreach ($this as $field_delta => $item) {
-      $item->getOccurrenceHandler()->onDeleteRevision();
+    $event = new DateRecurValueEvent($this, FALSE);
+    $this->getDispatcher()->dispatch(DateRecurEvents::FIELD_REVISION_DELETE, $event);
+  }
+
+  /**
+   * Get the event dispatcher.
+   *
+   * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   *   The event dispatcher.
+   */
+  protected function getDispatcher() {
+    if (isset($this->eventDispatcher)) {
+      return $this->eventDispatcher;
     }
+    return \Drupal::service('event_dispatcher');
+  }
+
+  /**
+   * Set the event dispatcher.
+   *
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface|null $eventDispatcher
+   *   The event dispatcher.
+   */
+  public function setEventDispatcher($eventDispatcher) {
+    $this->eventDispatcher = $eventDispatcher;
   }
 
 }

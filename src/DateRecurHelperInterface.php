@@ -19,7 +19,7 @@ interface DateRecurHelperInterface extends \Iterator {
    * @param \DateTimeInterface|null $dtStartEnd
    *   The initial occurrence end date, or NULL to use start date.
    *
-   * @throws \Exception
+   * @throws \Drupal\date_recur\Exception\DateRecurHelperArgumentException
    *   Throws various exceptions if string is invalid.
    */
   public static function createInstance($string, \DateTimeInterface $dtStart, \DateTimeInterface $dtStartEnd = NULL);

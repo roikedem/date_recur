@@ -37,7 +37,6 @@ class DateRecurViewsOccurrenceFilterAttachedTest extends DateRecurViewsOccurrenc
       'type' => 'date_recur',
       'settings' => [
         'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
       ],
     ]);
     $fieldStorage->save();

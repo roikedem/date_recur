@@ -89,7 +89,7 @@ class DateRecurFieldSimpleRender extends EntityField {
       $item->end_value = $values->{$this->aliases[$field_name . '_end_value']};
     }
     $entity->{$field_name}->filter(function (DateRecurItem $item) {
-      if ($item->getDelta() === 0) {
+      if ($item->getName() === 0) {
         return TRUE;
       }
       return FALSE;

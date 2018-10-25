@@ -3,16 +3,8 @@ services:
     class: Drupal\date_recur\Plugin\DateRecurInterpreterManager
     parent: default_plugin_manager
 
-  plugin.manager.date_recur_occurrence_handler:
-    class: Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManager
-    parent: default_plugin_manager
-
-  date_recur.entity_hooks:
-    class: Drupal\date_recur\DateRecurEntityHooks
-    arguments: ['@typed_data_manager', '@plugin.manager.date_recur_occurrence_handler']
-
-  date_recur.entity_schema_subscriber:
-    class: Drupal\date_recur\EventSubscriber\DateRecurEntitySchemaSubscriber
-    arguments: ['@entity_field.manager', '@plugin.manager.date_recur_occurrence_handler']
+  date_recur.occurrences:
+    class: Drupal\date_recur\DateRecurOccurrences
+    arguments: ['@database', '@entity_field.manager', '@typed_data_manager',]
     tags:
     - { name: 'event_subscriber' }

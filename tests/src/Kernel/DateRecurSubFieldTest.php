@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\date_recur\Kernel;
 
-use Drupal\date_recur\Plugin\DateRecurOccurrenceHandler\DateRecurRlOccurrenceHandler;
+use Drupal\date_recur\DateRecurOccurrences;
 use Drupal\date_recur_subfield\Plugin\Field\FieldType\DateRecurSubItem;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
@@ -47,7 +47,6 @@ class DateRecurSubFieldTest extends KernelTestBase {
       'type' => 'date_recur_sub',
       'settings' => [
         'datetime_type' => DateRecurSubItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
       ],
     ]);
     $fieldStorage->save();
@@ -69,7 +68,7 @@ class DateRecurSubFieldTest extends KernelTestBase {
     ];
     $entity->save();
 
-    $tableName = DateRecurRlOccurrenceHandler::getOccurrenceCacheStorageTableName($fieldStorage);
+    $tableName = DateRecurOccurrences::getOccurrenceCacheStorageTableName($fieldStorage);
     $actualExists = $this->container->get('database')
       ->schema()
       ->tableExists($tableName);

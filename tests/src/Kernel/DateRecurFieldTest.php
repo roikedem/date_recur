@@ -38,7 +38,6 @@ class DateRecurFieldTest extends KernelTestBase {
       'type' => 'date_recur',
       'settings' => [
         'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
       ],
     ]);
     $field_storage->save();
@@ -72,8 +71,7 @@ class DateRecurFieldTest extends KernelTestBase {
 
     /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
     $item = $entity->get('foo')[0];
-    $occurrences = $item->getOccurrenceHandler()
-      ->getHelper()
+    $occurrences = $item->getHelper()
       ->getOccurrences(NULL, NULL, 1);
 
     // Christmas island is UTC+7, so start time will be 6am.

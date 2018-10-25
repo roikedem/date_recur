@@ -47,7 +47,6 @@ class DateRecurTest extends KernelTestBase {
       'type' => 'date_recur',
       'settings' => [
         'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
       ],
     ]);
     $field_storage->save();
@@ -72,8 +71,7 @@ class DateRecurTest extends KernelTestBase {
     $this->assertTrue($entity->isNew());
     /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
     $item = $entity->abc[0];
-    $occurrences = $item->getOccurrenceHandler()
-      ->getHelper()
+    $occurrences = $item->getHelper()
       ->getOccurrences(NULL, NULL, 2);
     $this->assertEquals('Mon, 16 Jun 2014 09:00:00 +1000', $occurrences[0]->getStart()->format('r'));
     $this->assertEquals('Mon, 16 Jun 2014 17:00:00 +1000', $occurrences[0]->getEnd()->format('r'));

@@ -4,6 +4,7 @@ namespace Drupal\date_recur\Rl;
 
 use Drupal\date_recur\DateRange;
 use Drupal\date_recur\DateRecurHelperInterface;
+use Drupal\date_recur\Exception\DateRecurHelperArgumentException;
 
 /**
  * Helper for recurring rules implemented with rlanvin/rrule.
@@ -58,13 +59,13 @@ class RlHelper implements DateRecurHelperInterface {
     foreach ($lines as $line) {
       list($part, $partValue) = explode(':', $line, 2);
       if (!isset($parts[$part])) {
-        throw new \InvalidArgumentException("Unsupported line: " . $part);
+        throw new DateRecurHelperArgumentException("Unsupported line: " . $part);
       }
       $parts[$part][] = $partValue;
     }
 
     if (($count = count($parts['RRULE'])) !== 1) {
-      throw new \InvalidArgumentException(sprintf('One RRULE must be provided. %d provided.', $count));
+      throw new DateRecurHelperArgumentException(sprintf('One RRULE must be provided. %d provided.', $count));
     }
 
     $this->set = new RlRSet();

@@ -5,77 +5,22 @@
  * Contains hooks for date_recur module.
  */
 
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\FieldStorageConfigInterface;
+use Drupal\date_recur\DateRecurCachedHooks;
 
 /**
  * Implements hook_theme().
  */
 function date_recur_theme($existing, $type, $theme, $path) {
-  return [
-    'date_recur_basic_widget' => [
-      'render element' => 'element',
-    ],
-    'date_recur_default_formatter' => [
-      'variables' => [
-        'date' => NULL,
-        'interpretation' => NULL,
-        'is_recurring' => FALSE,
-        'occurrences' => [],
-      ],
-    ],
-  ];
+  /** @var \Drupal\date_recur\DateRecurCachedHooks $cachedHooks */
+  $cachedHooks = \Drupal::classResolver(DateRecurCachedHooks::class);
+  return $cachedHooks->hookTheme($existing, $type, $theme, $path);
 }
 
 /**
- * Creates an occurrence handler from a field definition.
- *
- * @deprecated in alpha. Will be removed before beta.
- *
- * @internal
+ * Implements hook_field_info_alter().
  */
-function date_recur_create_occurrence_handler(FieldStorageDefinitionInterface $field) {
-  $pluginName = $field->getSetting('occurrence_handler_plugin');
-  /** @var \Drupal\date_recur\Plugin\DateRecurOccurrenceHandlerManagerInterface $manager */
-  $manager = \Drupal::service('plugin.manager.date_recur_occurrence_handler');
-  return $manager->createInstance($pluginName);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_insert().
- *
- * ENTITY_TYPE: 'field_storage_config'.
- *
- * @see \Drupal\date_recur\DateRecurEntityHooks::fieldStorageConfigInsert
- */
-function date_recur_field_storage_config_insert(FieldStorageConfigInterface $fieldStorage) {
-  /** @var \Drupal\date_recur\DateRecurEntityHooks $entityHooks */
-  $entityHooks = \Drupal::service('date_recur.entity_hooks');
-  $entityHooks->fieldStorageConfigInsert($fieldStorage);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_update().
- *
- * ENTITY_TYPE: 'field_storage_config'.
- *
- * @see \Drupal\date_recur\DateRecurEntityHooks::fieldStorageConfigUpdate
- */
-function date_recur_field_storage_config_update(FieldStorageConfigInterface $fieldStorage) {
-  /** @var \Drupal\date_recur\DateRecurEntityHooks $entityHooks */
-  $entityHooks = \Drupal::service('date_recur.entity_hooks');
-  $entityHooks->fieldStorageConfigUpdate($fieldStorage);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_delete().
- *
- * ENTITY_TYPE: 'field_storage_config'.
- *
- * @see \Drupal\date_recur\DateRecurEntityHooks::fieldStorageConfigDelete
- */
-function date_recur_field_storage_config_delete(FieldStorageConfigInterface $fieldStorage) {
-  /** @var \Drupal\date_recur\DateRecurEntityHooks $entityHooks */
-  $entityHooks = \Drupal::service('date_recur.entity_hooks');
-  $entityHooks->fieldStorageConfigDelete($fieldStorage);
+function date_recur_field_info_alter(&$info) {
+  /** @var \Drupal\date_recur\DateRecurCachedHooks $cachedHooks */
+  $cachedHooks = \Drupal::classResolver(DateRecurCachedHooks::class);
+  $cachedHooks->fieldInfoAlter($info);
 }

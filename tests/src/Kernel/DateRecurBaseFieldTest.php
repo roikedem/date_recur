@@ -62,7 +62,7 @@ class DateRecurBaseFieldTest extends KernelTestBase {
   /**
    * Tests occurrences table is dropped when date recur entity is uninstalled.
    *
-   * @covers \Drupal\date_recur\EventSubscriber\DateRecurEntitySchemaSubscriber::onEntityTypeDelete
+   * @covers \Drupal\date_recur\DateRecurOccurrences::fieldStorageDelete
    */
   public function testOccurrenceTableDrop() {
     $this->container->get('module_installer')

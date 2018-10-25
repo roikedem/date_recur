@@ -2,31 +2,34 @@
 
 namespace Drupal\Tests\date_recur\Kernel;
 
-use Drupal\date_recur\Plugin\DateRecurOccurrenceHandler\DateRecurRlOccurrenceHandler;
-use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\date_recur\DateRecurOccurrences;
 use Drupal\date_recur_entity_test\Entity\DrEntityTest;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests occurrence tables.
  *
- * @todo ensure the word cache isnt used anywhere.
+ * Tests with a base field.
  *
  * @group date_recur
  */
 class DateRecurOccurrenceTableTest extends KernelTestBase {
 
   /**
-   * {@inheritdoc}
+   * Name of field for testing.
+   *
+   * @var string
    */
-  protected function setUp() {
-    parent::setUp();
-    $this->installEntitySchema('entity_test');
-    $this->installEntitySchema('dr_entity_test');
-  }
+  protected $fieldName;
+
+  /**
+   * The field definition for testing.
+   *
+   * @var \Drupal\Core\Field\FieldStorageDefinitionInterface
+   */
+  protected $fieldDefinition;
 
   /**
    * {@inheritdoc}
@@ -42,68 +45,40 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
   ];
 
   /**
-   * Ensure occurrence table is created and deleted for field storage entities.
+   * {@inheritdoc}
    */
-  public function testTableCreateDeleteOnFieldStorageCreate() {
-    $tableName = 'date_recur__entity_test__abc';
+  protected function setUp() {
+    parent::setUp();
+    $this->installEntitySchema('dr_entity_test');
 
-    $actualExists = $this->container->get('database')
-      ->schema()
-      ->tableExists($tableName);
-    $this->assertFalse($actualExists);
+    // This is the name of the base field.
+    $this->fieldName = 'dr';
 
-    $fieldStorage = FieldStorageConfig::create([
-      'entity_type' => 'entity_test',
-      'field_name' => 'abc',
-      'type' => 'date_recur',
-      'settings' => [
-        'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
-      ],
-    ]);
-    $fieldStorage->save();
-
-    $actualExists = $this->container->get('database')
-      ->schema()
-      ->tableExists($tableName);
-    $this->assertTrue($actualExists);
-
-    $fieldStorage->delete();
-
-    $actualExists = $this->container->get('database')
-      ->schema()
-      ->tableExists($tableName);
-    $this->assertFalse($actualExists);
+    /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $efm */
+    $efm = \Drupal::service('entity_field.manager');
+    $definitions = $efm->getFieldStorageDefinitions('dr_entity_test');
+    $this->fieldDefinition = $definitions[$this->fieldName];
   }
 
   /**
    * Ensure occurrence table rows are created.
    */
   public function testTableRows() {
-    $fieldStorage = FieldStorageConfig::create([
-      'entity_type' => 'entity_test',
-      'field_name' => 'abc',
-      'type' => 'date_recur',
-      'settings' => [
-        'datetime_type' => DateRecurItem::DATETIME_TYPE_DATETIME,
-        'occurrence_handler_plugin' => 'date_recur_occurrence_handler',
-      ],
-    ]);
-    $fieldStorage->save();
-
     $preCreate = 'P1Y';
-    $fieldConfig = FieldConfig::create([
-      'field_name' => 'abc',
-      'entity_type' => 'entity_test',
-      'bundle' => 'entity_test',
-      'settings' => [
-        'precreate' => $preCreate,
-      ],
-    ]);
+
+    if ($this->fieldDefinition instanceof BaseFieldDefinition) {
+      // Use BaseFieldOverride entity, similar to NodeType being able to
+      // override some options of base fields.
+      $fieldConfig = $this->fieldDefinition->getConfig('dr_entity_test');
+    }
+    else {
+      $fieldConfig = FieldConfig::loadByName('entity_test', 'entity_test', $this->fieldName);
+    }
+    $fieldConfig->setSetting('precreate', $preCreate);
     $fieldConfig->save();
 
-    $entity = EntityTest::create();
-    $entity->abc = [
+    $entity = $this->createEntity();
+    $entity->{$this->fieldName} = [
       // The duration is 8 hours.
       'value' => '2014-06-15T23:00:00',
       'end_value' => '2014-06-16T07:00:00',
@@ -130,7 +105,7 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
       $day->modify('+1 day');
     }
 
-    $tableName = 'date_recur__entity_test__abc';
+    $tableName = DateRecurOccurrences::getOccurrenceCacheStorageTableName($this->fieldDefinition);
     $actualCount = $this->container->get('database')
       ->select($tableName)
       ->countQuery()
@@ -145,26 +120,21 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
    * Test table name generator.
    */
   public function testGetOccurrenceTableName() {
-    $fieldStorage = FieldStorageConfig::create([
-      'entity_type' => 'entity_test',
-      'field_name' => 'foo',
-      'type' => 'date_recur',
-    ]);
-    $actual = DateRecurRlOccurrenceHandler::getOccurrenceCacheStorageTableName($fieldStorage);
-    $this->assertEquals('date_recur__entity_test__foo', $actual);
-
-    $baseFields = $entityTypeDefinition = $this->container->get('entity_field.manager')
-      ->getBaseFieldDefinitions('dr_entity_test');
-    $actual = DateRecurRlOccurrenceHandler::getOccurrenceCacheStorageTableName($baseFields['dr']);
-    $this->assertEquals('date_recur__dr_entity_test__dr', $actual);
+    $actual = DateRecurOccurrences::getOccurrenceCacheStorageTableName($this->fieldDefinition);
+    $entityTypeId = $this->fieldDefinition->getTargetEntityTypeId();
+    $this->assertEquals('date_recur__' . $entityTypeId . '__' . $this->fieldName, $actual);
   }
 
   /**
    * Tests values of occurrence table.
    */
   public function testOccurrenceTableValues() {
-    $entity = DrEntityTest::create();
-    $entity->dr = [
+    $columnNameValue = $this->fieldName . '_value';
+    $columnNameEndValue = $this->fieldName . '_end_value';
+
+    $entity = $this->createEntity();
+    $entityTypeId = $entity->getEntityTypeId();
+    $entity->{$this->fieldName} = [
       [
         'value' => '2014-06-17T23:00:00',
         'end_value' => '2014-06-18T07:00:00',
@@ -182,14 +152,14 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
     ];
     $entity->save();
 
-    $tableName = 'date_recur__dr_entity_test__dr';
+    $tableName = 'date_recur__' . $entityTypeId . '__' . $this->fieldName;
     $fields = [
       'entity_id',
       'revision_id',
       'field_delta',
       'delta',
-      'dr_value',
-      'dr_end_value',
+      $columnNameValue,
+      $columnNameEndValue,
     ];
     $results = $this->container->get('database')
       ->select($tableName, 'occurences')
@@ -204,56 +174,56 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => 0,
         'delta' => 0,
-        'dr_value' => '2014-06-17T23:00:00',
-        'dr_end_value' => '2014-06-18T07:00:00',
+        $columnNameValue => '2014-06-17T23:00:00',
+        $columnNameEndValue => '2014-06-18T07:00:00',
       ],
       [
         'entity_id' => $entity->id(),
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => 0,
         'delta' => 1,
-        'dr_value' => '2014-06-18T23:00:00',
-        'dr_end_value' => '2014-06-19T07:00:00',
+        $columnNameValue => '2014-06-18T23:00:00',
+        $columnNameEndValue => '2014-06-19T07:00:00',
       ],
       [
         'entity_id' => $entity->id(),
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => 0,
         'delta' => 2,
-        'dr_value' => '2014-06-19T23:00:00',
-        'dr_end_value' => '2014-06-20T07:00:00',
+        $columnNameValue => '2014-06-19T23:00:00',
+        $columnNameEndValue => '2014-06-20T07:00:00',
       ],
       [
         'entity_id' => $entity->id(),
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => 0,
         'delta' => 3,
-        'dr_value' => '2014-06-22T23:00:00',
-        'dr_end_value' => '2014-06-23T07:00:00',
+        $columnNameValue => '2014-06-22T23:00:00',
+        $columnNameEndValue => '2014-06-23T07:00:00',
       ],
       [
         'entity_id' => $entity->id(),
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => 0,
         'delta' => 4,
-        'dr_value' => '2014-06-23T23:00:00',
-        'dr_end_value' => '2014-06-24T07:00:00',
+        $columnNameValue => '2014-06-23T23:00:00',
+        $columnNameEndValue => '2014-06-24T07:00:00',
       ],
       [
         'entity_id' => $entity->id(),
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => '1',
         'delta' => '0',
-        'dr_value' => '2015-07-17T02:00:00',
-        'dr_end_value' => '2015-07-18T10:00:00',
+        $columnNameValue => '2015-07-17T02:00:00',
+        $columnNameEndValue => '2015-07-18T10:00:00',
       ],
       [
         'entity_id' => $entity->id(),
         'revision_id' => $entity->getRevisionId(),
         'field_delta' => '1',
         'delta' => '1',
-        'dr_value' => '2015-07-20T02:00:00',
-        'dr_end_value' => '2015-07-21T10:00:00',
+        $columnNameValue => '2015-07-20T02:00:00',
+        $columnNameEndValue => '2015-07-21T10:00:00',
       ],
     ];
 
@@ -262,6 +232,16 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
       $actualValues = (array) $actualValues;
       $this->assertEquals($expectedValues, $actualValues);
     }
+  }
+
+  /**
+   * Creates an unsaved test entity.
+   *
+   * @return \Drupal\date_recur_entity_test\Entity\DrEntityTest
+   *   A test entity.
+   */
+  protected function createEntity() {
+    return DrEntityTest::create();
   }
 
 }

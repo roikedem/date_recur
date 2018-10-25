@@ -24,7 +24,6 @@ class DateRecurOccurrencesComputed extends ItemList {
    */
   public function getValue($langcode = NULL) {
     return $this->getParent()
-      ->getOccurrenceHandler()
       ->getHelper()
       ->generateOccurrences();
   }
