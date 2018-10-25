@@ -175,8 +175,12 @@ class DateRecurItem extends DateRangeItem {
       return $this->helper;
     }
 
-    // Set the timezone to the same as the source timezone for convenience.
-    $timeZone = new \DateTimeZone($this->timezone);
+    try {
+      $timeZone = new \DateTimeZone($this->timezone);
+    }
+    catch (\Exception $exception) {
+      throw new DateRecurHelperArgumentException('Invalid time zone');
+    }
 
     $startDate = NULL;
     $startDateEnd = NULL;

@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\date_recur\Kernel;
 
+use Drupal\date_recur\Exception\DateRecurHelperArgumentException;
 use Drupal\date_recur_entity_test\Entity\DrEntityTest;
 use Drupal\KernelTests\KernelTestBase;
 
@@ -66,6 +67,40 @@ class DateRecurFieldItemTest extends KernelTestBase {
     ];
     $entity->save();
     $this->assertTrue($entity->dr[0]->infinite === FALSE);
+  }
+
+  /**
+   * Test exception thrown if time zone is missing.
+   */
+  public function testTimeZoneMissing() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      [
+        'value' => '2008-06-16T00:00:00',
+        'end_value' => '2008-06-16T06:00:00',
+        'rrule' => 'FREQ=DAILY;COUNT=100',
+        'timezone' => '',
+      ],
+    ];
+    $this->setExpectedException(DateRecurHelperArgumentException::class, 'Invalid time zone');
+    $entity->dr[0]->getHelper();
+  }
+
+  /**
+   * Test exception thrown if time zone is invalid.
+   */
+  public function testTimeZoneInvalid() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      [
+        'value' => '2008-06-16T00:00:00',
+        'end_value' => '2008-06-16T06:00:00',
+        'rrule' => 'FREQ=DAILY;COUNT=100',
+        'timezone' => 'Mars/Mariner',
+      ],
+    ];
+    $this->setExpectedException(DateRecurHelperArgumentException::class, 'Invalid time zone');
+    $entity->dr[0]->getHelper();
   }
 
 }
