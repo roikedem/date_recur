@@ -132,7 +132,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
       'entity_id' => $entity->id(),
       'field_delta' => $fieldDelta,
     ];
-    if ($entity instanceof RevisionableInterface) {
+    if ($entity->getEntityType()->isRevisionable()) {
       $fields[] = 'revision_id';
       $baseRow['revision_id'] = $entity->getRevisionId();
     }
@@ -184,18 +184,15 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   public function onEntityRevisionDelete(DateRecurValueEvent $event) {
     $list = $event->getField();
     $entity = $list->getEntity();
-    if (!$entity instanceof RevisionableInterface) {
-      return;
-    }
 
     $fieldDefinition = $list->getFieldDefinition();
     $tableName = static::getOccurrenceCacheStorageTableName($fieldDefinition->getFieldStorageDefinition());
-    $delete = $this->database
-      ->delete($tableName);
-    $delete
-      ->condition('entity_id', $list->getEntity()->id())
-      ->condition('revision_id', $entity->getRevisionId())
-      ->execute();
+    $delete = $this->database->delete($tableName);
+    $delete->condition('entity_id', $list->getEntity()->id());
+    if ($entity->getEntityType()->isRevisionable()) {
+      $delete->condition('revision_id', $entity->getRevisionId());
+    }
+    $delete->execute();
   }
 
   /**

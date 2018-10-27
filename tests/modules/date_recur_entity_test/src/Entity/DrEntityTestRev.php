@@ -6,7 +6,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestRev;
 
 /**
@@ -14,7 +13,7 @@ use Drupal\entity_test\Entity\EntityTestRev;
  *
  * @ContentEntityType(
  *   id = "dr_entity_test_rev",
- *   label = @Translation("Date Recur Test entity"),
+ *   label = @Translation("Date Recur Test revisionable entity"),
  *   handlers = {
  *     "list_builder" = "Drupal\entity_test\EntityTestListBuilder",
  *     "view_builder" = "Drupal\entity_test\EntityTestViewBuilder",
@@ -29,7 +28,7 @@ use Drupal\entity_test\Entity\EntityTestRev;
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "views_data" = "Drupal\entity_test\EntityTestViewsData"
  *   },
- *   base_table = "dr_entity_test",
+ *   base_table = "dr_entity_test_rev",
  *   revision_table = "dr_entity_test_rev_revision",
  *   admin_permission = "administer entity_test content",
  *   show_revision_ui = TRUE,
@@ -43,13 +42,13 @@ use Drupal\entity_test\Entity\EntityTestRev;
  *     "langcode" = "langcode",
  *   },
  *   links = {
- *     "canonical" = "/dr_entity_test/{dr_entity_test}",
- *     "add-form" = "/dr_entity_test/add",
- *     "edit-form" = "/dr_entity_test/manage/{dr_entity_test}/edit",
- *     "delete-form" = "/dr_entity_test/delete/entity_test/{dr_entity_test}",
+ *     "canonical" = "/dr_entity_test_rev/{dr_entity_test_rev}",
+ *     "add-form" = "/dr_entity_test_rev/add",
+ *     "edit-form" = "/dr_entity_test_rev/manage/{dr_entity_test_rev}/edit",
+ *     "delete-form" = "/dr_entity_test_rev/delete/entity_test/{dr_entity_test_rev}",
  *     "revision" = "/dr_entity_test_rev/{dr_entity_test_rev}/revision/{dr_entity_test_rev_revision}/view",
  *   },
- *   field_ui_base_route = "entity.dr_entity_test.admin_form",
+ *   field_ui_base_route = "entity.dr_entity_test_rev.admin_form",
  * )
  */
 class DrEntityTestRev extends EntityTestRev {
