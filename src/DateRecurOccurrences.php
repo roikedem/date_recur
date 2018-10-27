@@ -44,6 +44,13 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   protected $database;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * The entity field manager.
    *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
@@ -69,6 +76,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    */
   public function __construct(Connection $database, EntityFieldManagerInterface $entityFieldManager, TypedDataManagerInterface $typedDataManager) {
     $this->database = $database;
+    $this->entityTypeManager = \Drupal::entityTypeManager();
     $this->entityFieldManager = $entityFieldManager;
     $this->typedDataManager = $typedDataManager;
   }
@@ -278,47 +286,70 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    *   The field definition.
    */
   protected function createOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition) {
-    $fields['entity_id'] = [
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-      'description' => "Entity id",
-    ];
+    $entityTypeId = $fieldDefinition->getTargetEntityTypeId();
+    $entityType = $this->entityTypeManager->getDefinition($entityTypeId);
+    $fieldName = $fieldDefinition->getName();
+    $entityFieldDefinitions = $this->entityFieldManager->getFieldStorageDefinitions($entityTypeId);
 
-    if ($fieldDefinition->isRevisionable()) {
-      $fields['revision_id'] = [
+    // Logic taken from field tables: see \Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema::getDedicatedTableSchema.
+    $idDefinition = $entityFieldDefinitions[$entityType->getKey('id')];
+    if ($idDefinition->getType() === 'integer') {
+      $fields['entity_id'] = [
         'type' => 'int',
-        'not null' => FALSE,
-        'default' => NULL,
-        'description' => "Entity revision id",
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The entity id this data is attached to',
       ];
+    }
+    else {
+      $fields['entity_id'] = [
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'description' => 'The entity id this data is attached to',
+      ];
+    }
+
+    if ($entityType->isRevisionable()) {
+      $revisionDefinition = $entityFieldDefinitions[$entityType->getKey('revision')];
+      if ($revisionDefinition->getType() === 'integer') {
+        $fields['revision_id'] = [
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'The entity revision id this data is attached to',
+        ];
+      }
+      else {
+        $fields['revision_id'] = [
+          'type' => 'varchar_ascii',
+          'length' => 128,
+          'not null' => TRUE,
+          'description' => 'The entity revision id this data is attached to',
+        ];
+      }
     }
 
     $fields['field_delta'] = [
       'type' => 'int',
+      'unsigned' => TRUE,
       'not null' => TRUE,
-      'default' => 0,
+      'description' => 'The sequence number for this data item, used for multi-value fields',
     ];
+
     $fields['delta'] = [
       'type' => 'int',
+      'unsigned' => TRUE,
       'not null' => TRUE,
-      'default' => 0,
+      'description' => 'The sequence number in generated occurrences for the RRULE',
     ];
 
-    $fieldName = $fieldDefinition->getName();
-    $fields[$fieldName . '_value'] = [
-      'description' => 'Start date',
-      'type' => 'varchar',
-      'length' => 20,
-    ];
-    $fields[$fieldName . '_end_value'] = [
-      'description' => 'End date',
-      'type' => 'varchar',
-      'length' => 20,
-    ];
+    $fieldSchema = $fieldDefinition->getSchema();
+    $fields[$fieldName . '_value'] = $fieldSchema['columns']['value'];
+    $fields[$fieldName . '_end_value'] = $fieldSchema['columns']['end_value'];
 
     $schema = [
-      'description' => sprintf('Date recur cache for %s.%s', $fieldDefinition->getTargetEntityTypeId(), $fieldName),
+      'description' => sprintf('Occurrences cache for %s.%s', $fieldDefinition->getTargetEntityTypeId(), $fieldName),
       'fields' => $fields,
       'indexes' => [
         'value' => ['entity_id', $fieldName . '_value'],

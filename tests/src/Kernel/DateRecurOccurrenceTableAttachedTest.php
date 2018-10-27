@@ -3,12 +3,12 @@
 namespace Drupal\Tests\date_recur\Kernel;
 
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
-use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
- * Tests occurrence tables.
+ * Tests occurrence tables values.
  *
  * Tests with an attached field.
  *
@@ -21,10 +21,12 @@ class DateRecurOccurrenceTableAttachedTest extends DateRecurOccurrenceTableTest 
    */
   protected function setUp() {
     parent::setUp();
-    $this->installEntitySchema('entity_test');
+
+    $this->testEntityType = 'entity_test_rev';
+    $this->installEntitySchema($this->testEntityType);
 
     $fieldStorage = FieldStorageConfig::create([
-      'entity_type' => 'entity_test',
+      'entity_type' => $this->testEntityType,
       'field_name' => 'abc',
       'type' => 'date_recur',
       'settings' => [
@@ -38,8 +40,8 @@ class DateRecurOccurrenceTableAttachedTest extends DateRecurOccurrenceTableTest 
 
     $fieldConfig = FieldConfig::create([
       'field_name' => 'abc',
-      'entity_type' => 'entity_test',
-      'bundle' => 'entity_test',
+      'entity_type' => $this->testEntityType,
+      'bundle' => $this->testEntityType,
       'settings' => [],
     ]);
     $fieldConfig->save();
@@ -49,7 +51,7 @@ class DateRecurOccurrenceTableAttachedTest extends DateRecurOccurrenceTableTest 
    * Ensure occurrence table is created and deleted for field storage entities.
    */
   public function testTableCreateDeleteOnFieldStorageCreate() {
-    $tableName = 'date_recur__entity_test__abc123';
+    $tableName = 'date_recur__entity_test_rev__abc123';
 
     $actualExists = $this->container->get('database')
       ->schema()
@@ -57,7 +59,7 @@ class DateRecurOccurrenceTableAttachedTest extends DateRecurOccurrenceTableTest 
     $this->assertFalse($actualExists);
 
     $fieldStorage = FieldStorageConfig::create([
-      'entity_type' => 'entity_test',
+      'entity_type' => $this->testEntityType,
       'field_name' => 'abc123',
       'type' => 'date_recur',
       'settings' => [
@@ -82,11 +84,11 @@ class DateRecurOccurrenceTableAttachedTest extends DateRecurOccurrenceTableTest 
   /**
    * {@inheritdoc}
    *
-   * @return \Drupal\entity_test\Entity\EntityTest
+   * @return \Drupal\entity_test\Entity\EntityTestRev
    *   A test entity.
    */
   protected function createEntity() {
-    return EntityTest::create();
+    return EntityTestRev::create();
   }
 
 }

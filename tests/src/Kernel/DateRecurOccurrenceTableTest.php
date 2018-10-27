@@ -4,18 +4,25 @@ namespace Drupal\Tests\date_recur\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\date_recur\DateRecurOccurrences;
-use Drupal\date_recur_entity_test\Entity\DrEntityTest;
+use Drupal\date_recur_entity_test\Entity\DrEntityTestRev;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Tests occurrence tables.
+ * Tests occurrence tables values.
  *
  * Tests with a base field.
  *
  * @group date_recur
  */
 class DateRecurOccurrenceTableTest extends KernelTestBase {
+
+  /**
+   * Test entity type.
+   *
+   * @var string
+   */
+  protected $testEntityType;
 
   /**
    * Name of field for testing.
@@ -49,14 +56,16 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->installEntitySchema('dr_entity_test');
+
+    $this->testEntityType = 'dr_entity_test_rev';
+    $this->installEntitySchema($this->testEntityType);
 
     // This is the name of the base field.
     $this->fieldName = 'dr';
 
     /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $efm */
     $efm = \Drupal::service('entity_field.manager');
-    $definitions = $efm->getFieldStorageDefinitions('dr_entity_test');
+    $definitions = $efm->getFieldStorageDefinitions($this->testEntityType);
     $this->fieldDefinition = $definitions[$this->fieldName];
   }
 
@@ -69,10 +78,10 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
     if ($this->fieldDefinition instanceof BaseFieldDefinition) {
       // Use BaseFieldOverride entity, similar to NodeType being able to
       // override some options of base fields.
-      $fieldConfig = $this->fieldDefinition->getConfig('dr_entity_test');
+      $fieldConfig = $this->fieldDefinition->getConfig($this->testEntityType);
     }
     else {
-      $fieldConfig = FieldConfig::loadByName('entity_test', 'entity_test', $this->fieldName);
+      $fieldConfig = FieldConfig::loadByName($this->testEntityType, $this->testEntityType, $this->fieldName);
     }
     $fieldConfig->setSetting('precreate', $preCreate);
     $fieldConfig->save();
@@ -237,11 +246,11 @@ class DateRecurOccurrenceTableTest extends KernelTestBase {
   /**
    * Creates an unsaved test entity.
    *
-   * @return \Drupal\date_recur_entity_test\Entity\DrEntityTest
+   * @return \Drupal\date_recur_entity_test\Entity\DrEntityTestRev
    *   A test entity.
    */
   protected function createEntity() {
-    return DrEntityTest::create();
+    return DrEntityTestRev::create();
   }
 
 }
