@@ -9,6 +9,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -145,6 +147,33 @@ class DateRecurViewsHooks implements ContainerInjectionInterface {
           // Default label for relationship in the UI.
           'label' => $this->t('Occurrences of @field_name', $tArgs),
         ];
+
+        $dateField = [
+          'id' => 'date_recur_date',
+          'source date format' => $this->getFieldDateFormat($field),
+          'source time zone' => DateTimeItemInterface::STORAGE_TIMEZONE,
+        ];
+        $data[$occurrenceTableName][$fieldName . '_value']['field'] = $dateField;
+        $data[$occurrenceTableName][$fieldName . '_end_value']['field'] = $dateField;
+
+        // Attached fields get automatic functionality provided by
+        // hook_field_views_data(). Add features here for base fields.
+        if ($field instanceof BaseFieldDefinition) {
+          $data[$occurrenceTableName]['table']['group'] = $this->t('Occurrences for @entity_type @field_name', [
+            '@entity_type' => $entityType->getLabel(),
+            '@field_name' => $fieldLabel,
+          ]);
+
+          $startField = $fieldName . '_value';
+          $endField = $fieldName . '_end_value';
+          $data[$occurrenceTableName][$startField]['title'] = $this->t('Occurrence start date');
+          $data[$occurrenceTableName][$endField]['title'] = $this->t('Occurrence end date');
+          // Sort.
+          // datetime_range_field_views_data() uses 'datetime', which relies
+          // on entity things.
+          $data[$occurrenceTableName][$startField]['sort']['id'] = 'date';
+          $data[$occurrenceTableName][$endField]['sort']['id'] = 'date';
+        }
       }
     }
 
@@ -378,6 +407,21 @@ class DateRecurViewsHooks implements ContainerInjectionInterface {
    */
   protected function getViewsPluginTypes() {
     return Views::getPluginTypes();
+  }
+
+  /**
+   * Get date format of field storage.
+   *
+   * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
+   *   A field definition.
+   *
+   * @return string
+   *   A date format.
+   */
+  protected function getFieldDateFormat(FieldStorageDefinitionInterface $fieldDefinition) {
+    return $fieldDefinition->getSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE
+      ? DateTimeItemInterface::DATE_STORAGE_FORMAT
+      : DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
   }
 
 }
