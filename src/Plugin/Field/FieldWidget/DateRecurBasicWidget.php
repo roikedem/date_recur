@@ -105,7 +105,7 @@ class DateRecurBasicWidget extends DateRangeDefaultWidget {
       ? $items[$delta]->timezone
       : $this->getSetting('timezone_override') ?: $this->getCurrentUserTimeZone();
 
-    $zones = system_time_zones(NULL, TRUE);
+    $zones = $this->getTimeZoneOptions();
     $element['timezone'] = [
       '#type' => 'select',
       '#title' => t('Time zone'),
@@ -232,7 +232,7 @@ class DateRecurBasicWidget extends DateRangeDefaultWidget {
    *   human readable and translatable labels.
    */
   protected function getTimeZoneOptions() {
-    return \system_time_zones(TRUE);
+    return \system_time_zones(TRUE, TRUE);
   }
 
   /**
