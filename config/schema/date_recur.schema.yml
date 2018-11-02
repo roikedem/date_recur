@@ -14,9 +14,9 @@ field.field_settings.date_recur:
       type: string
       label: 'Precreate interval'
 
-field.formatter.settings.date_recur_default_formatter:
+field.formatter.settings.date_recur_basic_formatter:
   type: field.formatter.settings.daterange_default
-  label: 'Default date recur formatter.'
+  label: 'Basic date recur formatter.'
   mapping:
     show_next:
       type: integer

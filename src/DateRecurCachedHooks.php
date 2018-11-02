@@ -38,7 +38,7 @@ class DateRecurCachedHooks {
       'date_recur_basic_widget' => [
         'render element' => 'element',
       ],
-      'date_recur_default_formatter' => [
+      'date_recur_basic_formatter' => [
         'variables' => [
           'date' => NULL,
           'interpretation' => NULL,

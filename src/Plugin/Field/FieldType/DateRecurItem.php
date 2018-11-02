@@ -23,7 +23,7 @@ use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
  *   label = @Translation("Date Recur"),
  *   description = @Translation("Recurring dates field"),
  *   default_widget = "date_recur_basic_widget",
- *   default_formatter = "date_recur_default_formatter",
+ *   default_formatter = "date_recur_basic_formatter",
  *   list_class = "\Drupal\date_recur\Plugin\Field\FieldType\DateRecurFieldItemList"
  * )
  */

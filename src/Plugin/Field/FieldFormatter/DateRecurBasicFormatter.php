@@ -18,17 +18,17 @@ use Drupal\datetime_range\Plugin\Field\FieldFormatter\DateRangeDefaultFormatter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Plugin implementation of the 'date_recur_default_formatter' formatter.
+ * Basic recurring date formatter.
  *
  * @FieldFormatter(
- *   id = "date_recur_default_formatter",
- *   label = @Translation("Date recur default formatter"),
+ *   id = "date_recur_basic_formatter",
+ *   label = @Translation("Date recur basic formatter"),
  *   field_types = {
  *     "date_recur"
  *   }
  * )
  */
-class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
+class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
 
   use DependencyTrait;
 
@@ -51,7 +51,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
   protected $formatType;
 
   /**
-   * Constructs a new DateRecurDefaultFormatter.
+   * Constructs a new DateRecurBasicFormatter.
    *
    * @param string $plugin_id
    *   The plugin_id for the formatter.
@@ -337,7 +337,7 @@ class DateRecurDefaultFormatter extends DateRangeDefaultFormatter {
   protected function viewItem(DateRecurItem $item, $maxOccurrences) {
     $cacheability = new CacheableMetadata();
     $build = [
-      '#theme' => 'date_recur_default_formatter',
+      '#theme' => 'date_recur_basic_formatter',
       '#is_recurring' => $item->isRecurring(),
     ];
 

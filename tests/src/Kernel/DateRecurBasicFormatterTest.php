@@ -11,9 +11,9 @@ use Drupal\KernelTests\KernelTestBase;
  * Tests date recur formatter.
  *
  * @group date_recur
- * @coversDefaultClass \Drupal\date_recur\Plugin\Field\FieldFormatter\DateRecurDefaultFormatter
+ * @coversDefaultClass \Drupal\date_recur\Plugin\Field\FieldFormatter\DateRecurBasicFormatter
  */
-class DateRecurDefaultFormatterTest extends KernelTestBase {
+class DateRecurBasicFormatterTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -202,7 +202,7 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
     $options = [
       'configuration' => [
         'label' => 'above',
-        'type' => 'date_recur_default_formatter',
+        'type' => 'date_recur_basic_formatter',
         'settings' => [
           'format_type' => $dateFormatId,
           'occurrence_format_type' => $dateFormatId,
@@ -244,7 +244,7 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
     $options = [
       'configuration' => [
         'label' => 'above',
-        'type' => 'date_recur_default_formatter',
+        'type' => 'date_recur_basic_formatter',
         'settings' => [
           'format_type' => $dateFormatId,
           'occurrence_format_type' => $dateFormatId,
@@ -280,7 +280,7 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
     $options = [
       'configuration' => [
         'label' => 'above',
-        'type' => 'date_recur_default_formatter',
+        'type' => 'date_recur_basic_formatter',
         'settings' => [
           'format_type' => $dateFormatId,
           'occurrence_format_type' => $dateFormatId,
@@ -328,7 +328,7 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
     $options = [
       'configuration' => [
         'label' => 'above',
-        'type' => 'date_recur_default_formatter',
+        'type' => 'date_recur_basic_formatter',
         'settings' => [
           'format_type' => $dateFormatId,
           'occurrence_format_type' => $dateFormatId,
@@ -382,7 +382,7 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
     $options = [
       'configuration' => [
         'label' => 'above',
-        'type' => 'date_recur_default_formatter',
+        'type' => 'date_recur_basic_formatter',
         'settings' => [
           'format_type' => $dateFormat1->id(),
           'occurrence_format_type' => $dateFormat2->id(),
@@ -418,13 +418,13 @@ class DateRecurDefaultFormatterTest extends KernelTestBase {
    * @param \Drupal\date_recur_entity_test\Entity\DrEntityTest $entity
    *   A date recur test entity.
    * @param array $settings
-   *   Settings for date recur default formatter.
+   *   Settings for date recur basic formatter.
    */
   protected function renderFormatterSettings(DrEntityTest $entity, array $settings) {
     /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurFieldItemList $field */
     $field = $entity->dr;
     $build = $field->view([
-      'type' => 'date_recur_default_formatter',
+      'type' => 'date_recur_basic_formatter',
       'settings' => $settings,
     ]);
     /** @var \Drupal\Core\Render\RendererInterface $renderer */

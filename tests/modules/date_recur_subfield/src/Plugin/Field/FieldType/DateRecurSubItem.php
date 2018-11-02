@@ -14,8 +14,8 @@ use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
  *   id = "date_recur_sub",
  *   label = @Translation("Date Recur Sub"),
  *   description = @Translation("Field subclassing date recur."),
- *   default_widget = "date_recur_default_widget",
- *   default_formatter = "date_recur_default_formatter",
+ *   default_widget = "date_recur_basic_widget",
+ *   default_formatter = "date_recur_basic_formatter",
  *   list_class = "\Drupal\date_recur\Plugin\Field\FieldType\DateRecurFieldItemList"
  * )
  */
