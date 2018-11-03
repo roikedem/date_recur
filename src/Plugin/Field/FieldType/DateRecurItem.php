@@ -70,8 +70,7 @@ class DateRecurItem extends DateRangeItem {
 
     $schema['columns']['rrule'] = [
       'description' => 'The repeat rule.',
-      'type' => 'varchar',
-      'length' => 255,
+      'type' => 'text',
     ];
     $schema['columns']['timezone'] = [
       'description' => 'The timezone.',
