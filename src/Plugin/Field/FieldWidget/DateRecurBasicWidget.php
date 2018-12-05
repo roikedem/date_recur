@@ -269,7 +269,7 @@ class DateRecurBasicWidget extends DateRangeDefaultWidget {
     $startDateEnd = $item->end_date;
     $timeZone = isset($item->timezone) ? new \DateTimeZone($item->timezone) : NULL;
     if ($timeZone) {
-      $element['value']['#date_timezone'] = $element['end_value']['#date_timezone'] = $timeZone;
+      $element['value']['#date_timezone'] = $element['end_value']['#date_timezone'] = $timeZone->getName();
       if ($startDate) {
         $startDate->setTimezone($timeZone);
         $element['value']['#default_value'] = $this->createDefaultValue($startDate, $timeZone->getName());
