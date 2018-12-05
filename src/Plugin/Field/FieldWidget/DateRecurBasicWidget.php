@@ -95,7 +95,8 @@ class DateRecurBasicWidget extends DateRangeDefaultWidget {
     $element['value']['#title'] = $this->t('Start');
     $element['end_value']['#title'] = $this->t('End');
     $element['end_value']['#description'] = $this->t('Leave end empty to copy start date; the occurrence will therefore not have any duration.');
-    // The end date is never required.
+    // The end date is never required. Start date is copied over if end date is
+    // empty.
     $element['end_value']['#required'] = FALSE;
     $element['value']['#group'] = $element['end_value']['#group'] = implode('][', $firstOccurrenceParents);
 
