@@ -47,18 +47,18 @@ class DateRecurTest extends KernelTestBase {
     $entity = DrEntityTestSingleCardinality::create();
     $entity->dr = [
       [
-      'value' => '2014-06-15T23:00:00',
-      'end_value' => '2014-06-16T07:00:00',
-      'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-      'infinite' => '1',
-      'timezone' => 'Australia/Sydney',
+        'value' => '2014-06-15T23:00:00',
+        'end_value' => '2014-06-16T07:00:00',
+        'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+        'infinite' => '1',
+        'timezone' => 'Australia/Sydney',
       ],
       [
-      'value' => '2013-06-15T23:00:00',
-      'end_value' => '2013-06-16T07:00:00',
-      'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-      'infinite' => '1',
-      'timezone' => 'Australia/Sydney',
+        'value' => '2013-06-15T23:00:00',
+        'end_value' => '2013-06-16T07:00:00',
+        'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+        'infinite' => '1',
+        'timezone' => 'Australia/Sydney',
       ],
     ];
 

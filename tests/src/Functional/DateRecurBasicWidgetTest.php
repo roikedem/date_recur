@@ -268,7 +268,6 @@ class DateRecurBasicWidgetTest extends BrowserTestBase {
     ];
     FieldConfig::create($field)->save();
 
-
     $display = entity_get_form_display('entity_test', 'entity_test', 'default');
     $component = $display->getComponent('foo');
     $component['region'] = 'content';
