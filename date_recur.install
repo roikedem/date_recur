@@ -5,10 +5,12 @@
  * Install, update and uninstall functions for date_recur module.
  */
 
+use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 use Drupal\Core\Utility\UpdateException;
+use Drupal\date_recur\Entity\DateRecurInterpreter;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
@@ -254,5 +256,24 @@ function date_recur_update_8204(&$sandbox) {
     }
 
     $display->save();
+  }
+}
+
+/**
+ * Add a default interpreter.
+ */
+function date_recur_update_8205(&$sandbox) {
+  if (DateFormat::load('long') && !DateRecurInterpreter::load('default_interpreter')) {
+    $interpreter = DateRecurInterpreter::create([
+      'id' => 'default_interpreter',
+      'plugin' => 'rl',
+      'settings' => [
+        'show_start_date' => TRUE,
+        'show_until' => TRUE,
+        'date_format' => 'long',
+        'show_infinite' => TRUE,
+      ],
+    ]);
+    $interpreter->save();
   }
 }
