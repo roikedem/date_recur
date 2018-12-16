@@ -91,25 +91,15 @@ class DateRecurUtility {
     assert(in_array($end, ['start', 'end']));
     $start = $end === 'start';
 
-    $granularityFormats = [
-      'year' => 'Y',
-      'month' => 'Y-m',
-      'day' => 'Y-m-d',
-      'second' => 'Y-m-d\TH:i:s',
-    ];
-    $format = $granularityFormats[$granularity];
+    $granularityFormatsMap = DateRecurGranularityMap::GRANULARITY_DATE_FORMATS;
+    $format = $granularityFormatsMap[$granularity];
 
     // PHP fills missing granularity parts with current datetime. Use this
     // object to reconstruct the date at the beginning of the granularity
     // period.
     $knownDate = \DateTime::createFromFormat($format, $value, $timezone);
 
-    $granularityComparison = [
-      'year' => 1,
-      'month' => 2,
-      'day' => 3,
-      'second' => 6,
-    ];
+    $granularityComparison = DateRecurGranularityMap::GRANULARITY;
     $granularityInt = $granularityComparison[$granularity];
 
     $dateParts = [
