@@ -105,12 +105,12 @@ class DateRecurUtility {
     $knownDate = \DateTime::createFromFormat($format, $value, $timezone);
 
     $granularityComparison = [
-      1 => 'year',
-      2 => 'month',
-      3 => 'day',
-      6 => 'second',
+      'year' => 1,
+      'month' => 2,
+      'day' => 3,
+      'second' => 6,
     ];
-    $granularityInt = array_search($granularity, $granularityComparison);
+    $granularityInt = $granularityComparison[$granularity];
 
     $dateParts = [
       'year' => (int) $knownDate->format('Y'),
