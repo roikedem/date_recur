@@ -128,11 +128,16 @@ class DateRecurFieldItemTest extends KernelTestBase {
 
     /** @var \Symfony\Component\Validator\ConstraintViolationListInterface $violations */
     $violations = $entity->dr->validate();
-    $this->assertEquals(1, $violations->count());
+    $this->assertGreaterThanOrEqual(1, $violations->count());
 
-    $violation = $violations->get(0);
-    $message = (string) $violation->getMessage();
-    $this->assertEquals('This value should be of the correct primitive type.', $message);
+    $expectedMessage = 'This value should be of the correct primitive type.';
+    $list = [];
+    foreach ($violations as $violation) {
+      if ((string) $violation->getMessage() === $expectedMessage) {
+        $list[] = $violation;
+      }
+    }
+    $this->assertCount(1, $list);
   }
 
   /**

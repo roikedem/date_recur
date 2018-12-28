@@ -2,6 +2,7 @@
 
 namespace Drupal\date_recur\Plugin\Field\FieldType;
 
+use Drupal\date_recur\DateRecurPartGrid;
 use Drupal\date_recur\Event\DateRecurEvents;
 use Drupal\date_recur\Event\DateRecurValueEvent;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -109,6 +110,17 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
    */
   public function setEventDispatcher($eventDispatcher) {
     $this->eventDispatcher = $eventDispatcher;
+  }
+
+  /**
+   * Get the parts grid for this field.
+   *
+   * @return \Drupal\date_recur\DateRecurPartGrid
+   *   The parts grid for this field.
+   */
+  public function getPartGrid() {
+    $partSettings = $this->getFieldDefinition()->getSetting('parts');
+    return DateRecurPartGrid::configSettingsToGrid($partSettings);
   }
 
 }

@@ -105,7 +105,10 @@ class RlHelper implements DateRecurHelperInterface {
   public function getRules() {
     return array_map(
       function (RlRRule $rule) {
-        return new RlDateRecurRule($rule->getRule());
+        // RL returns all parts, even if no values originally provided. Filter
+        // out the useless parts.
+        $parts = array_filter($rule->getRule());
+        return new RlDateRecurRule($parts);
       },
       $this->set->getRRules()
     );
