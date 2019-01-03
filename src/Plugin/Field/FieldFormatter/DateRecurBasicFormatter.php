@@ -92,8 +92,8 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
       $configuration['view_mode'],
       $configuration['third_party_settings'],
       $container->get('date.formatter'),
-      $container->get('entity.manager')->getStorage('date_format'),
-      $container->get('entity.manager')->getStorage('date_recur_interpreter')
+      $container->get('entity_type.manager')->getStorage('date_format'),
+      $container->get('entity_type.manager')->getStorage('date_recur_interpreter')
     );
   }
 
