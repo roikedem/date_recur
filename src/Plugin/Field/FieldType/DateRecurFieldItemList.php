@@ -65,7 +65,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function defaultValuesForm(array &$form, FormStateInterface $form_state): array {
+  public function defaultValuesForm(array &$form, FormStateInterface $form_state) {
     $element = parent::defaultValuesForm($form, $form_state);
 
     $defaultValue = $this->getFieldDefinition()->getDefaultValueLiteral();
@@ -81,7 +81,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function defaultValuesFormSubmit(array $element, array &$form, FormStateInterface $form_state): array {
+  public function defaultValuesFormSubmit(array $element, array &$form, FormStateInterface $form_state) {
     $values = parent::defaultValuesFormSubmit($element, $form, $form_state);
 
     $rrule = $form_state->getValue(['default_value_input', 'default_rrule']);
@@ -95,7 +95,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public static function processDefaultValue($default_value, FieldableEntityInterface $entity, FieldDefinitionInterface $definition): array {
+  public static function processDefaultValue($default_value, FieldableEntityInterface $entity, FieldDefinitionInterface $definition) {
     $rrule = isset($default_value[0]['default_rrule']) ? $default_value[0]['default_rrule'] : NULL;
     $defaultValue = parent::processDefaultValue($default_value, $entity, $definition);
     $defaultValue[0]['rrule'] = $rrule;
