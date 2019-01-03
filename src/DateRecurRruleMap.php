@@ -14,7 +14,7 @@ final class DateRecurRruleMap {
    *
    * In no particular order.
    */
-  public const FREQUENCIES = [
+  const FREQUENCIES = [
     'SECONDLY',
     'MINUTELY',
     'HOURLY',
@@ -29,7 +29,7 @@ final class DateRecurRruleMap {
    *
    * In no particular order.
    */
-  public const PARTS = [
+  const PARTS = [
     'DTSTART',
     'UNTIL',
     'COUNT',
@@ -53,7 +53,7 @@ final class DateRecurRruleMap {
    *
    * @see https://tools.ietf.org/html/rfc5545#page-44
    */
-  public const INCOMPATIBLE_PARTS = [
+  const INCOMPATIBLE_PARTS = [
     'SECONDLY' => ['BYWEEKNO'],
     'MINUTELY' => ['BYWEEKNO'],
     'HOURLY' => ['BYWEEKNO'],
