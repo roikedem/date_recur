@@ -394,14 +394,14 @@ class DateRecurItem extends DateRangeItem {
     $startDate = NULL;
     $startDateEnd = NULL;
     if ($this->start_date instanceof DrupalDateTime) {
-      $startDate = DateRecurUtility::toPhpDateTime($this->start_date);
+      $startDate = $this->start_date->getPhpDateTime();
       $startDate->setTimezone($timeZone);
     }
     else {
       throw new DateRecurHelperArgumentException('Start date is required.');
     }
     if ($this->end_date instanceof DrupalDateTime) {
-      $startDateEnd = DateRecurUtility::toPhpDateTime($this->end_date);
+      $startDateEnd = $this->end_date->getPhpDateTime();
       $startDateEnd->setTimezone($timeZone);
     }
     $this->helper = $this->isRecurring() ?

@@ -228,8 +228,8 @@ class DateRecurBasicWidget extends DateRangeDefaultWidget {
       try {
         DateRecurHelper::create(
           $rrule,
-          DateRecurUtility::toPhpDateTime($startDate),
-          DateRecurUtility::toPhpDateTime($startDateEnd)
+          $startDate->getPhpDateTime(),
+          $startDateEnd->getPhpDateTime()
         );
       }
       catch (\Exception $e) {
