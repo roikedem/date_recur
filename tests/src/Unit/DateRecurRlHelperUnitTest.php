@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\date_recur\Unit;
 
+use Drupal\date_recur\Exception\DateRecurHelperArgumentException;
 use Drupal\date_recur\Rl\RlHelper;
 use Drupal\Tests\UnitTestCase;
 
@@ -48,6 +49,18 @@ class DateRecurRlHelperUnitTest extends UnitTestCase {
     $this->assertArrayHasKey('DTSTART', $parts);
     $this->assertArrayHasKey('COUNT', $parts);
     $this->assertArrayNotHasKey('BYMONTHDAY', $parts);
+  }
+
+  /**
+   * Tests where a multiline rule without is missing the type prefix.
+   */
+  public function testMultilineMissingColon() {
+    $rrule = 'RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;COUNT=3
+EXDATE:19960402T010000Z
+foobar';
+
+    $this->setExpectedException(DateRecurHelperArgumentException::class, 'Multiline RRULE must be prefixed with either: RRULE, EXDATE, EXRULE, or RDATE. Missing for line 3');
+    $this->createHelper($rrule, new \DateTime());
   }
 
   /**

@@ -56,7 +56,13 @@ class RlHelper implements DateRecurHelperInterface {
     ];
 
     $lines = explode("\n", $string);
-    foreach ($lines as $line) {
+    foreach ($lines as $n => $line) {
+      $line = trim($line);
+
+      if (FALSE === strpos($line, ':')) {
+        throw new DateRecurHelperArgumentException(sprintf('Multiline RRULE must be prefixed with either: RRULE, EXDATE, EXRULE, or RDATE. Missing for line %s', $n + 1));
+      }
+
       list($part, $partValue) = explode(':', $line, 2);
       if (!isset($parts[$part])) {
         throw new DateRecurHelperArgumentException("Unsupported line: " . $part);
