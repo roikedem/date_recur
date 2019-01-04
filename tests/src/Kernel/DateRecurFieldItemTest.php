@@ -184,6 +184,33 @@ class DateRecurFieldItemTest extends KernelTestBase {
   }
 
   /**
+   * Tests when an invalid RRULE is passed.
+   */
+  public function testRruleInvalidConstraint() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      'value' => '2014-06-15T23:00:00',
+      'end_value' => '2014-06-16T07:00:00',
+      'rrule' => $this->randomMachineName(),
+      'infinite' => '0',
+      'timezone' => 'Australia/Sydney',
+    ];
+
+    /** @var \Symfony\Component\Validator\ConstraintViolationListInterface $violations */
+    $violations = $entity->dr->validate();
+    $this->assertGreaterThanOrEqual(1, $violations->count());
+
+    $expectedMessage = 'Invalid RRULE.';
+    $list = [];
+    foreach ($violations as $violation) {
+      if ((string) $violation->getMessage() === $expectedMessage) {
+        $list[] = $violation;
+      }
+    }
+    $this->assertCount(1, $list);
+  }
+
+  /**
    * Test exception thrown if time zone is missing when getting a item helper.
    */
   public function testTimeZoneMissing() {

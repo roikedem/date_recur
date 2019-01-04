@@ -48,7 +48,7 @@ class DateRecurRulePartConstraintValidator extends ConstraintValidator {
       $helper = DateRecurHelper::create($value->rrule, new \DateTime());
     }
     catch (\Exception $e) {
-      // @todo add a valid-RRULE constraint and mention it here.
+      // Invalid RRULE's are handled by DateRecurRruleConstraint.
       return;
     }
 
