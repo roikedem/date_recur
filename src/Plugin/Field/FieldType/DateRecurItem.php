@@ -196,7 +196,7 @@ class DateRecurItem extends DateRangeItem {
     $element['parts']['all'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Allow all frequency and parts'),
-      '#default_value' => $allPartsSettings['all'],
+      '#default_value' => isset($allPartsSettings['all']) ? $allPartsSettings['all'] : TRUE,
     ];
     $parents = array_merge($elementParts, ['parts', 'all']);
     // The form 'name' attribute of the 'all' parts checkbox above.
