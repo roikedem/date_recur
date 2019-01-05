@@ -7,4 +7,5 @@ package: Field types
 dependencies:
   - drupal:system (>=8.6.x)
   - drupal:datetime_range (>=8.6.x)
-
+test_dependencies:
+  - token:token
