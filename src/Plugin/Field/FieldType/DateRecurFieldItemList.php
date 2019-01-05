@@ -120,6 +120,8 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
    */
   public function getPartGrid() {
     $partSettings = $this->getFieldDefinition()->getSetting('parts');
+    // Existing field configs may not have a parts setting yet.
+    $partSettings = isset($partSettings) ? $partSettings : [];
     return DateRecurPartGrid::configSettingsToGrid($partSettings);
   }
 
