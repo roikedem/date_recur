@@ -261,4 +261,56 @@ class DateRecurFieldItemTest extends KernelTestBase {
     $this->assertEquals(0, $violations->count());
   }
 
+  /**
+   * Tests value is emptied if time zone is empty.
+   */
+  public function testNoTimeZone() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      [
+        'value' => '2008-06-16T00:00:00',
+        'end_value' => '2008-06-16T06:00:00',
+        'rrule' => 'FREQ=DAILY;COUNT=100',
+      ],
+    ];
+
+    // After saving, empty/invalid values are emptied.
+    $entity->save();
+    $this->assertEquals(0, $entity->dr->count());
+  }
+
+  /**
+   * Tests value is emptied if start is empty.
+   */
+  public function testMissingStart() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      [
+        'end_value' => '2008-06-16T06:00:00',
+        'timezone' => 'Pacific/Chuuk',
+      ],
+    ];
+
+    // After saving, empty/invalid values are emptied.
+    $entity->save();
+    $this->assertEquals(0, $entity->dr->count());
+  }
+
+  /**
+   * Tests value is emptied if end is empty.
+   */
+  public function testMissingEnd() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      [
+        'value' => '2008-06-16T00:00:00',
+        'timezone' => 'Pacific/Chuuk',
+      ],
+    ];
+
+    // After saving, empty/invalid values are emptied.
+    $entity->save();
+    $this->assertEquals(0, $entity->dr->count());
+  }
+
 }
