@@ -61,10 +61,6 @@ field.formatter.settings.date_recur_basic_formatter:
 field.widget.settings.date_recur_basic_widget:
   type: field.widget.settings.daterange_default
   label: 'Settings for Simple Recurring Date Widget'
-  mapping:
-    timezone_override:
-      label: 'The time zone (in PHP time format) to set new values, or empty to use the current users time zone at time of first save.'
-      type: string
 
 date_recur.interpreter.*:
   type: config_entity
