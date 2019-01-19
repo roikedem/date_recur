@@ -363,6 +363,17 @@ class DateRecurItem extends DateRangeItem {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function onChange($property_name, $notify = TRUE) {
+    if (in_array($property_name, ['value', 'end_value', 'rrule', 'timezone'])) {
+      // Reset cached helper instance if values changed.
+      $this->helper = NULL;
+    }
+    parent::onChange($property_name, $notify);
+  }
+
+  /**
    * Determine whether the field value is recurring/repeating.
    *
    * @return bool
