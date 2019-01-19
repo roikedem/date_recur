@@ -14,6 +14,7 @@ use Drupal\date_recur\DateRecurHelper;
 use Drupal\date_recur\DateRecurNonRecurringHelper;
 use Drupal\date_recur\DateRecurRruleMap;
 use Drupal\date_recur\Exception\DateRecurHelperArgumentException;
+use Drupal\date_recur\Plugin\Field\DateRecurDateTimeComputed;
 use Drupal\date_recur\Plugin\Field\DateRecurOccurrencesComputed;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 
@@ -73,6 +74,9 @@ class DateRecurItem extends DateRangeItem {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties = parent::propertyDefinitions($field_definition);
+
+    $properties['start_date']->setClass(DateRecurDateTimeComputed::class);
+    $properties['end_date']->setClass(DateRecurDateTimeComputed::class);
 
     $properties['rrule'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('RRule'))

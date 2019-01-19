@@ -349,4 +349,30 @@ class DateRecurFieldItemTest extends KernelTestBase {
     $this->assertEquals('DAILY', $helper2->getRules()[0]->getFrequency());
   }
 
+  /**
+   * Tests magic properties have the correct time zone.
+   */
+  public function testStartEndDateTimeZone() {
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      [
+        'value' => '2014-06-15T23:00:01',
+        'end_value' => '2014-06-16T07:00:02',
+        'timezone' => 'Indian/Christmas',
+        'rrule' => 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=5',
+      ],
+    ];
+
+    /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $item */
+    $item = $entity->dr[0];
+    /** @var \Drupal\Core\Datetime\DrupalDateTime $startDate */
+    $startDate = $item->start_date;
+    $this->assertEquals('Mon, 16 Jun 2014 06:00:01 +0700', $startDate->format('r'));
+    $this->assertEquals('Indian/Christmas', $startDate->getTimezone()->getName());
+    /** @var \Drupal\Core\Datetime\DrupalDateTime $endDate */
+    $endDate = $item->end_date;
+    $this->assertEquals('Mon, 16 Jun 2014 14:00:02 +0700', $endDate->format('r'));
+    $this->assertEquals('Indian/Christmas', $endDate->getTimezone()->getName());
+  }
+
 }
