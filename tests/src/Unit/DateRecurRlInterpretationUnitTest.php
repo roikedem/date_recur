@@ -74,13 +74,13 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testSecondly() {
     $parts = [
       'FREQ' => 'SECONDLY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
       'BYSECOND' => '59',
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('secondly at second 59, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('secondly at second 59, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
   /**
@@ -89,13 +89,13 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testMinutely() {
     $parts = [
       'FREQ' => 'MINUTELY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
       'BYMINUTE' => '44',
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('minutely at minute 44, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('minutely at minute 44, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
   /**
@@ -104,13 +104,13 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testHourly() {
     $parts = [
       'FREQ' => 'HOURLY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
       'BYHOUR' => '4,7',
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('hourly at 4h and 7h, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('hourly at 4h and 7h, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
   /**
@@ -119,13 +119,13 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testDaily() {
     $parts = [
       'FREQ' => 'DAILY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
       'BYDAY' => 'WE,SU',
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('daily on Wednesday and Sunday, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('daily on Wednesday and Sunday, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
   /**
@@ -134,13 +134,13 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testWeekly() {
     $parts = [
       'FREQ' => 'WEEKLY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
       'BYDAY' => 'MO,TU',
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('weekly on Monday and Tuesday, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('weekly on Monday and Tuesday, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
   /**
@@ -149,13 +149,13 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testMonthly() {
     $parts = [
       'FREQ' => 'MONTHLY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
       'BYMONTH' => '2,10',
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('monthly in February and October, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('monthly in February and October, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
   /**
@@ -164,12 +164,12 @@ class DateRecurRlInterpretationUnitTest extends UnitTestCase {
   public function testYearly() {
     $parts = [
       'FREQ' => 'YEARLY',
-      'DTSTART' => new \DateTime('4am 15 July 2012'),
+      'DTSTART' => new \DateTime('4am 15 July 2012', new \DateTimeZone('Pacific/Honolulu')),
     ];
     $rules[] = new RlDateRecurRule($parts);
     $interpreter = RlInterpreter::create($this->testContainer, [], '', []);
     $interpretation = $interpreter->interpret($rules, 'en');
-    $this->assertEquals('yearly, starting from Sat, 14 Jul 2012 18:00:00 +0000, forever', $interpretation);
+    $this->assertEquals('yearly, starting from Sun, 15 Jul 2012 14:00:00 +0000, forever', $interpretation);
   }
 
 }
