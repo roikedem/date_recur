@@ -212,6 +212,8 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
           'count_per_item' => TRUE,
           'separator' => $separator,
           'show_next' => 5,
+          'allow_all_day' => FALSE,
+          'all_day_format_type' => $dateFormatId
         ],
       ],
       'field_definition' => $definitions['dr'],
@@ -231,6 +233,97 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
     $this->assertEquals('Format: ' . $formatSample, $summary[0]);
     $this->assertEquals('Separator: <em class="placeholder">' . $separator . '</em>', $summary[1]);
     $this->assertEquals('Show maximum of 5 occurrences per field item', $summary[2]);
+  }
+
+  /**
+   * Tests setting summary.
+   */
+  public function testFormatterSettingsSummaryAllDay() {
+    /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $efm */
+    $efm = $this->container->get('entity_field.manager');
+    $definitions = $efm->getBaseFieldDefinitions('dr_entity_test');
+
+    $separator = $this->randomMachineName(4);
+
+    $dateFormatId = $this->dateFormat->id();
+    $options = [
+      'configuration' => [
+        'label' => 'above',
+        'type' => 'date_recur_basic_formatter',
+        'settings' => [
+          'format_type' => $dateFormatId,
+          'occurrence_format_type' => $dateFormatId,
+          'same_end_date_format_type' => $dateFormatId,
+          'interpreter' => $this->interpreter->id(),
+          'count_per_item' => FALSE,
+          'separator' => $separator,
+          'show_next' => 5,
+          'allow_all_day' => TRUE,
+          'all_day_format_type' => $dateFormatId
+        ],
+      ],
+      'field_definition' => $definitions['dr'],
+      'prepare' => TRUE,
+      'view_mode' => 'full',
+    ];
+
+    /** @var \Drupal\Core\Field\FormatterPluginManager $fieldFormatterManager */
+    $fieldFormatterManager = $this->container->get('plugin.manager.field.formatter');
+    $instance = $fieldFormatterManager->getInstance($options);
+    $summary = $instance->settingsSummary();
+
+    // Generate after summary to prevent random test failures.
+    $now = new \DateTime('today 9am');
+    $formatSample = $now->format($this->dateFormat->getPattern());
+
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
+    $rendered = $renderer->renderRoot($summary['all_day']);
+    // Remove newlines from Twig templates.
+    $rendered = preg_replace('/\n/', '', $rendered);
+    $this->setRawContent($rendered);
+
+    $this->assertEquals(sprintf('All day: %s', $formatSample), $this->getTextContent());
+  }
+
+  /**
+   * Tests setting summary.
+   */
+  public function testFormatterSettingsSummaryNoAllDay() {
+    /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $efm */
+    $efm = $this->container->get('entity_field.manager');
+    $definitions = $efm->getBaseFieldDefinitions('dr_entity_test');
+
+    $separator = $this->randomMachineName(4);
+
+    $dateFormatId = $this->dateFormat->id();
+    $options = [
+      'configuration' => [
+        'label' => 'above',
+        'type' => 'date_recur_basic_formatter',
+        'settings' => [
+          'format_type' => $dateFormatId,
+          'occurrence_format_type' => $dateFormatId,
+          'same_end_date_format_type' => $dateFormatId,
+          'interpreter' => $this->interpreter->id(),
+          'count_per_item' => TRUE,
+          'separator' => $separator,
+          'show_next' => 5,
+          'allow_all_day' => FALSE,
+          'all_day_format_type' => $dateFormatId
+        ],
+      ],
+      'field_definition' => $definitions['dr'],
+      'prepare' => TRUE,
+      'view_mode' => 'full',
+    ];
+
+    /** @var \Drupal\Core\Field\FormatterPluginManager $fieldFormatterManager */
+    $fieldFormatterManager = $this->container->get('plugin.manager.field.formatter');
+    $instance = $fieldFormatterManager->getInstance($options);
+    $summary = $instance->settingsSummary();
+
+    $this->assertNotContains('All day:', $summary);
   }
 
   /**
@@ -254,6 +347,8 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
           'count_per_item' => FALSE,
           'separator' => '-',
           'show_next' => 10,
+          'allow_all_day' => FALSE,
+          'all_day_format_type' => $dateFormatId
         ],
       ],
       'field_definition' => $definitions['dr'],
@@ -290,6 +385,8 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
           'count_per_item' => FALSE,
           'separator' => '-',
           'show_next' => 10,
+          'allow_all_day' => FALSE,
+          'all_day_format_type' => $dateFormatId
         ],
       ],
       'field_definition' => $definitions['dr'],
@@ -338,6 +435,8 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
           'count_per_item' => FALSE,
           'separator' => '-',
           'show_next' => 10,
+          'allow_all_day' => FALSE,
+          'all_day_format_type' => $dateFormatId
         ],
       ],
       'field_definition' => $definitions['dr'],
@@ -380,6 +479,8 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
     $dateFormat2->save();
     $dateFormat3 = DateFormat::create(['id' => $this->randomMachineName()]);
     $dateFormat3->save();
+    $dateFormat4 = DateFormat::create(['id' => $this->randomMachineName()]);
+    $dateFormat4->save();
     $options = [
       'configuration' => [
         'label' => 'above',
@@ -392,6 +493,8 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
           'count_per_item' => FALSE,
           'separator' => '-',
           'show_next' => 10,
+          'allow_all_day' => TRUE,
+          'all_day_format_type' => $dateFormat4->id(),
         ],
       ],
       'field_definition' => $definitions['dr'],
@@ -401,12 +504,13 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
 
     /** @var \Drupal\Core\Field\FormatterPluginManager $fieldFormatterManager */
     $fieldFormatterManager = $this->container->get('plugin.manager.field.formatter');
-    /** @var \Drupal\date_recur\Plugin\Field\FieldFormatter\DateRecurDefaultFormatter $instance */
+    /** @var \Drupal\date_recur\Plugin\Field\FieldFormatter\DateRecurBasicFormatter $instance */
     $instance = $fieldFormatterManager->getInstance($options);
     $expectedConfigDependencies = [
       'core.date_format.' . $dateFormat1->id(),
       'core.date_format.' . $dateFormat2->id(),
       'core.date_format.' . $dateFormat3->id(),
+      'core.date_format.' . $dateFormat4->id(),
       'date_recur.interpreter.' . $this->interpreter->id(),
     ];
     sort($expectedConfigDependencies);
@@ -433,6 +537,7 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
       'format_type' => $this->dateFormat->id(),
       'occurrence_format_type' => $this->dateFormat->id(),
       'same_end_date_format_type' => $dateFormatSameDate->id(),
+      'allow_all_day' => FALSE,
       'interpreter' => $this->interpreter->id(),
     ];
     $entity = DrEntityTest::create();
@@ -455,6 +560,39 @@ class DateRecurBasicFormatterTest extends KernelTestBase {
 
     // Second time is end date.
     $this->assertEquals('same date', (string) $dates[1]);
+  }
+
+  /**
+   * Tests formatter output for an "all day" date.
+   */
+  public function testFormatterAllDay() {
+    $dateFormatAllDay = DateFormat::create(['id' => $this->randomMachineName(), 'pattern' => 'j M Y \(\a\l\l \d\a\y\)']);
+    $dateFormatAllDay->save();
+    $settings = [
+      'format_type' => $this->dateFormat->id(),
+      'occurrence_format_type' => $this->dateFormat->id(),
+      'allow_all_day' => TRUE,
+      'all_day_format_type' => $dateFormatAllDay->id(),
+      'interpreter' => $this->interpreter->id(),
+    ];
+    $entity = DrEntityTest::create();
+    $entity->dr = [
+      'value' => '2014-06-14T14:00:00',
+      'end_value' => '2014-06-16T13:59:59',
+      'rrule' => '',
+      'infinite' => '0',
+      'timezone' => 'Australia/Sydney',
+    ];
+    $this->renderFormatterSettings($entity, $settings);
+
+    $dates = $this->cssSelect('time');
+    $this->assertCount(2, $dates);
+
+    // First time is start date.
+    $this->assertEquals('15 Jun 2014 (all day)', (string) $dates[0]);
+
+    // Second time is end date.
+    $this->assertEquals('16 Jun 2014 (all day)', (string) $dates[1]);
   }
 
   /**

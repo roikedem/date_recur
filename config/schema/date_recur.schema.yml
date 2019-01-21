@@ -55,12 +55,18 @@ field.formatter.settings.date_recur_basic_formatter:
       type: string
     same_end_date_format_type:
       type: string
+    all_day_format_type:
+      type: string
     interpreter:
       type: string
 
 field.widget.settings.date_recur_basic_widget:
   type: field.widget.settings.daterange_default
   label: 'Settings for Simple Recurring Date Widget'
+  mapping:
+    allow_all_day:
+      label: 'Allow "all day" option to be selected'
+      type: boolean
 
 date_recur.interpreter.*:
   type: config_entity
