@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;

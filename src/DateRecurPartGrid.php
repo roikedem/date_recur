@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 use Drupal\date_recur\Exception\DateRecurRulePartIncompatible;
@@ -28,15 +26,15 @@ class DateRecurPartGrid {
    * @param string[] $parts
    *   An array of parts.
    */
-  public function allowParts(string $frequency, array $parts): void {
-    $existingFrequencyParts = $this->allowedParts[$frequency] ?? [];
+  public function allowParts($frequency, array $parts) {
+    $existingFrequencyParts = isset($this->allowedParts[$frequency]) ? $this->allowedParts[$frequency] : [];
     $this->allowedParts[$frequency] = array_merge($parts, $existingFrequencyParts);
   }
 
   /**
    * Determines whether all parts and frequencies are supported.
    */
-  public function isAllowEverything(): bool {
+  public function isAllowEverything() {
     return count($this->allowedParts) === 0;
   }
 
@@ -49,7 +47,7 @@ class DateRecurPartGrid {
    * @return bool
    *   Whether a frequency is supported.
    */
-  public function isFrequencyAllowed(string $frequency): bool {
+  public function isFrequencyAllowed($frequency) {
     assert(in_array($frequency, DateRecurRruleMap::FREQUENCIES, TRUE));
     if ($this->isAllowEverything()) {
       return TRUE;
@@ -72,7 +70,7 @@ class DateRecurPartGrid {
    * @throws \Drupal\date_recur\Exception\DateRecurRulePartIncompatible
    *   Part is incompatible with frequency.
    */
-  public function isPartAllowed(string $frequency, string $part): bool {
+  public function isPartAllowed($frequency, $part) {
     assert(in_array($frequency, DateRecurRruleMap::FREQUENCIES, TRUE) && in_array($part, DateRecurRruleMap::PARTS, TRUE));
     if (in_array($part, DateRecurRruleMap::INCOMPATIBLE_PARTS[$frequency], TRUE)) {
       throw new DateRecurRulePartIncompatible();
@@ -82,7 +80,7 @@ class DateRecurPartGrid {
       return TRUE;
     }
 
-    $partsInFrequency = $this->allowedParts[$frequency] ?? [];
+    $partsInFrequency = isset($this->allowedParts[$frequency]) ? $this->allowedParts[$frequency] : [];
     // Supports the part, or everything in this frequency.
     return in_array($part, $partsInFrequency, TRUE) || in_array(DateRecurItem::PART_SUPPORTS_ALL, $partsInFrequency, TRUE);
   }
@@ -103,7 +101,7 @@ class DateRecurPartGrid {
       return $grid;
     }
 
-    $frequencies = $parts['frequencies'] ?? [];
+    $frequencies = isset($parts['frequencies']) ? $parts['frequencies'] : [];
     foreach ($frequencies as $frequency => $frequencyParts) {
       $grid->allowParts($frequency, $frequencyParts);
     }

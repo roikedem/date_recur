@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin\Validation\Constraint;
 
 use Drupal\date_recur\DateRecurHelper;
-use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -17,9 +14,9 @@ class DateRecurRruleConstraintValidator extends ConstraintValidator {
   /**
    * {@inheritdoc}
    */
-  public function validate($value, Constraint $constraint): void {
-    assert($value instanceof DateRecurItem);
-    assert($constraint instanceof DateRecurRruleConstraint);
+  public function validate($value, Constraint $constraint) {
+    /** @var \Drupal\date_recur\Plugin\Validation\Constraint\DateRecurRruleConstraint $constraint */
+    /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem $value */
 
     // Validator do not apply to field values without RRULE.
     if (empty($value->rrule)) {

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin\Field\FieldFormatter;
 
 use Drupal\Component\Utility\NestedArray;
@@ -34,9 +32,9 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
 
   use DependencyTrait;
 
-  protected const COUNT_PER_ITEM_ITEM = 'per_item';
+  const COUNT_PER_ITEM_ITEM = 'per_item';
 
-  protected const COUNT_PER_ITEM_ALL = 'all_items';
+  const COUNT_PER_ITEM_ALL = 'all_items';
 
   /**
    * The date recur interpreter entity storage.
@@ -102,7 +100,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
   /**
    * {@inheritdoc}
    */
-  public static function defaultSettings(): array {
+  public static function defaultSettings() {
     return [
       // Show number of occurrences.
       'show_next' => 5,
@@ -112,10 +110,6 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
       'occurrence_format_type' => 'medium',
       // Date format for end date, if same day as start date.
       'same_end_date_format_type' => 'medium',
-      // Specify whether "All day" settings should be observed.
-      'allow_all_day' => FALSE,
-      // Date format for "All day" dates.
-      'all_day_format_type' => 'html_date',
       'interpreter' => NULL,
     ] + parent::defaultSettings();
   }
@@ -123,7 +117,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies(): array {
+  public function calculateDependencies() {
     $this->dependencies = parent::calculateDependencies();
 
     /** @var string|null $dateFormatId */
@@ -136,7 +130,6 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
       'format_type',
       'occurrence_format_type',
       'same_end_date_format_type',
-      'all_day_format_type',
     ];
     foreach ($dateFormatDependencies as $dateFormatId) {
       $id = $this->getSetting($dateFormatId);
@@ -153,7 +146,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
   /**
    * {@inheritdoc}
    */
-  public function settingsForm(array $form, FormStateInterface $form_state): array {
+  public function settingsForm(array $form, FormStateInterface $form_state) {
     $form = parent::settingsForm($form, $form_state);
 
     $originalFormatType = $form['format_type'];
@@ -172,28 +165,12 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
     $form['same_end_date_format_type']['#description'] = $this->t('Date format used for end date if field value has repeat rule. Used only if occurs on same calendar day as start date.');
     $form['same_end_date_format_type']['#default_value'] = $this->getSetting('same_end_date_format_type');
 
-    $form['allow_all_day'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Allow all day'),
-      '#description' => $this->t('Whether to check for "all day" dates.'),
-      '#default_value' => $this->getSetting('allow_all_day'),
-    ];
-    $form['all_day_format_type'] = $originalFormatType;
-    $form['all_day_format_type']['#title'] = $this->t('"All day" date format');
-    $form['all_day_format_type']['#description'] = $this->t('Date format used if date is set as "All day"');
-    $form['all_day_format_type']['#default_value'] = $this->getSetting('all_day_format_type');
-    $form['all_day_format_type']['#states']['visible'] = [
-      ':input[name="fields[field_recurring_date_field][settings_edit_form][settings][allow_all_day]"]' => [
-        'checked' => TRUE,
-      ],
-    ];
-
     // Redefine separator to change the natural order of form fields.
     $originalSeparator = $form['separator'];
     unset($form['separator']);
     $form['separator'] = $originalSeparator;
     // Change the width of the field if not already set. (Not set by default)
-    $form['separator']['#size'] = $form['separator']['#size'] ?? 5;
+    $form['separator']['#size'] = isset($form['separator']['#size']) ? $form['separator']['#size'] : 5;
 
     // Redefine timezone to change the natural order of form fields.
     $originalTimezoneOverride = $form['timezone_override'];
@@ -202,8 +179,8 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
     $form['timezone_override']['#empty_option'] = $this->t('Use current user timezone');
     $form['timezone_override']['#description'] = $this->t('Change the timezone used for displaying dates (not recommended).');
 
-    $interpreterOptions = array_map(function (DateRecurInterpreterInterface $interpreter): string {
-      return $interpreter->label();
+    $interpreterOptions = array_map(function (DateRecurInterpreterInterface $interpreter) {
+        return $interpreter->label();
     }, $this->dateRecurInterpreterStorage->loadMultiple());
     $form['interpreter'] = [
       '#type' => 'select',
@@ -254,7 +231,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
    * @param array $complete_form
    *   The complete form structure.
    */
-  public static function validateSettingsCountPerItem(array &$element, FormStateInterface $form_state, array &$complete_form): void {
+  public static function validateSettingsCountPerItem(array &$element, FormStateInterface $form_state, array &$complete_form) {
     $countPerItem = $element['#value'] == static::COUNT_PER_ITEM_ITEM;
     $arrayParents = array_slice($element['#array_parents'], 0, -2);
     $formatterForm = NestedArray::getValue($complete_form, $arrayParents);
@@ -273,7 +250,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
    * @param array $complete_form
    *   The complete form structure.
    */
-  public static function validateSettingsShowNext(array &$element, FormStateInterface $form_state, array &$complete_form): void {
+  public static function validateSettingsShowNext(array &$element, FormStateInterface $form_state, array &$complete_form) {
     $arrayParents = array_slice($element['#array_parents'], 0, -2);
     $formatterForm = NestedArray::getValue($complete_form, $arrayParents);
     $parents = $formatterForm['#parents'];
@@ -284,7 +261,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
   /**
    * {@inheritdoc}
    */
-  public function settingsSummary(): array {
+  public function settingsSummary() {
     $this->formatType = $this->getSetting('format_type');
     $summary = parent::settingsSummary();
 
@@ -307,7 +284,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
       '#template' => '{{ label }}: {{ sample }}',
       '#context' => [
         'label' => $this->t('Same day range'),
-        'sample' => $this->buildDateRangeValue($start, $endSameDay, TRUE, []),
+        'sample' => $this->buildDateRangeValue($start, $endSameDay, TRUE),
       ],
     ];
     $endDifferentDay = clone $endSameDay;
@@ -317,21 +294,9 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
       '#template' => '{{ label }}: {{ sample }}',
       '#context' => [
         'label' => $this->t('Different day range'),
-        'sample' => $this->buildDateRangeValue($start, $endDifferentDay, TRUE, []),
+        'sample' => $this->buildDateRangeValue($start, $endDifferentDay, TRUE),
       ],
     ];
-
-    if ($this->getSetting('allow_all_day')) {
-      $this->formatType = $this->getSetting('all_day_format_type');
-      $summary['all_day'] = [
-        '#type' => 'inline_template',
-        '#template' => '{{ label }}: {{ sample }}',
-        '#context' => [
-          'label' => $this->t('All day'),
-          'sample' => $this->formatDate($start),
-        ],
-      ];
-    }
 
     return $summary;
   }
@@ -339,17 +304,15 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items, $langcode): array {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     // Whether maximum is per field item or in total.
     $isSharedMaximum = !$this->getSetting('count_per_item');
     // Maximum amount of occurrences to be displayed.
     $occurrenceQuota = (int) $this->getSetting('show_next');
-    // Whether or not the "all day" condition should be evaluated.
-    $allowAllDay = $this->getSetting('allow_all_day');
 
     $elements = [];
     foreach ($items as $delta => $item) {
-      $value = $this->viewItem($item, $occurrenceQuota, $allowAllDay);
+      $value = $this->viewItem($item, $occurrenceQuota);
       $occurrenceQuota -= ($isSharedMaximum ? count($value['#occurrences']) : 0);
       $elements[$delta] = $value;
       if ($occurrenceQuota <= 0) {
@@ -367,31 +330,22 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
    *   A field item.
    * @param int $maxOccurrences
    *   Maximum number of occurrences to show for this field item.
-   * @param bool $checkAllDay
-   *   Whether or not the "all day" condition should be evaluated.
    *
    * @return array
    *   A render array for a field item.
    */
-  protected function viewItem(DateRecurItem $item, $maxOccurrences, $checkAllDay = FALSE): array {
+  protected function viewItem(DateRecurItem $item, $maxOccurrences) {
     $cacheability = new CacheableMetadata();
     $build = [
       '#theme' => 'date_recur_basic_formatter',
       '#is_recurring' => $item->isRecurring(),
     ];
 
-    $isAllDay = [];
-    if ($checkAllDay) {
-      if ($item->isStartAllDay()) {$isAllDay[] = 'start';}
-      if ($item->isEndAllDay()) {$isAllDay[] = 'end';}
-    }
-
-    $timezone = new \DateTimeZone($item->getValue()['timezone']);
     /** @var \Drupal\Core\Datetime\DrupalDateTime|null $startDate */
-    $startDate = $item->start_date->setTimezone($timezone);
+    $startDate = $item->start_date;
     /** @var \Drupal\Core\Datetime\DrupalDateTime|null $endDate */
-    $endDate = $item->end_date ? $item->end_date->setTimezone($timezone) : $startDate;
-    $build['#date'] = $this->buildDateRangeValue($startDate, $endDate, FALSE, $isAllDay);
+    $endDate = $item->end_date ? $item->end_date : $startDate;
+    $build['#date'] = $this->buildDateRangeValue($startDate, $endDate, FALSE);
 
     // Render the rule.
     if ($item->isRecurring() && $this->getSetting('interpreter')) {
@@ -408,7 +362,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
 
     // Occurrences are generated even if the item is not recurring.
     $build['#occurrences'] = array_map(
-      function (DateRange $occurrence): array {
+      function (DateRange $occurrence) {
         $startDate = DrupalDateTime::createFromDateTime($occurrence->getStart());
         $endDate = DrupalDateTime::createFromDateTime($occurrence->getEnd());
         return $this->buildDateRangeValue(
@@ -433,17 +387,12 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
    *   The start date.
    * @param bool $isOccurrence
    *   Whether the range is an occurrence of a repeating value.
-   * @param array $isAllDay
-   *   Whether the "all day" format should be used for the start or end dates.
    *
    * @return array
    *   A render array.
    */
-  protected function buildDateRangeValue(DrupalDateTime $startDate, DrupalDateTime $endDate, $isOccurrence, $isAllDay = []): array {
+  protected function buildDateRangeValue(DrupalDateTime $startDate, DrupalDateTime $endDate, $isOccurrence) {
     $this->formatType = $isOccurrence ? $this->getSetting('occurrence_format_type') : $this->getSetting('format_type');
-    if (array_search('start', $isAllDay) !== FALSE) {
-      $this->formatType = $this->getSetting('all_day_format_type');
-    }
     $startDateString = $this->buildDateWithIsoAttribute($startDate);
 
     // Show the range if start and end are different, otherwise only start date.
@@ -455,9 +404,6 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
       $this->formatType = $startDate->format('Ymd') == $endDate->format('Ymd') ?
         $this->getSetting('same_end_date_format_type') :
         $this->getSetting('occurrence_format_type');
-      if (array_search('end', $isAllDay) !== FALSE) {
-        $this->formatType = $this->getSetting('all_day_format_type');
-      }
       $endDateString = $this->buildDateWithIsoAttribute($endDate);
       return [
         'start_date' => $startDateString,
@@ -470,38 +416,11 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
   /**
    * {@inheritdoc}
    */
-  protected function buildDateWithIsoAttribute(DrupalDateTime $date): array {
-    // Create the ISO date in Universal Time.
-    $iso_date = $date->format("Y-m-d\TH:i:s") . 'Z';
-
-    $build = [
-      '#theme' => 'time',
-      '#text' => $this->formatDate($date),
-      '#html' => FALSE,
-      '#attributes' => [
-        'datetime' => $iso_date,
-      ],
-      '#cache' => [
-        'contexts' => [
-          'timezone',
-        ],
-      ],
-    ];
-
-    return $build;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function formatDate($date): string {
-    assert($date instanceof DrupalDateTime);
+  protected function formatDate($date) {
     if (!is_string($this->formatType)) {
       throw new \LogicException('Date format must be set.');
     }
     $timezone = $this->getSetting('timezone_override') ?: $date->getTimezone()->getName();
-    //kint($date);
-    //kint($timezone);
     return $this->dateFormatter->format($date->getTimestamp(), $this->formatType, '', $timezone);
   }
 
@@ -519,7 +438,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
    * @return \Drupal\date_recur\DateRange[]
    *   A render array.
    */
-  protected function getOccurrences(DateRecurItem $item, $maxOccurrences): array {
+  protected function getOccurrences(DateRecurItem $item, $maxOccurrences) {
     $start = new \DateTime('now');
     return $item->getHelper()
       ->getOccurrences($start, NULL, $maxOccurrences);

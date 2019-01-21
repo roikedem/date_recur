@@ -17,7 +17,12 @@ class DateRecurDateRangeUnitTest extends UnitTestCase {
    * Test arguments required.
    */
   public function testRequiredConstructorArguments() {
-    $this->setExpectedException(\ArgumentCountError::class);
+    if (version_compare(phpversion(), "7.0.0", ">=")) {
+      $this->setExpectedException(\ArgumentCountError::class);
+    }
+    else {
+      $this->setExpectedException(\PHPUnit_Framework_Error::class);
+    }
     $this->createDateRange();
   }
 

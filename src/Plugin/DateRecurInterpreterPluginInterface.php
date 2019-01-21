@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
@@ -23,16 +21,15 @@ interface DateRecurInterpreterPluginInterface extends ConfigurablePluginInterfac
    * @return string
    *   Rules interpreted into a string.
    */
-  public function interpret(array $rules, string $language): string;
+  public function interpret(array $rules, $language);
 
   /**
    * The languages supported by this plugin.
    *
    * Two letter langcodes. E.g: 'en', 'fr', etc.
    *
-   * @return string[]
-   *   Supported languages.
+   * @var string[]
    */
-  public function supportedLanguages(): array;
+  public function supportedLanguages();
 
 }

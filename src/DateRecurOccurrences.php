@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 use Drupal\Core\Database\Connection;
@@ -35,7 +33,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   /**
    * The key in field definitions indicating whether field is date recur like.
    */
-  public const IS_DATE_RECUR = 'is_date_recur';
+  const IS_DATE_RECUR = 'is_date_recur';
 
   /**
    * The database connection.
@@ -88,7 +86,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @param \Drupal\date_recur\Event\DateRecurValueEvent $event
    *   The date recur event.
    */
-  public function onSave(DateRecurValueEvent $event): void {
+  public function onSave(DateRecurValueEvent $event) {
     /** @var \Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem[]|\Drupal\date_recur\Plugin\Field\FieldType\DateRecurFieldItemList $list */
     $list = $event->getField();
     $fieldDefinition = $list->getFieldDefinition();
@@ -116,7 +114,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @param string $tableName
    *   The name of table to store occurrences.
    */
-  protected function saveItem(DateRecurItem $item, string $tableName): void {
+  protected function saveItem(DateRecurItem $item, $tableName) {
     $fieldDelta = $item->getName();
     assert(is_int($fieldDelta));
     $fieldName = $item->getFieldDefinition()->getName();
@@ -140,7 +138,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
 
     $occurrences = $this->getOccurrencesForCacheStorage($item);
     $rows = array_map(
-      function (DateRange $occurrence, $delta) use ($baseRow, $fieldName, $item): array {
+      function (DateRange $occurrence, $delta) use ($baseRow, $fieldName, $item) {
         $row = $baseRow;
         $row['delta'] = $delta;
         $row[$fieldName . '_value'] = $this->massageDateValueForStorage($occurrence->getStart(), $item);
@@ -166,7 +164,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @param \Drupal\date_recur\Event\DateRecurValueEvent $event
    *   The date recur event.
    */
-  public function onEntityDelete(DateRecurValueEvent $event): void {
+  public function onEntityDelete(DateRecurValueEvent $event) {
     $list = $event->getField();
     $fieldDefinition = $list->getFieldDefinition();
     $tableName = static::getOccurrenceCacheStorageTableName($fieldDefinition->getFieldStorageDefinition());
@@ -182,7 +180,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @param \Drupal\date_recur\Event\DateRecurValueEvent $event
    *   The date recur event.
    */
-  public function onEntityRevisionDelete(DateRecurValueEvent $event): void {
+  public function onEntityRevisionDelete(DateRecurValueEvent $event) {
     $list = $event->getField();
     $entity = $list->getEntity();
 
@@ -199,7 +197,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   /**
    * {@inheritdoc}
    */
-  public function onFieldStorageDefinitionCreate(FieldStorageDefinitionInterface $fieldStorageConfig): void {
+  public function onFieldStorageDefinitionCreate(FieldStorageDefinitionInterface $fieldStorageConfig) {
     if ($this->isDateRecur($fieldStorageConfig)) {
       $this->fieldStorageCreate($fieldStorageConfig);
     }
@@ -208,7 +206,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   /**
    * {@inheritdoc}
    */
-  public function onFieldStorageDefinitionDelete(FieldStorageDefinitionInterface $fieldStorageConfig): void {
+  public function onFieldStorageDefinitionDelete(FieldStorageDefinitionInterface $fieldStorageConfig) {
     if ($this->isDateRecur($fieldStorageConfig)) {
       $this->fieldStorageDelete($fieldStorageConfig);
     }
@@ -217,7 +215,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   /**
    * {@inheritdoc}
    */
-  public function onEntityTypeCreate(EntityTypeInterface $entity_type): void {
+  public function onEntityTypeCreate(EntityTypeInterface $entity_type) {
     if (!$entity_type instanceof ContentEntityTypeInterface) {
       // Only add field for content entity types.
       return;
@@ -231,7 +229,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   /**
    * {@inheritdoc}
    */
-  public function onEntityTypeDelete(EntityTypeInterface $entity_type): void {
+  public function onEntityTypeDelete(EntityTypeInterface $entity_type) {
     if (!$entity_type instanceof ContentEntityTypeInterface) {
       // Only delete field for content entity types.
       return;
@@ -245,14 +243,14 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
   /**
    * Reacts to field creation.
    */
-  protected function fieldStorageCreate(FieldStorageDefinitionInterface $fieldDefinition): void {
+  protected function fieldStorageCreate(FieldStorageDefinitionInterface $fieldDefinition) {
     $this->createOccurrenceTable($fieldDefinition);
   }
 
   /**
    * Reacts to field deletion.
    */
-  protected function fieldStorageDelete(FieldStorageDefinitionInterface $fieldDefinition): void {
+  protected function fieldStorageDelete(FieldStorageDefinitionInterface $fieldDefinition) {
     $tableName = static::getOccurrenceCacheStorageTableName($fieldDefinition);
     $this->database
       ->schema()
@@ -268,7 +266,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @return \Drupal\date_recur\DateRange[]
    *   Date range objects for storage.
    */
-  protected function getOccurrencesForCacheStorage(DateRecurItem $item): array {
+  protected function getOccurrencesForCacheStorage(DateRecurItem $item) {
     $until = NULL;
     if ($item->getHelper()->isInfinite()) {
       $until = (new \DateTime('now'))
@@ -283,7 +281,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $fieldDefinition
    *   The field definition.
    */
-  protected function createOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition): void {
+  protected function createOccurrenceTable(FieldStorageDefinitionInterface $fieldDefinition) {
     $entityTypeId = $fieldDefinition->getTargetEntityTypeId();
     $entityType = $this->entityTypeManager->getDefinition($entityTypeId);
     $fieldName = $fieldDefinition->getName();
@@ -371,7 +369,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @return string
    *   The date value for storage.
    */
-  protected function massageDateValueForStorage(\DateTimeInterface $date, DateRecurItem $item): string {
+  protected function massageDateValueForStorage(\DateTimeInterface $date, DateRecurItem $item) {
     // Convert native timezone to UTC.
     $date->setTimezone(new \DateTimeZone(DateRecurItem::STORAGE_TIMEZONE));
 
@@ -393,7 +391,7 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @return bool
    *   Whether field is date recur or subclasses date recur.
    */
-  protected function isDateRecur(FieldStorageDefinitionInterface $fieldDefinition): bool {
+  protected function isDateRecur(FieldStorageDefinitionInterface $fieldDefinition) {
     $typeDefinition = \Drupal::service('typed_data_manager')
       ->getDefinition('field_item:' . $fieldDefinition->getType());
     // @see \Drupal\date_recur\DateRecurCachedHooks::fieldInfoAlter
@@ -409,14 +407,14 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @return \Drupal\Core\Field\FieldStorageDefinitionInterface[]
    *   An array of storage definitions for base fields for an entity type.
    */
-  protected function getBaseFieldStorages(ContentEntityTypeInterface $entityType): array {
+  protected function getBaseFieldStorages(ContentEntityTypeInterface $entityType) {
     $baseFields = $this->entityFieldManager->getBaseFieldDefinitions($entityType->id());
-    $baseFields = array_filter($baseFields, function (FieldDefinitionInterface $fieldDefinition): bool {
+    $baseFields = array_filter($baseFields, function (FieldDefinitionInterface $fieldDefinition) {
       return $this->isDateRecur($fieldDefinition->getFieldStorageDefinition());
     });
 
     return array_map(
-      function (FieldDefinitionInterface $baseField): FieldStorageDefinitionInterface {
+      function (FieldDefinitionInterface $baseField) {
         return $baseField->getFieldStorageDefinition();
       },
       $baseFields
@@ -432,14 +430,14 @@ class DateRecurOccurrences implements EventSubscriberInterface, EntityTypeListen
    * @return string
    *   A table name.
    */
-  public static function getOccurrenceCacheStorageTableName(FieldStorageDefinitionInterface $fieldDefinition): string {
+  public static function getOccurrenceCacheStorageTableName(FieldStorageDefinitionInterface $fieldDefinition) {
     return sprintf('date_recur__%s__%s', $fieldDefinition->getTargetEntityTypeId(), $fieldDefinition->getName());
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       DateRecurEvents::FIELD_VALUE_SAVE => ['onSave'],
       DateRecurEvents::FIELD_ENTITY_DELETE => ['onEntityDelete'],

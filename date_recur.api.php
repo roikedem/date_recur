@@ -2,13 +2,6 @@
 
 /**
  * @file
- * API Examples for Recurring Dates Field.
- */
-
-declare(strict_types = 1);
-
-/**
- * @file
  * Contains hooks and event examples for date_recur module.
  *
  * This file documents events dispatched by date_recur.
@@ -42,7 +35,7 @@ class MyEventSubscriber implements \Symfony\Component\EventDispatcher\EventSubsc
    * @see \Drupal\date_recur\DateRecurOccurrences::onSave
    *   Live example.
    */
-  public function onSave(\Drupal\date_recur\Event\DateRecurValueEvent $event): void {}
+  public function onSave(\Drupal\date_recur\Event\DateRecurValueEvent $event) {}
 
   /**
    * Dispatched when an entity containing date recur fields is almost deleted.
@@ -57,7 +50,7 @@ class MyEventSubscriber implements \Symfony\Component\EventDispatcher\EventSubsc
    * @see \Drupal\date_recur\DateRecurOccurrences::onEntityDelete
    *   Live example.
    */
-  public function onEntityDelete(\Drupal\date_recur\Event\DateRecurValueEvent $event): void {}
+  public function onEntityDelete(\Drupal\date_recur\Event\DateRecurValueEvent $event) {}
 
   /**
    * Dispatched when an entity revision is deleted.
@@ -72,12 +65,12 @@ class MyEventSubscriber implements \Symfony\Component\EventDispatcher\EventSubsc
    * @see \Drupal\date_recur\DateRecurOccurrences::onEntityRevisionDelete
    *   Live example.
    */
-  public function onEntityRevisionDelete(\Drupal\date_recur\Event\DateRecurValueEvent $event): void {}
+  public function onEntityRevisionDelete(\Drupal\date_recur\Event\DateRecurValueEvent $event) {}
 
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents(): array {
+  public static function getSubscribedEvents() {
     return [
       \Drupal\date_recur\Event\DateRecurEvents::FIELD_VALUE_SAVE => ['onSave'],
       \Drupal\date_recur\Event\DateRecurEvents::FIELD_ENTITY_DELETE => ['onEntityDelete'],

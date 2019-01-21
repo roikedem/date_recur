@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\date_recur\Entity\DateRecurInterpreter;
 
 /**
  * Add form for date recur interpreter entities.
@@ -15,7 +12,7 @@ class DateRecurInterpreterAddForm extends DateRecurInterpreterEditForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, FormStateInterface $form_state): array {
+  public function form(array $form, FormStateInterface $form_state) {
     $dateRecurInterpreter = $this->getEntity();
 
     $form['label'] = [
@@ -29,12 +26,12 @@ class DateRecurInterpreterAddForm extends DateRecurInterpreterEditForm {
       '#type' => 'machine_name',
       '#default_value' => $dateRecurInterpreter->id(),
       '#machine_name' => [
-        'exists' => [DateRecurInterpreter::class, 'load'],
+        'exists' => '\Drupal\date_recur\Entity\DateRecurInterpreter::load',
       ],
     ];
 
     $options = array_map(
-      function (array $definition): string {
+      function (array $definition) {
         return (string) $definition['label'];
       },
       $this->dateRecurInterpreterPluginManager->getDefinitions()
@@ -57,7 +54,7 @@ class DateRecurInterpreterAddForm extends DateRecurInterpreterEditForm {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state): void {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     if (!isset($form['configure'])) {
       $form_state->setRebuild();
     }
@@ -70,7 +67,7 @@ class DateRecurInterpreterAddForm extends DateRecurInterpreterEditForm {
   /**
    * {@inheritdoc}
    */
-  protected function actions(array $form, FormStateInterface $form_state): array {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
 
     if (!$form_state->getValue('plugin_type')) {

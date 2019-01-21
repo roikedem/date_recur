@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 use Drupal\date_recur\Plugin\Field\FieldType\DateRecurItem;
@@ -19,7 +17,7 @@ class DateRecurCachedHooks {
    * @see \hook_field_info_alter()
    * @see \date_recur_field_info_alter()
    */
-  public function fieldInfoAlter(array &$info): void {
+  public function fieldInfoAlter(&$info) {
     foreach ($info as &$definition) {
       $class = $definition['class'];
       // Is date_recur or a subclass.
@@ -35,7 +33,7 @@ class DateRecurCachedHooks {
    * @see \hook_theme()
    * @see \date_recur_theme()
    */
-  public function hookTheme(array $existing, string $type, string $theme, string $path): array {
+  public function hookTheme($existing, $type, $theme, $path) {
     return [
       'date_recur_basic_widget' => [
         'render element' => 'element',

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -24,7 +22,7 @@ class DateRecurUtility {
    * @return \DateTime
    *   A date time with the smallest value given granularity and input.
    */
-  public static function createSmallestDateFromInput(string $granularity, string $value, \DateTimeZone $timezone): \DateTime {
+  public static function createSmallestDateFromInput($granularity, $value, \DateTimeZone $timezone) {
     return static::createDateFromInput($granularity, $value, $timezone, 'start');
   }
 
@@ -41,7 +39,7 @@ class DateRecurUtility {
    * @return \DateTime
    *   A date time with the smallest value given granularity and input.
    */
-  public static function createLargestDateFromInput(string $granularity, string $value, \DateTimeZone $timezone): \DateTime {
+  public static function createLargestDateFromInput($granularity, $value, \DateTimeZone $timezone) {
     return static::createDateFromInput($granularity, $value, $timezone, 'end');
   }
 
@@ -63,7 +61,7 @@ class DateRecurUtility {
    *
    * @internal
    */
-  protected static function createDateFromInput(string $granularity, string $value, \DateTimeZone $timezone, string $end): \DateTime {
+  protected static function createDateFromInput($granularity, $value, \DateTimeZone $timezone, $end) {
     assert(in_array($end, ['start', 'end']));
     $start = $end === 'start';
 

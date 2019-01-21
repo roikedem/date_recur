@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 /**
@@ -17,7 +15,7 @@ interface DateRecurRuleInterface {
    * @return string
    *   The frequency for the rule.
    */
-  public function getFrequency(): string;
+  public function getFrequency();
 
   /**
    * Get the RULE parts.
@@ -37,6 +35,6 @@ interface DateRecurRuleInterface {
    * @return array
    *   The parts of the RRULE.
    */
-  public function getParts(): array;
+  public function getParts();
 
 }

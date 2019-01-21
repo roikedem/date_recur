@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin;
 
 use Drupal\Component\Utility\NestedArray;
@@ -18,28 +16,28 @@ abstract class DateRecurInterpreterPluginBase extends PluginBase implements Date
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies(): array {
+  public function calculateDependencies() {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getConfiguration(): array {
+  public function getConfiguration() {
     return $this->configuration;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setConfiguration(array $configuration): void {
+  public function setConfiguration(array $configuration) {
     $this->configuration = NestedArray::mergeDeep($this->defaultConfiguration(), $configuration);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration(): array {
+  public function defaultConfiguration() {
     return [];
   }
 

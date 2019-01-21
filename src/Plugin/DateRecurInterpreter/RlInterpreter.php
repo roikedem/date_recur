@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin\DateRecurInterpreter;
 
 use Drupal\Core\Datetime\DateFormatInterface;
@@ -12,7 +10,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\date_recur\Plugin\DateRecurInterpreterPluginBase;
 use RRule\RRule;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -83,7 +80,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration(): array {
+  public function defaultConfiguration() {
     return [
       'show_start_date' => TRUE,
       'show_until' => TRUE,
@@ -95,7 +92,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function interpret(array $rules, string $language): string {
+  public function interpret(array $rules, $language) {
     $pluginConfig = $this->getConfiguration();
 
     if (!in_array($language, $this->supportedLanguages())) {
@@ -112,7 +109,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
     $dateFormatId = $this->configuration['date_format'];
     $dateFormat = $this->dateFormatStorage->load($dateFormatId);
     if ($dateFormat) {
-      $dateFormatter = function (\DateTimeInterface $date) use ($dateFormat): string {
+      $dateFormatter = function (\DateTimeInterface $date) use ($dateFormat) {
         return $this->dateFormatter->format($date->getTimestamp(), $dateFormat->id());
       };
       $options['date_formatter'] = $dateFormatter;
@@ -130,7 +127,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['show_start_date'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show the start date'),
@@ -151,7 +148,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
 
     $exampleDate = new DrupalDateTime();
     $dateFormatOptions = array_map(
-      function (DateFormatInterface $dateFormat) use ($exampleDate): TranslatableMarkup {
+      function (DateFormatInterface $dateFormat) use ($exampleDate) {
         return $this->t('@name (@date)', [
           '@name' => $dateFormat->label(),
           '@date' => $this->dateFormatter->format($exampleDate->getTimestamp(), $dateFormat->id()),
@@ -174,13 +171,13 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['show_start_date'] = $form_state->getValue('show_start_date');
     $this->configuration['show_until'] = $form_state->getValue('show_until');
     $this->configuration['date_format'] = $form_state->getValue('date_format');
@@ -190,7 +187,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies(): array {
+  public function calculateDependencies() {
     /** @var string $dateFormatId */
     $dateFormatId = $this->configuration['date_format'];
     $dateFormat = $this->dateFormatStorage->load($dateFormatId);
@@ -203,7 +200,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function supportedLanguages(): array {
+  public function supportedLanguages() {
     return [
       'de',
       'en',

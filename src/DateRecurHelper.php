@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 use Drupal\date_recur\Rl\RlHelper;
@@ -51,7 +49,7 @@ final class DateRecurHelper implements DateRecurHelperInterface {
    * @throws \Exception
    *   Throws various exceptions if string is invalid.
    */
-  public static function create(string $string, \DateTimeInterface $dtStart, \DateTimeInterface $dtStartEnd = NULL) {
+  public static function create($string, \DateTimeInterface $dtStart, \DateTimeInterface $dtStartEnd = NULL) {
     // @todo: get the helper preference from Drupal module config.
     /** @var \Drupal\date_recur\DateRecurHelperInterface $dateRecurHelper */
     $dateRecurHelper = RlHelper::createInstance($string, $dtStart, $dtStartEnd);
@@ -61,14 +59,14 @@ final class DateRecurHelper implements DateRecurHelperInterface {
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(string $string, \DateTimeInterface $dtStart, ?\DateTimeInterface $dtStartEnd = NULL): DateRecurHelperInterface {
+  public static function createInstance($string, \DateTimeInterface $dtStart, \DateTimeInterface $dtStartEnd = NULL) {
     throw new \LogicException('Create instance must not be called on this helper.');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRules(): array {
+  public function getRules() {
     $rules = $this->dateRecurHelper->getRules();
     assert(is_array($rules));
     assert(count($rules) == 0 || $rules[0] instanceof DateRecurRuleInterface);
@@ -78,56 +76,56 @@ final class DateRecurHelper implements DateRecurHelperInterface {
   /**
    * {@inheritdoc}
    */
-  public function isInfinite(): bool {
+  public function isInfinite() {
     return $this->dateRecurHelper->isInfinite();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function generateOccurrences(?\DateTimeInterface $rangeStart = NULL, ?\DateTimeInterface $rangeEnd = NULL): \Generator {
+  public function generateOccurrences(\DateTimeInterface $rangeStart = NULL, \DateTimeInterface $rangeEnd = NULL) {
     return $this->dateRecurHelper->generateOccurrences($rangeStart, $rangeEnd);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getOccurrences(\DateTimeInterface $rangeStart = NULL, ?\DateTimeInterface $rangeEnd = NULL, ?int $limit = NULL): array {
+  public function getOccurrences(\DateTimeInterface $rangeStart = NULL, \DateTimeInterface $rangeEnd = NULL, $limit = NULL) {
     return $this->dateRecurHelper->getOccurrences($rangeStart, $rangeEnd, $limit);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function current(): DateRange {
+  public function current() {
     return $this->dateRecurHelper->current();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function next(): void {
+  public function next() {
     $this->dateRecurHelper->next();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function key(): ?int {
+  public function key() {
     return $this->dateRecurHelper->key();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function valid(): bool {
+  public function valid() {
     return $this->dateRecurHelper->valid();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function rewind(): void {
+  public function rewind() {
     $this->dateRecurHelper->rewind();
   }
 

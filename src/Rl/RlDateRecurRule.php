@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Rl;
 
 use Drupal\date_recur\DateRecurRuleInterface;
@@ -36,14 +34,14 @@ final class RlDateRecurRule implements DateRecurRuleInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFrequency(): string {
+  public function getFrequency() {
     return $this->parts['FREQ'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getParts(): array {
+  public function getParts() {
     return $this->parts;
   }
 

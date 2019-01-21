@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin;
 
 use Drupal\Core\Plugin\DefaultPluginManager;

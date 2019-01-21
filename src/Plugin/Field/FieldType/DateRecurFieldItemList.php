@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin\Field\FieldType;
 
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -14,7 +12,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeFieldItemList;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Recurring date field item list.
@@ -31,7 +28,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function postSave($update): void {
+  public function postSave($update) {
     parent::postSave($update);
     $event = new DateRecurValueEvent($this, !$update);
     $this->getDispatcher()->dispatch(DateRecurEvents::FIELD_VALUE_SAVE, $event);
@@ -40,7 +37,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function delete(): void {
+  public function delete() {
     parent::delete();
     $event = new DateRecurValueEvent($this, FALSE);
     $this->getDispatcher()->dispatch(DateRecurEvents::FIELD_ENTITY_DELETE, $event);
@@ -49,7 +46,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function deleteRevision(): void {
+  public function deleteRevision() {
     parent::deleteRevision();
     $event = new DateRecurValueEvent($this, FALSE);
     $this->getDispatcher()->dispatch(DateRecurEvents::FIELD_REVISION_DELETE, $event);
@@ -61,7 +58,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
    * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
    *   The event dispatcher.
    */
-  protected function getDispatcher(): EventDispatcherInterface {
+  protected function getDispatcher() {
     if (isset($this->eventDispatcher)) {
       return $this->eventDispatcher;
     }
@@ -71,7 +68,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function defaultValuesForm(array &$form, FormStateInterface $form_state): array {
+  public function defaultValuesForm(array &$form, FormStateInterface $form_state) {
     $element = parent::defaultValuesForm($form, $form_state);
 
     $defaultValue = $this->getFieldDefinition()->getDefaultValueLiteral();
@@ -81,7 +78,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
       '#title' => $this->t('Start and end date time zone'),
       '#description' => $this->t('Time zone is required if a default start date or end date is provided.'),
       '#options' => $this->getTimeZoneOptions(),
-      '#default_value' => $defaultValue[0]['default_date_time_zone'] ?? '',
+      '#default_value' => isset($defaultValue[0]['default_date_time_zone']) ? $defaultValue[0]['default_date_time_zone'] : '',
       '#states' => [
         // Show the field if either start or end is set.
         'invisible' => [
@@ -98,14 +95,14 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
       '#title' => $this->t('Time zone'),
       '#description' => $this->t('Default time zone.'),
       '#options' => $this->getTimeZoneOptions(),
-      '#default_value' => $defaultValue[0]['default_time_zone'] ?? '',
+      '#default_value' => isset($defaultValue[0]['default_time_zone']) ? $defaultValue[0]['default_time_zone'] : '',
       '#empty_option' => $this->t('- Current user time zone -'),
     ];
 
     $element['default_rrule'] = [
       '#type' => 'textarea',
       '#title' => $this->t('RRULE'),
-      '#default_value' => $defaultValue[0]['default_rrule'] ?? '',
+      '#default_value' => isset($defaultValue[0]['default_rrule']) ? $defaultValue[0]['default_rrule'] : '',
     ];
 
     return $element;
@@ -114,7 +111,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function defaultValuesFormValidate(array $element, array &$form, FormStateInterface $form_state): void {
+  public function defaultValuesFormValidate(array $element, array &$form, FormStateInterface $form_state) {
     $defaultDateTimeZone = $form_state->getValue(['default_value_input', 'default_date_time_zone']);
     if (empty($defaultDateTimeZone)) {
       $defaultStartType = $form_state->getValue(['default_value_input', 'default_date_type']);
@@ -134,7 +131,7 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public function defaultValuesFormSubmit(array $element, array &$form, FormStateInterface $form_state): array {
+  public function defaultValuesFormSubmit(array $element, array &$form, FormStateInterface $form_state) {
     $values = parent::defaultValuesFormSubmit($element, $form, $form_state);
 
     $rrule = $form_state->getValue(['default_value_input', 'default_rrule']);
@@ -158,9 +155,8 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * {@inheritdoc}
    */
-  public static function processDefaultValue($default_value, FieldableEntityInterface $entity, FieldDefinitionInterface $definition): array {
-    assert(is_array($default_value));
-    $defaultDateTimeZone = $default_value[0]['default_date_time_zone'] ?? NULL;
+  public static function processDefaultValue($default_value, FieldableEntityInterface $entity, FieldDefinitionInterface $definition) {
+    $defaultDateTimeZone = isset($default_value[0]['default_date_time_zone']) ? $default_value[0]['default_date_time_zone'] : NULL;
 
     $defaultValue = FieldItemList::processDefaultValue($default_value, $entity, $definition);
 
@@ -194,12 +190,12 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
       $defaultValue = $defaultValues;
     }
 
-    $rrule = $default_value[0]['default_rrule'] ?? NULL;
+    $rrule = isset($default_value[0]['default_rrule']) ? $default_value[0]['default_rrule'] : NULL;
     if (!empty($rrule)) {
       $defaultValue[0]['rrule'] = $rrule;
     }
 
-    $defaultTimeZone = $default_value[0]['default_time_zone'] ?? NULL;
+    $defaultTimeZone = isset($default_value[0]['default_time_zone']) ? $default_value[0]['default_time_zone'] : NULL;
     if (!empty($defaultTimeZone)) {
       $defaultValue[0]['timezone'] = $defaultTimeZone;
     }
@@ -231,10 +227,10 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
   /**
    * Set the event dispatcher.
    *
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface|null $eventDispatcher
    *   The event dispatcher.
    */
-  public function setEventDispatcher(EventDispatcherInterface $eventDispatcher): void {
+  public function setEventDispatcher($eventDispatcher) {
     $this->eventDispatcher = $eventDispatcher;
   }
 
@@ -244,10 +240,10 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
    * @return \Drupal\date_recur\DateRecurPartGrid
    *   The parts grid for this field.
    */
-  public function getPartGrid(): DateRecurPartGrid {
+  public function getPartGrid() {
     $partSettings = $this->getFieldDefinition()->getSetting('parts');
     // Existing field configs may not have a parts setting yet.
-    $partSettings = $partSettings ?? [];
+    $partSettings = isset($partSettings) ? $partSettings : [];
     return DateRecurPartGrid::configSettingsToGrid($partSettings);
   }
 

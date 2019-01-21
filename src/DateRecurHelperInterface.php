@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur;
 
 /**
@@ -21,10 +19,10 @@ interface DateRecurHelperInterface extends \Iterator {
    * @param \DateTimeInterface|null $dtStartEnd
    *   The initial occurrence end date, or NULL to use start date.
    *
-   * @return \Drupal\date_recur\DateRecurHelperInterface
-   *   An instance of helper.
+   * @throws \Drupal\date_recur\Exception\DateRecurHelperArgumentException
+   *   Throws various exceptions if string is invalid.
    */
-  public static function createInstance(string $string, \DateTimeInterface $dtStart, ?\DateTimeInterface $dtStartEnd = NULL): DateRecurHelperInterface;
+  public static function createInstance($string, \DateTimeInterface $dtStart, \DateTimeInterface $dtStartEnd = NULL);
 
   /**
    * Get the rules that comprise this helper.
@@ -32,7 +30,7 @@ interface DateRecurHelperInterface extends \Iterator {
    * @return \Drupal\date_recur\DateRecurRuleInterface[]
    *   The rules that comprise this helper.
    */
-  public function getRules(): array;
+  public function getRules();
 
   /**
    * Determine whether this is infinite.
@@ -40,7 +38,7 @@ interface DateRecurHelperInterface extends \Iterator {
    * @return bool
    *   Whether this is infinite.
    */
-  public function isInfinite(): bool;
+  public function isInfinite();
 
   /**
    * Calculates occurrences as a generator.
@@ -53,7 +51,7 @@ interface DateRecurHelperInterface extends \Iterator {
    * @return \Generator|\Drupal\date_recur\DateRange[]
    *   A date range generator.
    */
-  public function generateOccurrences(?\DateTimeInterface $rangeStart = NULL, ?\DateTimeInterface $rangeEnd = NULL): \Generator;
+  public function generateOccurrences(\DateTimeInterface $rangeStart = NULL, \DateTimeInterface $rangeEnd = NULL);
 
   /**
    * Get all occurrences.
@@ -73,6 +71,6 @@ interface DateRecurHelperInterface extends \Iterator {
    * @throws \InvalidArgumentException
    *   Exceptions thrown if ranges are invalid or undefined.
    */
-  public function getOccurrences(\DateTimeInterface $rangeStart = NULL, ?\DateTimeInterface $rangeEnd = NULL, ?int $limit = NULL): array;
+  public function getOccurrences(\DateTimeInterface $rangeStart = NULL, \DateTimeInterface $rangeEnd = NULL, $limit = NULL);
 
 }

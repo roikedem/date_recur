@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\date_recur\Plugin\views\filter;
 
 use Drupal\Core\Database\Connection;
@@ -9,7 +7,6 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\date_recur\DateRecurGranularityMap;
 use Drupal\date_recur\DateRecurOccurrences;
 use Drupal\date_recur\DateRecurUtility;
@@ -114,7 +111,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function defineOptions(): array {
+  protected function defineOptions() {
     $options = parent::defineOptions();
 
     // The minimum date in \DATE_ISO8601 format.
@@ -129,7 +126,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function query(): void {
+  public function query() {
     $this->ensureMyTable();
 
     $dateRecurFieldName = $this->configuration['date recur field name'];
@@ -159,7 +156,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function valueForm(&$form, FormStateInterface $form_state): array {
+  protected function valueForm(&$form, FormStateInterface $form_state) {
     $timezone = $this->currentUser->getTimeZone();
     $form['value'] = [
       '#title' => $this->t('Value'),
@@ -180,7 +177,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
     $form['value_granularity'] = [
       '#title' => $this->t('Granularity'),
@@ -216,7 +213,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function submitOptionsForm(&$form, FormStateInterface $form_state): void {
+  public function submitOptionsForm(&$form, FormStateInterface $form_state) {
     parent::submitOptionsForm($form, $form_state);
     $this->options['value_granularity'] = $form_state->getValue(['options', 'value_granularity']);
 
@@ -238,13 +235,8 @@ class DateRecurFilter extends FilterPluginBase {
 
   /**
    * Form field validator.
-   *
-   * @param array $element
-   *   The form element.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
    */
-  public static function validateValue(array &$element, FormStateInterface $form_state): void {
+  public static function validateValue(array &$element, FormStateInterface $form_state) {
     $elementValue = $element['#value'];
     if ($element['#required'] === FALSE && empty($elementValue)) {
       return;
@@ -309,7 +301,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function validateExposed(&$form, FormStateInterface $form_state): void {
+  public function validateExposed(&$form, FormStateInterface $form_state) {
     if (empty($this->options['exposed'])) {
       return;
     }
@@ -338,7 +330,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function adminSummary(): TranslatableMarkup {
+  public function adminSummary() {
     $granularityLabels = DateRecurGranularityMap::granularityLabels();
     $granularity = $this->options['value_granularity'];
     return $granularityLabels[$granularity];
@@ -347,7 +339,7 @@ class DateRecurFilter extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getCacheContexts(): array {
+  public function getCacheContexts() {
     $contexts = parent::getCacheContexts();
     // Output of filter varies by timezone.
     $contexts[] = 'timezone';
