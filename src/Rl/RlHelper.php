@@ -7,6 +7,7 @@ namespace Drupal\date_recur\Rl;
 use Drupal\date_recur\DateRange;
 use Drupal\date_recur\DateRecurHelperInterface;
 use Drupal\date_recur\Exception\DateRecurHelperArgumentException;
+use RRule\RfcParser;
 use RRule\RRule;
 use RRule\RSet;
 
@@ -53,10 +54,10 @@ class RlHelper implements DateRecurHelperInterface {
     }
 
     $parts = [
+      'RRULE' => [],
       'RDATE' => [],
       'EXRULE' => [],
       'EXDATE' => [],
-      'RRULE' => [],
     ];
 
     $lines = explode("\n", $string);
@@ -88,11 +89,17 @@ class RlHelper implements DateRecurHelperInterface {
             break;
 
           case 'RDATE':
-            $this->set->addDate($value);
+            $dates = RfcParser::parseRDate('RDATE:' . $value);
+            array_walk($dates, function (\DateTimeInterface $value): void {
+              $this->set->addDate($value);
+            });
             break;
 
           case 'EXDATE':
-            $this->set->addExDate($value);
+            $dates = RfcParser::parseExDate('EXDATE:' . $value);
+            array_walk($dates, function (\DateTimeInterface $value): void {
+              $this->set->addExDate($value);
+            });
             break;
 
           case 'EXRULE':
@@ -226,12 +233,12 @@ class RlHelper implements DateRecurHelperInterface {
   /**
    * Get the set.
    *
-   * @return \Drupal\date_recur\Rl\RlRSet
+   * @return \RRule\RSet
    *   Returns the set.
    *
    * @internal this method is specific to rlanvin/rrule implementation only.
    */
-  public function getRlRuleset(): RlRSet {
+  public function getRlRuleset(): RSet {
     return $this->set;
   }
 
