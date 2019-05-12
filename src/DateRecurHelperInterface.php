@@ -75,4 +75,19 @@ interface DateRecurHelperInterface extends \Iterator {
    */
   public function getOccurrences(\DateTimeInterface $rangeStart = NULL, ?\DateTimeInterface $rangeEnd = NULL, ?int $limit = NULL): array;
 
+  /**
+   * Get excluded dates.
+   *
+   * Excluded dates are intended to match the start date of occurrences.
+   * Excluded dates may not necessarily intersect with occurrences. Excluded
+   * dates in the same time zone as the initial dates.
+   *
+   * Implementors of this method are responsible for ensuring time zone is
+   * normalised.
+   *
+   * @return \DateTimeInterface[]
+   *   An array of excluded dates.
+   */
+  public function getExcluded(): array;
+
 }

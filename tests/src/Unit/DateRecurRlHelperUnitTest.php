@@ -278,6 +278,23 @@ foobar';
   }
 
   /**
+   * Tests list.
+   *
+   * @covers ::getExcluded
+   */
+  public function testGetExcluded() {
+    $tz = new \DateTimeZone('Asia/Singapore');
+    $dtStart = new \DateTime('9am 4 September 2018', $tz);
+    $string = 'RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;COUNT=3
+EXDATE:20180906T010000Z';
+    $helper = $this->createHelper($string, $dtStart);
+    $excluded = $helper->getExcluded();
+    $this->assertCount(1, $excluded);
+    $expectedDate = new \DateTime('9am 6 September 2018', $tz);
+    $this->assertEquals($expectedDate, $excluded[0]);
+  }
+
+  /**
    * Creates a new helper.
    *
    * @param string|\DateTimeInterface|null|mixed $args

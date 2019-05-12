@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\date_recur;
 
+use Drupal\Component\Assertion\Inspector;
 use Drupal\date_recur\Rl\RlHelper;
 
 /**
@@ -94,6 +95,15 @@ final class DateRecurHelper implements DateRecurHelperInterface {
    */
   public function getOccurrences(\DateTimeInterface $rangeStart = NULL, ?\DateTimeInterface $rangeEnd = NULL, ?int $limit = NULL): array {
     return $this->dateRecurHelper->getOccurrences($rangeStart, $rangeEnd, $limit);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExcluded(): array {
+    $exDates = $this->dateRecurHelper->getExcluded();
+    assert(Inspector::assertAllObjects($exDates, \DateTimeInterface::class));
+    return $exDates;
   }
 
   /**

@@ -95,6 +95,13 @@ class DateRecurNonRecurringHelper implements DateRecurHelperInterface {
   /**
    * {@inheritdoc}
    */
+  public function getExcluded(): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function current(): DateRange {
     return current($this->occurrences);
   }
