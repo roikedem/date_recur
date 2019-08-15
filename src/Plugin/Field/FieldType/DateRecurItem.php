@@ -37,8 +37,8 @@ use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
  *   }
  * )
  *
- * @property \DateTime start_date
- * @property \DateTime end_date
+ * @property \Drupal\Core\Datetime\DrupalDateTime|null start_date
+ * @property \Drupal\Core\Datetime\DrupalDateTime|null end_date
  */
 class DateRecurItem extends DateRangeItem {
 
