@@ -95,7 +95,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
   /**
    * {@inheritdoc}
    */
-  public function interpret(array $rules, string $language): string {
+  public function interpret(array $rules, string $language, ?\DateTimeZone $timeZone = NULL): string {
     $pluginConfig = $this->getConfiguration();
 
     if (!in_array($language, $this->supportedLanguages())) {
@@ -110,12 +110,15 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
     ];
 
     $dateFormatId = $this->configuration['date_format'];
-    $dateFormat = $this->dateFormatStorage->load($dateFormatId);
-    if ($dateFormat) {
-      $dateFormatter = function (\DateTimeInterface $date) use ($dateFormat): string {
-        return $this->dateFormatter->format($date->getTimestamp(), $dateFormat->id());
-      };
-      $options['date_formatter'] = $dateFormatter;
+    if (!empty($dateFormatId)) {
+      $dateFormat = $this->dateFormatStorage->load($dateFormatId);
+      if ($dateFormat) {
+        $dateFormatter = function (\DateTimeInterface $date) use ($dateFormat, $timeZone): string {
+          $timeZoneString = $timeZone ? $timeZone->getName() : NULL;
+          return $this->dateFormatter->format($date->getTimestamp(), $dateFormat->id(), '', $timeZoneString);
+        };
+        $options['date_formatter'] = $dateFormatter;
+      }
     }
 
     $strings = [];
