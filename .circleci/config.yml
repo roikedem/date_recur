@@ -10,22 +10,23 @@ jobs:
           path: drupal/web/modules/contrib/date_recur
       - run: cd drupal/web/modules/contrib/date_recur && composer install --ignore-platform-reqs
       - save_cache:
-          key: my-key-{{ checksum "drupal/web/modules/contrib/date_recur/composer.lock" }}
+          key: my-key-{{ checksum "drupal/web/modules/contrib/date_recur/composer.lock" }}-{{ .Revision }}
           paths:
             - drupal/
-  phpcs:
+
+  coding_standards:
     docker:
       - image: circleci/php:7.3-cli
     steps:
       - checkout:
           path: tmp/
       - restore_cache:
-          key: my-key-{{ checksum "tmp/composer.lock" }}
+          key: my-key-{{ checksum "tmp/composer.lock" }}-{{ .Revision }}
       - run: cd drupal/web/modules/contrib/date_recur && ./vendor/bin/phpcs . > ~/phpcs-report.txt
       - store_artifacts:
           path: ~/phpcs-report.txt
 
-  test:
+  static_analysis:
     docker:
       - image: circleci/php:7.3-cli
     steps:
@@ -34,7 +35,7 @@ jobs:
       - checkout:
           path: tmp/
       - restore_cache:
-          key: my-key-{{ checksum "tmp/composer.lock" }}
+          key: my-key-{{ checksum "tmp/composer.lock" }}-{{ .Revision }}
       - run: sudo apt update
       - run: sudo apt install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev
       - run: sudo docker-php-ext-install gd
@@ -47,9 +48,9 @@ workflows:
   test:
     jobs:
       - build
-      - phpcs:
+      - coding_standards:
           requires:
             - build
-      - test:
+      - static_analysis:
           requires:
             - build
