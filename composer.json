@@ -19,15 +19,15 @@
   "require": {
     "php": "^7.1",
     "drupal/core": "^8.6",
-    "rlanvin/php-rrule": "1.*"
+    "rlanvin/php-rrule": "1.*",
+    "drupal/coder": "8.2.*"
   },
   "require-dev": {
     "drupal/token": "^1.5",
     "phpstan/phpstan": "^0.11.19",
     "mglaman/phpstan-drupal": "^0.11.12",
     "phpstan/phpstan-deprecation-rules": "^0.11.2",
-    "dealerdirect/phpcodesniffer-composer-installer": "dev-master",
-    "drupal/coder": "^8.3"
+    "dealerdirect/phpcodesniffer-composer-installer": "dev-master"
   },
   "suggest": {
     "drupal/date_recur_interactive": "Provides an interactive recurring date widget."
