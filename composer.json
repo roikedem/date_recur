@@ -20,7 +20,7 @@
     "php": "^7.1",
     "drupal/core": "^8.6",
     "rlanvin/php-rrule": "1.*",
-    "drupal/coder": "8.2.*"
+    "drupal/coder": "~8.2"
   },
   "require-dev": {
     "drupal/token": "^1.5",
