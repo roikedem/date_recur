@@ -13,12 +13,12 @@
   "repositories": [
       {
           "type": "composer",
-          "url": "https://packages.drupal.org/8"
+          "url": "https://packages.drupal.org/9"
       }
   ],
   "require": {
     "php": "^7.1",
-    "drupal/core": "^8.6",
+    "drupal/core": "^9",
     "rlanvin/php-rrule": "1.*",
     "drupal/coder": "~8.2"
   },
