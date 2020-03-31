@@ -1,7 +1,7 @@
 {
   "name": "drupal/date_recur",
   "type": "drupal-module",
-  "description": "Recurring date field.",
+  "description": "Recurring Dates Field",
   "keywords": ["Drupal"],
   "license": "GPL-2.0+",
   "homepage": "https://www.drupal.org/project/date_recur",
@@ -17,10 +17,9 @@
       }
   ],
   "require": {
-    "php": "^7.1",
+    "php": "^7.3",
     "drupal/core": "^9",
-    "rlanvin/php-rrule": "1.*",
-    "drupal/coder": "~8.2"
+    "rlanvin/php-rrule": "1.*"
   },
   "require-dev": {
     "drupal/token": "^1.5",
