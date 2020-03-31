@@ -79,6 +79,23 @@ class DateRecurUtility {
     $granularityFormatsMap = DateRecurGranularityMap::GRANULARITY_DATE_FORMATS;
     $format = $granularityFormatsMap[$granularity];
 
+    // Fill in the month, and day, for Year/Month granularities because if the
+    // date we are creating doesnt have a month/day that exists at that time,
+    // the date will be created in the future.
+    // For example: if today is the 31st day, and the user is searching for
+    // 2014-09, where September does not have 31 days, then the created date
+    // will roll over to the next month to 2014-10-01.
+    if ($granularity === 'year') {
+      $format = $granularityFormatsMap['day'];
+      // Every year has a month 1 and day 1.
+      $value .= '-01-01';
+    }
+    elseif ($granularity === 'month') {
+      $format = $granularityFormatsMap['day'];
+      // Every month has a day 1.
+      $value .= '-01';
+    }
+
     // PHP fills missing granularity parts with current datetime. Use this
     // object to reconstruct the date at the beginning of the granularity
     // period.
