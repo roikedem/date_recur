@@ -376,6 +376,8 @@ class DateRecurItem extends DateRangeItem {
   public function setValue($values, $notify = TRUE): void {
     // Cast infinite to boolean on load.
     $values['infinite'] = !empty($values['infinite']);
+    // All values are going to be overwritten atomically.
+    $this->resetHelper();
     parent::setValue($values, $notify);
   }
 
@@ -385,7 +387,7 @@ class DateRecurItem extends DateRangeItem {
   public function onChange($property_name, $notify = TRUE) {
     if (in_array($property_name, ['value', 'end_value', 'rrule', 'timezone'])) {
       // Reset cached helper instance if values changed.
-      $this->helper = NULL;
+      $this->resetHelper();
     }
     parent::onChange($property_name, $notify);
   }
@@ -472,6 +474,13 @@ class DateRecurItem extends DateRangeItem {
     $values['infinite'] = FALSE;
 
     return $values;
+  }
+
+  /**
+   * Resets helper value since source values changed.
+   */
+  public function resetHelper(): void {
+    $this->helper = NULL;
   }
 
 }

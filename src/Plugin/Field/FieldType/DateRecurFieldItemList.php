@@ -249,4 +249,15 @@ class DateRecurFieldItemList extends DateRangeFieldItemList {
     return DateRecurPartGrid::configSettingsToGrid($partSettings);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function onChange($delta) {
+    foreach ($this->list as $item) {
+      assert($item instanceof DateRecurItem);
+      $item->resetHelper();
+    }
+    parent::onChange($delta);
+  }
+
 }
