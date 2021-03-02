@@ -150,91 +150,265 @@ class DateRecurBasicWidgetTest extends BrowserTestBase {
   }
 
   /**
-   * Tests inherited validation.
+   * Tests form field submission.
    *
-   * Tests validation that comes automatically from date range. Specifically,
-   * assert end date comes on or after start date.
+   * Tests simple form success and failure without testing the saved entity.
+   *
+   * @param array $edit
+   *   Form field values.
+   * @param bool $isSuccess
+   *   Whether submitting the form results in success.
+   * @param string|null $errorMessage
+   *   The the form submission results in failure, assert the error message.
+   *
+   * @dataProvider providerFields
    */
-  public function testInheritedValidation() {
-    $edit = [
-      'dr[0][value][date]' => '2008-06-17',
-      'dr[0][value][time]' => '03:00:00',
-      'dr[0][end_value][date]' => '2008-06-15',
-      'dr[0][end_value][time]' => '03:00:00',
-      'dr[0][timezone]' => 'America/Chicago',
-      'dr[0][rrule]' => 'FREQ=DAILY',
-    ];
-    $url = Url::fromRoute('entity.dr_entity_test.add_form');
-    $this->drupalPostForm($url, $edit, 'Save');
-    $this->assertSession()->pageTextContains('end date cannot be before the start date');
+  public function testFields(array $edit, bool $isSuccess, ?string $errorMessage = NULL) {
+    $this->drupalGet(Url::fromRoute('entity.dr_entity_test.add_form'));
+    $this->submitForm($edit, 'Save');
+
+    if ($isSuccess) {
+      $this->assertSession()->pageTextContains('dr_entity_test 1 has been created.');
+    }
+    else {
+      $this->assertSession()->pageTextNotContains('dr_entity_test 1 has been created.');
+      $this->assertSession()->pageTextContains($errorMessage);
+    }
   }
 
   /**
-   * Tests start date must be set if end date is set.
+   * Data provider for testFields.
+   *
+   * @return array
+   *   Data for testing.
    */
-  public function testStartDateSetIfEndPosted() {
-    $edit = [
-      'dr[0][value][date]' => '',
-      'dr[0][value][time]' => '',
-      'dr[0][end_value][date]' => '2008-06-17',
-      'dr[0][end_value][time]' => '12:00:04',
-      'dr[0][timezone]' => 'America/Chicago',
-      'dr[0][rrule]' => 'FREQ=DAILY',
+  public function providerFields(): array {
+    $scenarios = [];
+
+    $scenarios['Test no failures if nothing is filled.'] = [
+      [
+        'dr[0][value][date]' => '',
+        'dr[0][value][time]' => '',
+        'dr[0][end_value][date]' => '',
+        'dr[0][end_value][time]' => '',
+        'dr[0][timezone]' => '',
+        'dr[0][rrule]' => '',
+      ],
+      TRUE,
     ];
-    $url = Url::fromRoute('entity.dr_entity_test.add_form');
-    $this->drupalPostForm($url, $edit, 'Save');
-    $this->assertSession()->pageTextContains('Start date must be set if end date is set.');
+
+    $scenarios['Test failure when only start date field filled.'] = [
+      [
+        'dr[0][value][date]' => '2008-06-17',
+        'dr[0][value][time]' => '',
+        'dr[0][end_value][date]' => '',
+        'dr[0][end_value][time]' => '',
+        'dr[0][timezone]' => '',
+        'dr[0][rrule]' => '',
+      ],
+      FALSE,
+      'Missing time zone for date.',
+    ];
+
+    $scenarios['Test failure when only start time field filled.'] = [
+      [
+        'dr[0][value][date]' => '',
+        'dr[0][value][time]' => '10:00:00',
+        'dr[0][end_value][date]' => '',
+        'dr[0][end_value][time]' => '',
+        'dr[0][timezone]' => '',
+        'dr[0][rrule]' => '',
+      ],
+      FALSE,
+      'Missing time zone for date.',
+    ];
+
+    $scenarios['Test failure when start date and time field filled.'] = [
+      [
+        'dr[0][value][date]' => '2008-06-17',
+        'dr[0][value][time]' => '10:00:00',
+        'dr[0][end_value][date]' => '',
+        'dr[0][end_value][time]' => '',
+        'dr[0][timezone]' => '',
+        'dr[0][rrule]' => '',
+      ],
+      FALSE,
+      'Missing time zone for date.',
+    ];
+
+    $scenarios['Test failure when end date filled.'] = [
+      [
+        'dr[0][value][date]' => '',
+        'dr[0][value][time]' => '',
+        'dr[0][end_value][date]' => '2008-06-17',
+        'dr[0][end_value][time]' => '',
+        'dr[0][timezone]' => '',
+        'dr[0][rrule]' => '',
+      ],
+      FALSE,
+      'Missing time zone for date.',
+    ];
+
+    $scenarios['Test failure when end time filled.'] = [
+      [
+        'dr[0][value][date]' => '',
+        'dr[0][value][time]' => '',
+        'dr[0][end_value][date]' => '',
+        'dr[0][end_value][time]' => '10:00:00',
+        'dr[0][timezone]' => '',
+        'dr[0][rrule]' => '',
+      ],
+      FALSE,
+      'Missing time zone for date.',
+    ];
+
+    $scenarios['Test success when start date and time and time zone field filled.'] = [
+      [
+        'dr[0][value][date]' => '2008-06-17',
+        'dr[0][value][time]' => '10:00:00',
+        'dr[0][end_value][date]' => '',
+        'dr[0][end_value][time]' => '',
+        'dr[0][timezone]' => 'Australia/Sydney',
+        'dr[0][rrule]' => '',
+      ],
+      TRUE,
+    ];
+
+    $scenarios['Test failure when end date and time and time zone field filled.'] = [
+      [
+        'dr[0][value][date]' => '',
+        'dr[0][value][time]' => '',
+        'dr[0][end_value][date]' => '2008-06-17',
+        'dr[0][end_value][time]' => '10:00:00',
+        'dr[0][timezone]' => 'Australia/Sydney',
+        'dr[0][rrule]' => '',
+      ],
+      FALSE,
+      'Start date must be set if end date is set.',
+    ];
+
+    $scenarios['Tests failure on invalid rule.'] = [
+      [
+        'dr[0][value][date]' => '2008-06-17',
+        'dr[0][value][time]' => '12:00:00',
+        'dr[0][end_value][date]' => '2008-06-17',
+        'dr[0][end_value][time]' => '12:00:00',
+        'dr[0][timezone]' => 'America/Chicago',
+        'dr[0][rrule]' => $this->randomMachineName(),
+      ],
+      FALSE,
+      'Repeat rule is formatted incorrectly.',
+    ];
+
+    // Tests validation that comes automatically from date range. Specifically,
+    // assert end date comes on or after start date.
+    $scenarios['Tests inherited validation: end before start'] = [
+      [
+        'dr[0][value][date]' => '2008-06-17',
+        'dr[0][value][time]' => '03:00:00',
+        'dr[0][end_value][date]' => '2008-06-15',
+        'dr[0][end_value][time]' => '03:00:00',
+        'dr[0][timezone]' => 'America/Chicago',
+        'dr[0][rrule]' => 'FREQ=DAILY',
+      ],
+      FALSE,
+      'end date cannot be before the start date',
+    ];
+
+    return $scenarios;
   }
 
   /**
    * Tests default values appear in widget.
+   *
+   * @dataProvider providerDefaultValues
    */
-  public function testDefaultValues() {
+  public function testDefaultValues(array $baseFieldValue, array $assertFieldValues) {
     /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager */
     $entityFieldManager = \Drupal::service('entity_field.manager');
     $baseFields = $entityFieldManager->getBaseFieldDefinitions('dr_entity_test');
     $baseFieldOverride = BaseFieldOverride::createFromBaseFieldDefinition($baseFields['dr'], 'dr_entity_test');
     // Default values need to evaluate FALSE per DateRecurItem::isEmpty
     // otherwise the values will be cleared out before display.
-    $baseFieldOverride->setDefaultValue([
-      [
-        'default_date_type' => 'relative',
-        'default_date' => '12th April 2013 3pm',
-        'default_end_date_type' => 'relative',
-        'default_end_date' => '12th April 2013 4pm',
-        'default_date_time_zone' => 'Europe/Oslo',
-        'default_time_zone' => 'Indian/Christmas',
-        'default_rrule' => 'FREQ=WEEKLY;COUNT=995',
-      ],
-    ]);
+    $baseFieldOverride->setDefaultValue($baseFieldValue);
     $baseFieldOverride->save();
 
     $url = Url::fromRoute('entity.dr_entity_test.add_form');
     $this->drupalGet($url);
-    // 3pm/4pm Oslo (UTC+2) -> 8pm/9pm Christmas (UTC+7).
-    $this->assertSession()->fieldValueEquals('dr[0][value][date]', '2013-04-12');
-    $this->assertSession()->fieldValueEquals('dr[0][value][time]', '20:00:00');
-    $this->assertSession()->fieldValueEquals('dr[0][end_value][date]', '2013-04-12');
-    $this->assertSession()->fieldValueEquals('dr[0][end_value][time]', '21:00:00');
-    $this->assertSession()->fieldValueEquals('dr[0][timezone]', 'Indian/Christmas');
-    $this->assertSession()->fieldValueEquals('dr[0][rrule]', 'FREQ=WEEKLY;COUNT=995');
+
+    foreach ($assertFieldValues as [$fieldName, $fieldValue]) {
+      $this->assertSession()->fieldValueEquals($fieldName, $fieldValue);
+    }
   }
 
   /**
-   * Tests invalid rule.
+   * Data provider for testFields.
+   *
+   * @return array
+   *   Data for testing.
    */
-  public function testInvalidRule() {
-    $edit = [
-      'dr[0][value][date]' => '2008-06-17',
-      'dr[0][value][time]' => '12:00:00',
-      'dr[0][end_value][date]' => '2008-06-17',
-      'dr[0][end_value][time]' => '12:00:00',
-      'dr[0][timezone]' => 'America/Chicago',
-      'dr[0][rrule]' => $this->randomMachineName(),
+  public function providerDefaultValues(): array {
+    $scenarios = [];
+
+    $scenarios['all values'] = [
+      // 3pm/4pm Oslo (UTC+2) -> 8pm/9pm Christmas (UTC+7).
+      [
+        [
+          'default_date_type' => 'relative',
+          'default_date' => '12th April 2013 3pm',
+          'default_end_date_type' => 'relative',
+          'default_end_date' => '12th April 2013 4pm',
+          'default_date_time_zone' => 'Europe/Oslo',
+          'default_time_zone' => 'Indian/Christmas',
+          'default_rrule' => 'FREQ=WEEKLY;COUNT=995',
+        ],
+      ],
+      [
+        ['dr[0][value][date]', '2013-04-12'],
+        ['dr[0][value][time]', '20:00:00'],
+        ['dr[0][end_value][date]', '2013-04-12'],
+        ['dr[0][end_value][time]', '21:00:00'],
+        ['dr[0][timezone]', 'Indian/Christmas'],
+        ['dr[0][rrule]', 'FREQ=WEEKLY;COUNT=995'],
+      ],
     ];
-    $url = Url::fromRoute('entity.dr_entity_test.add_form');
-    $this->drupalPostForm($url, $edit, 'Save');
-    $this->assertSession()->pageTextContains('Repeat rule is formatted incorrectly.');
+
+    $scenarios['only time zone'] = [
+      [
+        [
+          'default_time_zone' => 'Indian/Christmas',
+        ],
+      ],
+      [
+        ['dr[0][value][date]', ''],
+        ['dr[0][value][time]', ''],
+        ['dr[0][end_value][date]', ''],
+        ['dr[0][end_value][time]', ''],
+        ['dr[0][timezone]', 'Indian/Christmas'],
+        ['dr[0][rrule]', ''],
+      ],
+    ];
+
+    $scenarios['only start'] = [
+      [
+        [
+          'default_date_type' => 'relative',
+          'default_date' => '12th April 2013 3pm',
+          'default_date_time_zone' => 'Europe/Oslo',
+          'default_time_zone' => 'Indian/Christmas',
+        ],
+      ],
+      [
+        ['dr[0][value][date]', '2013-04-12'],
+        ['dr[0][value][time]', '20:00:00'],
+        ['dr[0][end_value][date]', ''],
+        ['dr[0][end_value][time]', ''],
+        ['dr[0][timezone]', 'Indian/Christmas'],
+        ['dr[0][rrule]', ''],
+      ],
+    ];
+
+    return $scenarios;
   }
 
   /**

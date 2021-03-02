@@ -19,6 +19,7 @@ use Drupal\date_recur\DateRecurRruleMap;
 use Drupal\date_recur\Exception\DateRecurHelperArgumentException;
 use Drupal\date_recur\Plugin\Field\DateRecurDateTimeComputed;
 use Drupal\date_recur\Plugin\Field\DateRecurOccurrencesComputed;
+use Drupal\date_recur\Plugin\Validation\Constraint\DateRecurTimeZoneConstraint;
 use Drupal\datetime_range\Plugin\Field\FieldType\DateRangeItem;
 
 /**
@@ -102,7 +103,7 @@ class DateRecurItem extends DateRangeItem {
     $properties['timezone'] = DataDefinition::create('string')
       ->setLabel((string) new TranslatableMarkup('Timezone'))
       ->setRequired(TRUE)
-      ->addConstraint('DateRecurTimeZone');
+      ->addConstraint(DateRecurTimeZoneConstraint::PLUGIN_ID);
 
     $properties['infinite'] = DataDefinition::create('boolean')
       ->setLabel((string) new TranslatableMarkup('Whether the RRule is an infinite rule. Derived value from RRULE.'))
@@ -454,10 +455,8 @@ class DateRecurItem extends DateRangeItem {
     $start_value = $this->get('value')->getValue();
     $end_value = $this->get('end_value')->getValue();
     return (
-      // Use OR operator instead of AND from parent. See
-      // https://www.drupal.org/project/drupal/issues/3025812
-      ($start_value === NULL || $start_value === '') ||
-      ($end_value === NULL || $end_value === '') ||
+      ($start_value === NULL || $start_value === '') &&
+      ($end_value === NULL || $end_value === '') &&
       empty($this->get('timezone')->getValue())
     );
   }
