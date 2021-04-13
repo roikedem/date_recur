@@ -23,7 +23,7 @@
     "require": {
         "php": "^7.1",
         "drupal/core": "^8.6",
-        "roikedem/php-rrule.git": "dev"
+        "roikedem/php-rrule.git": "dev-dev"
     },
     "require-dev": {
         "drupal/coder": "~8.2",
