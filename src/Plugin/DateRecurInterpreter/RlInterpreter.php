@@ -214,6 +214,7 @@ class RlInterpreter extends DateRecurInterpreterPluginBase implements ContainerF
       'fr',
       'it',
       'nl',
+      'he',
     ];
   }
 

@@ -314,7 +314,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
 
     $elements = [];
     foreach ($items as $delta => $item) {
-      $value = $this->viewItem($item, $occurrenceQuota);
+      $value = $this->viewItem($item, $occurrenceQuota, $langcode);
       $occurrenceQuota -= ($isSharedMaximum ? count($value['#occurrences']) : 0);
       $elements[$delta] = $value;
       if ($occurrenceQuota <= 0) {
@@ -336,7 +336,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
    * @return array
    *   A render array for a field item.
    */
-  protected function viewItem(DateRecurItem $item, $maxOccurrences): array {
+  protected function viewItem(DateRecurItem $item, $maxOccurrences, string $langcode = NULL): array {
     $cacheability = new CacheableMetadata();
     $build = [
       '#theme' => 'date_recur_basic_formatter',
@@ -361,7 +361,7 @@ class DateRecurBasicFormatter extends DateRangeDefaultFormatter {
         $rules = $item->getHelper()->getRules();
         $plugin = $interpreter->getPlugin();
         $cacheability->addCacheableDependency($interpreter);
-        $build['#interpretation'] = $plugin->interpret($rules, 'en');
+        $build['#interpretation'] = $plugin->interpret($rules, $langcode);
       }
     }
 
